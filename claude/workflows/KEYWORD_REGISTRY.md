@@ -18,6 +18,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **NEXT_ISSUE** | `NEXT_ISSUE.md` | Automated next issue selection workflow | Determining which GitHub issue to work on next | `next sesame` |
 | **WORKFLOW_RECOMMENDATION** | `WORKFLOW_RECOMMENDATION.md` | Workflow recommendation system based on historical data | When uncertain which workflow approach to use | `recommend sesame` |
 | **VERSION_TRANSITION** | `VERSION_TRANSITION.md` | Mandatory post-release knowledge processing and next version preparation | After RELEASE_PROCESS completion | `transition sesame` |
+| **REPO_TODO_WORKFLOW** | `REPO_TODO_WORKFLOW.md` | Repository todo list management and cross-session continuity | Todo operations, status updates, completion tracking | `todo sesame` |
 | **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | *No sesame alias* |
 
 ## Built-in Claude Code Keywords
@@ -83,6 +84,7 @@ planning sesame  → PLANNED_VS_UNPLANNED
 project sesame   → PROJECT_AUTOMATION
 next sesame      → NEXT_ISSUE
 recommend sesame → WORKFLOW_RECOMMENDATION
+todo sesame      → REPO_TODO_WORKFLOW
 ```
 
 ## Registry Maintenance Rules

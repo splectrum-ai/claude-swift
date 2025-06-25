@@ -13,7 +13,7 @@
 4. **CONFIRM CLEAN HANDOFF**: Ensure repository meets all MANDATORY requirements for session end
 
 **SESSION TERMINATION:**
-1. **COMPLETE OUTSTANDING TODOS**: Mark completed tasks and update todo status
+1. **COMPLETE OUTSTANDING TODOS**: Follow REPO_TODO_WORKFLOW for todo completion and transient todo transfer - See [REPO_TODO_WORKFLOW.md](./REPO_TODO_WORKFLOW.md)
 2. **CAPTURE SESSION LEARNINGS**: Document insights in appropriate files
 3. **EXECUTE GIT_WORKFLOW**: Handle all git operations with proper branching policy
 
@@ -38,7 +38,7 @@
 - Resolve any violations before session termination
 
 ### **2. Todo and Learning Management**
-- Mark completed tasks as completed status
+- Follow REPO_TODO_WORKFLOW for todo completion and transient todo transfer
 - Document session learnings in appropriate docs/ files
 
 ### **3. Git Operations and Clean Handoff (MANDATORY SEQUENCE)**
@@ -85,7 +85,7 @@ At the start of each session, Claude MUST:
 2. If last entry is `SESSION_END | session_end:` with no subsequent activities, previous session ended cleanly
 3. If last entry shows incomplete SESSION_END (session_end logged but activities after), complete the missing steps:
    - Check TodoRead for incomplete todos from previous session
-   - Mark appropriate todos as completed based on git history
+   - Follow REPO_TODO_WORKFLOW for todo completion and transfer procedures
    - Capture any obvious learnings from previous session's work
    - Stage and commit any uncommitted changes with session summary
 

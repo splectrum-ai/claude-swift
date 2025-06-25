@@ -2,6 +2,19 @@
 
 ## Current Topics for Discussion
 
+### Template-Claude Sync Workflow Development
+- **Status**: 🔄 NEW PRIORITY  
+- **Context**: Internal sync rules for maintaining /claude/ source of truth and /template/ deployment
+- **Sync Stages**:
+  1. **Template cleanup** → Clean project-specific data from template
+  2. **Migration merge** → Clean template → /claude/ (establish source of truth)
+  3. **Development activity** → Interactive freestyle rule improvement in /claude/
+  4. **Staging merge** → /claude/ → /template/ (prepare deployment)
+- **Current Tasks**:
+  - ⏳ Complete template cleanup (prerequisite)
+  - ⏳ Design migration merge workflow (template → claude)
+  - ⏳ Design staging merge workflow (`sync template sesame`)
+
 ### Claude-Swift Template System Development
 - **Status**: 🔄 IN PROGRESS
 - **Context**: Converting this repository to claude-swift ways of working template system
@@ -20,6 +33,7 @@
   - ✅ Document event-driven reminder system (`docs/preliminary/event-driven-reminder-system.md`)
 
 - **Remaining Tasks**:
+  - ✅ Finish setting up git repository for WoW (create unplanned branch, fix branching workflow)
   - ⏳ Clean up project-specific data from template content (remove audit logs, project docs)
   - ⏳ Create basic template-merge-procedures.md for Claude
   - ⏳ Create simple deployment-guide.md with step-by-step instructions
