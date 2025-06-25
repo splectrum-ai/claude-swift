@@ -24,7 +24,7 @@ This file provides essential operational guidance for Claude Code when working w
 **MANDATORY FILE PATH SPECIFICATION**: All file references in workflows, documentation, and instructions MUST specify exact file paths.
 
 **Examples:**
-- ❌ "log in timelog" → ✅ "log in `claude/audit/current/current.log`"
+- ❌ "log in timelog" → ✅ "log in `claude/project/audit/current/current.log`"
 - ❌ "update documentation" → ✅ "update `docs/project-overview.md`"
 - ❌ "check the config" → ✅ "check `settings/config.json`"
 
@@ -49,10 +49,9 @@ This file provides essential operational guidance for Claude Code when working w
 1. Identify format violations
 2. Convert to correct format immediately  
 3. Log the correction activity itself
-4. Reference `claude/workflows/AUDIT_LOGGING.md` for definitive rules
+4. Reference `claude/wow/workflows/AUDIT_LOGGING.md` for definitive rules
 
 **Purpose**: Prevents audit format drift and ensures consistent operational logging across all sessions.
-
 ## Critical Workflow Execution Rule
 
 **MANDATORY WORKFLOW LOGGING**: When any custom workflow is recognized, Claude MUST:
@@ -74,8 +73,8 @@ This file provides essential operational guidance for Claude Code when working w
 
 **CRITICAL**: All audit entries MUST follow the format: `TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION`
 - Use `||` for empty FILE_PATH fields
-- Append entries before `##APPEND_MARKER_UNIQUE##` marker in `claude/audit/current/current.log`
-- See `claude/workflows/AUDIT_LOGGING.md` for complete formatting rules
+- Append entries before `##APPEND_MARKER_UNIQUE##` marker in `claude/project/audit/current/current.log`
+- See `claude/wow/workflows/AUDIT_LOGGING.md` for complete formatting rules
 
 This enables detection of incomplete workflow executions and ensures proper workflow accountability.
 
@@ -107,7 +106,7 @@ This enables detection of incomplete workflow executions and ensures proper work
 ### 4. Progress Recognition
 - Celebrate each completed step as meaningful progress
 - **MANDATORY**: Update current audit log with step completion using correct format: `TIMESTAMP|WORKFLOW|step|context|file_path|description`
-- Remove completed items from `todo-list.md` immediately
+- **MANDATORY**: Follow REPO_TODO_WORKFLOW for repository todo list management - See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
 
 **Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking, and creates natural stopping points for session management.
 
@@ -236,10 +235,9 @@ issue-branch: accumulate commits → PR when transitioning → continue or compl
 - Prevents branch divergence and work loss
 
 **Purpose**: Maintains clean separation between planned/unplanned work, prevents conflicts, ensures all work stays current with latest changes.
-
 ## Workflow Triggers
 
-**KEYWORD_REGISTRY** → See [claude/workflows/KEYWORD_REGISTRY.md](./claude/workflows/KEYWORD_REGISTRY.md) - Complete keyword system
+**KEYWORD_REGISTRY** → See [claude/wow/KEYWORD_REGISTRY.md](./claude/wow/KEYWORD_REGISTRY.md) - Complete keyword system
 
 ### User-Friendly Sesame Triggers
 Use natural language with "sesame" suffix:
@@ -255,25 +253,30 @@ Use natural language with "sesame" suffix:
 - `next sesame` → NEXT_ISSUE
 - `recommend sesame` → WORKFLOW_RECOMMENDATION (experimental)
 - `transition sesame` → VERSION_TRANSITION (complete 5-step automation)
+- `todo sesame` → REPO_TODO_WORKFLOW
 - `version planning sesame` → NEW_VERSION_PLANNING
+- `docs sesame` → DOCUMENTATION_WORKFLOW
 
 ### Technical Keywords (for documentation)
-**SESSION_START** → See [claude/workflows/SESSION_START.md](./claude/workflows/SESSION_START.md)
-**GITHUB_WORKFLOW** → See [claude/workflows/GITHUB_WORKFLOW.md](./claude/workflows/GITHUB_WORKFLOW.md)  
-**GIT_WORKFLOW** → See [claude/workflows/GIT_WORKFLOW.md](./claude/workflows/GIT_WORKFLOW.md)
-**OPERATIONAL_RULES** → See [claude/workflows/OPERATIONAL_RULES.md](./claude/workflows/OPERATIONAL_RULES.md)
-**ESSENTIAL_COMMANDS** → See [claude/workflows/ESSENTIAL_COMMANDS.md](./claude/workflows/ESSENTIAL_COMMANDS.md)
-**RELEASE_PROCESS** → See [claude/workflows/RELEASE_PROCESS.md](./claude/workflows/RELEASE_PROCESS.md)
-**PLANNED_VS_UNPLANNED** → See [claude/workflows/PLANNED_VS_UNPLANNED.md](./claude/workflows/PLANNED_VS_UNPLANNED.md)
-**WORKFLOW_RECOMMENDATION** → See [claude/workflows/WORKFLOW_RECOMMENDATION.md](./claude/workflows/WORKFLOW_RECOMMENDATION.md)
-**VERSION_TRANSITION** → See [claude/workflows/VERSION_TRANSITION.md](./claude/workflows/VERSION_TRANSITION.md)
-**NEW_VERSION_PLANNING** → See [claude/workflows/NEW_VERSION_PLANNING.md](./claude/workflows/NEW_VERSION_PLANNING.md)
+**SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
+**GITHUB_WORKFLOW** → See [claude/wow/workflows/GITHUB_WORKFLOW.md](./claude/wow/workflows/GITHUB_WORKFLOW.md)  
+**GIT_WORKFLOW** → See [claude/wow/workflows/GIT_WORKFLOW.md](./claude/wow/workflows/GIT_WORKFLOW.md)
+**OPERATIONAL_RULES** → See [claude/wow/workflows/OPERATIONAL_RULES.md](./claude/wow/workflows/OPERATIONAL_RULES.md)
+**ESSENTIAL_COMMANDS** → See [claude/wow/workflows/ESSENTIAL_COMMANDS.md](./claude/wow/workflows/ESSENTIAL_COMMANDS.md)
+**RELEASE_PROCESS** → See [claude/wow/workflows/RELEASE_PROCESS.md](./claude/wow/workflows/RELEASE_PROCESS.md)
+**PLANNED_VS_UNPLANNED** → See [claude/wow/workflows/PLANNED_VS_UNPLANNED.md](./claude/wow/workflows/PLANNED_VS_UNPLANNED.md)
+**WORKFLOW_RECOMMENDATION** → See [claude/wow/workflows/WORKFLOW_RECOMMENDATION.md](./claude/wow/workflows/WORKFLOW_RECOMMENDATION.md)
+**VERSION_TRANSITION** → See [claude/wow/workflows/VERSION_TRANSITION.md](./claude/wow/workflows/VERSION_TRANSITION.md)
+**REPO_TODO_WORKFLOW** → See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
+**NEW_VERSION_PLANNING** → See [claude/wow/workflows/NEW_VERSION_PLANNING.md](./claude/wow/workflows/NEW_VERSION_PLANNING.md)
+**DOCUMENTATION_WORKFLOW** → See [claude/wow/workflows/DOCUMENTATION_WORKFLOW.md](./claude/wow/workflows/DOCUMENTATION_WORKFLOW.md)
 
-## Project Context
+## spl1 Context
 
-**Template Repository**: This repository uses the claude-swift template for ways of working. The template provides standardized workflows, audit systems, and operational procedures.
+**Transition Repository**: spl1 focuses on repository restructure, external install workflows, and core API enhancements. See [Federated Monorepo Design](./docs/federated-monorepo-design.md) for transition strategy.
 
-**Development Strategy**: Uses [Phase-Based Development](./claude/workflows/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas, following PRINCE2 "just enough planning" principles.
+**Development Strategy**: Uses [Phase-Based Development](./claude/wow/docs/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas, following PRINCE2 "just enough planning" principles.
+
 
 ## Essential Development Tools
 
@@ -287,33 +290,40 @@ Use natural language with "sesame" suffix:
 ## Key Files for Understanding
 
 **Core Platform**:
-- `modules/spl/spl.js` - Core utility library (if applicable)
+- `modules/spl/spl.js` - Core utility library
 - `docs/project-overview.md` - Architecture and components  
-- `docs/app-development.md` - Application development patterns (if applicable)
-- `docs/code-quality-patterns.md` - Critical coding standards (if applicable)
-- `docs/testing-frameworks.md` - Testing methodologies (if applicable)
+- `docs/app-development.md` - Application development patterns
+- `docs/code-quality-patterns.md` - Critical coding standards
+- `docs/testing-frameworks.md` - Testing methodologies
 
-**Claude-Swift Strategy**:
-- `claude/workflows/phase-based-development-strategy.md` - PRINCE2-inspired roadmap execution approach
-- `claude/workflows/phase-based-implementation-guide.md` - Step-by-step workflow implementation guide
-- `claude/workflows/branching-strategy.md` - Simplified GitHub Flow with integrated TDD
-- `claude/operational-docs/current-development-process.md` - Current development workflow and process
+**spl1 Strategy**:
+- `claude/wow/docs/phase-based-development-strategy.md` - PRINCE2-inspired roadmap execution approach
+- `claude/wow/workflows/phase-based-implementation-guide.md` - Step-by-step workflow implementation guide
+- `claude/wow/workflows/branching-strategy.md` - Simplified GitHub Flow with integrated TDD
+- `claude/project/docs/current-development-process.md` - Current development workflow and process
+
 
 ## Persistent Todo Management
 
-**Repository Todo List**: `claude/operational-docs/persistent-todo-list.md` - Maintains discussion topics and todos across sessions to ensure continuity.
+**Repository Todo List**: `claude/project/todo.md` - Maintains discussion topics and todos across sessions to ensure continuity.
 
 ## Learning Rule
 
 At regular intervals, ask "What have I learned?" and update documentation in appropriate docs/ files.
 
-## Template Updates
+## Future Evolution
 
-This repository uses the claude-swift template system. To update the template:
+See [Subdirectory CLAUDE.md Evolution Plan](./docs/subdirectory-claude-md-plan.md) for planned transition to federated repository architecture.
 
-1. Tell Claude: "update claude template from claude-swift repository"
-2. Claude will read the template merge procedures and execute intelligent updates
-3. Local operational data (audit logs, todos, project-specific docs) will be preserved
-4. Template improvements (workflows, tools, base documentation) will be updated
+## Documentation Standards
 
-**Template Source**: https://github.com/SPlectrum/claude-swift
+**MANDATORY DOCUMENTATION RULES**:
+1. **File Location**: All documentation MUST be created in `docs/` directory or appropriate subdirectory
+2. **Homepage Back Links**: All documentation files MUST include back link to README.md at TOP of file
+3. **Back Link Format**: `[← Back to Claude-Swift Home](../README.md)` (adjust path as needed)
+4. **No External Documentation**: NEVER create documentation files outside `docs/` hierarchy
+
+**AUTOMATIC CORRECTION**: When documentation files are found outside `docs/`, Claude MUST:
+1. Move files to appropriate `docs/` subdirectory
+2. Update all references to new locations
+3. Fix homepage back links to be at top of files

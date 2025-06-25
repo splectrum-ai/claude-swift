@@ -38,7 +38,7 @@ cd claude-swift/
 ./deploy fresh --target ../my-project
 
 # Setup automated git workflow (prevents sync issues)
-source scripts/git-workflow-helpers.sh
+source claude/scripts/git-workflow-helpers.sh
 ```
 
 ### Existing Project Migration
@@ -89,9 +89,9 @@ cd claude-swift/
 - **[Phase-Based Development Strategy](claude/workflows/phase-based-development-strategy.md)** - PRINCE2-inspired approach
 - **[Phase-Based Implementation Guide](claude/workflows/phase-based-implementation-guide.md)** - Step-by-step workflow
 - **[Branching Strategy](claude/workflows/branching-strategy.md)** - GitHub Flow with TDD
-- **[Current Development Process](claude/operational-docs/current-development-process.md)** - Active workflow
-- **[Persistent Todo List](claude/operational-docs/persistent-todo-list.md)** - Cross-session continuity
-- **[Dual Report Strategy](claude/operational-docs/dual-report-strategy.md)** - Process improvement
+- **[Current Development Process](claude/project/docs/current-development-process.md)** - Active workflow
+- **[Repository Todo List](claude/project/todo.md)** - Cross-session continuity
+- **[Dual Report Strategy](claude/project/docs/dual-report-strategy.md)** - Process improvement
 
 ## Key Features
 
