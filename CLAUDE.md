@@ -106,7 +106,7 @@ This enables detection of incomplete workflow executions and ensures proper work
 ### 4. Progress Recognition
 - Celebrate each completed step as meaningful progress
 - **MANDATORY**: Update current audit log with step completion using correct format: `TIMESTAMP|WORKFLOW|step|context|file_path|description`
-- Remove completed items from `todo-list.md` immediately
+- **MANDATORY**: Follow REPO_TODO_WORKFLOW for repository todo list management - See [claude/workflows/REPO_TODO_WORKFLOW.md](./claude/workflows/REPO_TODO_WORKFLOW.md)
 
 **Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking, and creates natural stopping points for session management.
 
@@ -253,6 +253,7 @@ Use natural language with "sesame" suffix:
 - `next sesame` → NEXT_ISSUE
 - `recommend sesame` → WORKFLOW_RECOMMENDATION (experimental)
 - `transition sesame` → VERSION_TRANSITION (complete 5-step automation)
+- `todo sesame` → REPO_TODO_WORKFLOW
 - `version planning sesame` → NEW_VERSION_PLANNING
 
 ### Technical Keywords (for documentation)
@@ -265,6 +266,7 @@ Use natural language with "sesame" suffix:
 **PLANNED_VS_UNPLANNED** → See [claude/workflows/PLANNED_VS_UNPLANNED.md](./claude/workflows/PLANNED_VS_UNPLANNED.md)
 **WORKFLOW_RECOMMENDATION** → See [claude/workflows/WORKFLOW_RECOMMENDATION.md](./claude/workflows/WORKFLOW_RECOMMENDATION.md)
 **VERSION_TRANSITION** → See [claude/workflows/VERSION_TRANSITION.md](./claude/workflows/VERSION_TRANSITION.md)
+**REPO_TODO_WORKFLOW** → See [claude/workflows/REPO_TODO_WORKFLOW.md](./claude/workflows/REPO_TODO_WORKFLOW.md)
 **NEW_VERSION_PLANNING** → See [claude/workflows/NEW_VERSION_PLANNING.md](./claude/workflows/NEW_VERSION_PLANNING.md)
 
 ## spl1 Context

@@ -22,6 +22,14 @@ Following PRINCE2 principles:
 - Adapt strategy based on learning from each delivery cycle
 - Avoid over-planning work that may change based on new insights
 
+### KISS Principle (Keep It Simple, Stupid)
+Aligned with PRINCE2 "just-enough planning":
+- **Favor simple solutions** over complex ones
+- **Eliminate unnecessary complexity** at every level
+- **One clear purpose** per component/workflow/process
+- **Simplicity as default** - complexity requires justification
+- **Simple is maintainable** - easier to understand, modify, and debug
+
 ## Methodology
 
 ### Phase Definition
