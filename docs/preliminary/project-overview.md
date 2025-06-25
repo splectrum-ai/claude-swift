@@ -1,3 +1,5 @@
+[← Back to Claude-Swift Home](../../README.md)
+
 # Claude-Swift Ways of Working Template System
 
 ## Project Overview
@@ -77,4 +79,8 @@ The immediate task is to clean up the existing operational data and establish cl
 3. Define upgrade rules and mechanisms
 4. Create deployment automation
 5. Test with multiple target repositories
+
+---
+
+[← Back to Claude-Swift Home](../../README.md)
 6. Document complete setup and usage procedures

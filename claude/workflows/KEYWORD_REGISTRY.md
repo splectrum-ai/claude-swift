@@ -19,6 +19,8 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **WORKFLOW_RECOMMENDATION** | `WORKFLOW_RECOMMENDATION.md` | Workflow recommendation system based on historical data | When uncertain which workflow approach to use | `recommend sesame` |
 | **VERSION_TRANSITION** | `VERSION_TRANSITION.md` | Mandatory post-release knowledge processing and next version preparation | After RELEASE_PROCESS completion | `transition sesame` |
 | **REPO_TODO_WORKFLOW** | `REPO_TODO_WORKFLOW.md` | Repository todo list management and cross-session continuity | Todo operations, status updates, completion tracking | `todo sesame` |
+| **NEW_VERSION_PLANNING** | `NEW_VERSION_PLANNING.md` | Next version planning and roadmap development | Version planning, feature prioritization | `version planning sesame` |
+| **DOCUMENTATION_WORKFLOW** | `DOCUMENTATION_WORKFLOW.md` | Documentation standards and compliance management | Documentation creation, maintenance, compliance | `docs sesame` |
 | **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | *No sesame alias* |
 
 ## Built-in Claude Code Keywords
