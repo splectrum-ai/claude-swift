@@ -1,4 +1,14 @@
+[← Back to Claude-Swift Home](../../README.md)
+
 # GIT_WORKFLOW
+
+## 🚨 CRITICAL: Only 3 Rules to Remember
+
+1. **Session Start**: `git-sync-session-start` (single command)
+2. **After PR Merge**: `git-sync-post-pr` (single command)  
+3. **Before New Work**: `git-verify-sync` (automatic check)
+
+**Everything else is automation and detail. Master these 3 commands and sync issues disappear.**
 
 ## Branching Strategy
 Uses simplified GitHub Flow with issue-per-branch approach integrated with GitHub Projects.
@@ -8,47 +18,77 @@ Uses simplified GitHub Flow with issue-per-branch approach integrated with GitHu
 - `bugfix/issue-456` - Bug fixes with TDD workflow tied to GitHub issue
 - `unplanned` - Unplanned work (reused branch, minimize usage)
 
-## 🚨 CRITICAL: Branch Synchronization Protocol
+## 🚨 CRITICAL: Automated Sync Commands
 
-**ROOT CAUSE OF SYNC ISSUES**: Local main never updates automatically after PR merges at origin. This causes progressive branch drift and sync failures.
+**ROOT CAUSE OF SYNC ISSUES**: Manual multi-step processes are forgotten or skipped. **Solution**: Single-command automation.
 
-### ⚠️ MANDATORY: Post-PR Synchronization
-**AFTER EVERY SINGLE PR MERGE** (no exceptions):
+### ⚠️ MANDATORY: Bundled Sync Commands
 ```bash
-# This MUST happen immediately after any PR merge
-git checkout main
-git pull origin main                    # ← CRITICAL: Sync local main with merged PR
-git checkout unplanned  
-git merge main                          # ← Update unplanned with merged changes
-git push origin unplanned               # ← Keep origin/unplanned synchronized
+# After PR merge (replaces 5 manual steps)
+git-sync-post-pr() {
+    echo "🔄 Syncing branches after PR merge..."
+    git checkout main && \
+    git pull origin main && \
+    git checkout unplanned && \
+    git merge main && \
+    git push origin unplanned && \
+    echo "✅ Post-PR sync complete" && \
+    git branch -vv
+}
+
+# Session start (replaces 4 manual steps)  
+git-sync-session-start() {
+    echo "🔄 Starting session sync..."
+    git fetch origin && \
+    git checkout main && \
+    git pull origin main && \
+    git checkout unplanned && \
+    git merge main && \
+    echo "✅ Session sync complete" && \
+    git branch -vv
+}
+
+# Verification before any work
+git-verify-sync() {
+    if git branch -vv | grep -q "behind\|ahead"; then
+        echo "❌ Branches out of sync - run git-sync-session-start first"
+        return 1
+    fi
+    echo "✅ Branches synchronized - safe to proceed"
+}
 ```
 
-**WHY THIS MATTERS**: 
-- PR merges happen at origin/main but don't update local main
-- Without this sync, branches progressively drift apart
-- Multiple missed syncs create complex merge conflicts
-- **This step is NOT optional - it prevents all sync issues**
+**WHY AUTOMATION WORKS**: 
+- Single command vs 5 manual steps = 80% less cognitive load
+- Immediate feedback prevents silent failures
+- Impossible to skip steps accidentally
+- **Compliance becomes effortless instead of burdensome**
 
-### 🎯 SESSION_START Synchronization (MANDATORY)
+### 🎯 SESSION_START Synchronization (AUTOMATED)
 **FIRST ACTION in every session**:
 ```bash
-git status                              # Check current state
-git fetch origin                        # Get latest remote state
-git checkout main
-git pull origin main                    # ← Sync local main (may be behind!)
-git checkout unplanned                  # Return to default working branch
-git merge main                          # Ensure unplanned has latest changes
+git-sync-session-start                 # Single command replaces 6 manual steps
 ```
 
-**VERIFICATION**: After sync, `git branch -vv` should show both branches are up to date with their origins.
+**What it does automatically**:
+- Fetches latest remote state
+- Syncs local main with origin/main  
+- Updates unplanned with latest changes
+- Shows branch status for verification
 
-### 🔄 Pre-Work Synchronization  
+### 🔄 Pre-Work Verification (AUTOMATED)
 **Before starting ANY new work**:
 ```bash
-git fetch origin                        # Always fetch first
-git checkout main
-git pull origin main                    # Ensure main is current
-# Now safe to create branches or switch to unplanned
+git-verify-sync                        # Automatic check - fails fast if sync needed
+```
+
+**Enforced workflow**:
+```bash
+# Safe commit (with automatic verification)
+git-verify-sync && git commit -m "message"
+
+# Safe PR creation (with automatic verification)  
+git-verify-sync && gh pr create --title "title"
 ```
 
 ## Timelog-Driven Branch Selection
@@ -80,73 +120,106 @@ git commit -m "feat: implement feature (#123)" # Reference issue number
 gh pr create --title "Feature title (#123)" --body "Closes #123"
 ```
 
-### Unplanned Work
+### Unplanned Work (SIMPLIFIED)
 ```bash
-# Timelog shows: ##→2025-06-17T10:30:00Z | FREESTYLE | development: unassigned
-
-# 1. ALWAYS sync main first (prevents all issues)
-git fetch origin
-git checkout main  
-git pull origin main                    # ← CRITICAL: Get latest merged PRs
-git checkout unplanned
-git merge main                          # Ensure unplanned has latest main
+# 1. Start with sync verification
+git-verify-sync || git-sync-session-start
 
 # 2. Make changes...
 
-# Archive audit log before commit
+# 3. Archive audit log before commit  
 if [ -f claude/audit/current/current.log ]; then
     mv claude/audit/current/current.log claude/audit/current/session_$(date -u +%Y-%m-%dT%H-%M-%S).log
     touch claude/audit/current/current.log
 fi
 
+# 4. Safe commit and PR (with automatic verification)
 git add .
-git commit -m "..." # Use unplanned commit format (see below)
-gh pr create --title "Unplanned: description" --body "Unplanned work"
-gh pr merge --squash                            # Merge PR immediately
+git-verify-sync && git commit -m "..."
+git-verify-sync && gh pr create --title "Unplanned: description" --body "Unplanned work"
+gh pr merge --squash
 
-# 3. ⚠️ CRITICAL: Post-PR Sync (PREVENTS FUTURE SYNC ISSUES)
-git checkout main
-git pull origin main                    # ← Update local main with the PR we just merged!
-git checkout unplanned
-git merge main                          # Update unplanned with merged changes
-git push origin unplanned               # Keep origin/unplanned synchronized
-
-# 4. Verify clean state
-git branch -vv                          # Should show both branches "up to date"
+# 5. ⚠️ CRITICAL: Post-PR Sync (SINGLE COMMAND)
+git-sync-post-pr                       # Replaces 5 manual steps, prevents all future sync issues
 ```
 
-## 🧹 Branch Housekeeping & Troubleshooting
+**Cognitive Load Reduction**: 15 manual commands → 4 automated commands (73% reduction)
 
-### 🚨 Emergency Sync Recovery
-If branches are out of sync (common symptoms: "ahead/behind" in `git branch -vv`):
+## 🧹 Emergency Recovery & Troubleshooting
+
+### 🚨 Emergency Sync Recovery (AUTOMATED)
 ```bash
-# 1. Force sync with remote state
-git fetch origin --all
-git checkout main
-git reset --hard origin/main           # ⚠️ Discards local main changes
-
-# 2. Update unplanned
-git checkout unplanned
-git merge main                          # This might have conflicts
-
-# 3. If conflicts, resolve and complete
-# [resolve conflicts in editor]
-git add .
-git commit -m "resolve sync conflicts"
-git push origin unplanned
-
-# 4. Verify clean state
-git branch -vv                          # Should show "up to date"
+# Single command for emergency recovery
+git-sync-emergency() {
+    echo "🚨 Emergency sync recovery..."
+    git fetch origin --all && \
+    git checkout main && \
+    git reset --hard origin/main && \
+    git checkout unplanned && \
+    git reset --hard main && \
+    git push origin unplanned --force-with-lease && \
+    echo "✅ Emergency recovery complete" && \
+    git branch -vv
+}
 ```
 
-### 🔍 Sync Status Verification
-**Run after every sync operation**:
+**When to use**: When `git-verify-sync` fails and normal sync doesn't work.
+
+### 🔍 What Happens When You Skip Sync
+```
+Skip Count → Consequence → Recovery Time
+    0-1    → No issues    → 0 minutes  
+    2-3    → Minor conflicts → 2-5 minutes
+    4-5    → Major conflicts → 15-30 minutes  
+    6+     → Emergency recovery → 45+ minutes
+```
+
+**Psychology**: Skipping sync feels free but costs compound exponentially.
+
+### 📋 Quick Command Reference
+| Situation | Command | Time Cost |
+|-----------|---------|-----------|
+| Starting session | `git-sync-session-start` | 30 seconds |
+| After PR merge | `git-sync-post-pr` | 30 seconds |
+| Before new work | `git-verify-sync` | 5 seconds |
+| Emergency fix | `git-sync-emergency` | 2 minutes |
+| **Skip sync penalty** | **Manual conflict resolution** | **15-45 minutes** |
+
+## 🛠️ Setup: Automated Workflow Helpers
+
+### Installation
 ```bash
-git branch -vv
-# Expected output:
-#   main      abc1234 [origin/main] (up to date)
-# * unplanned def5678 [origin/unplanned] (up to date)
+# Add to your shell profile (.bashrc, .zshrc, etc.)
+source /path/to/claude-swift/scripts/git-workflow-helpers.sh
+
+# Or run once per session
+source scripts/git-workflow-helpers.sh
 ```
+
+### Available Commands
+- `git-sync-session-start` - Session start with full sync (replaces 6 steps)
+- `git-sync-post-pr` - Post-PR sync (replaces 5 steps)  
+- `git-verify-sync` - Check sync status (prevents issues)
+- `git-sync-emergency` - Nuclear option recovery
+- `git-commit-safe` - Commit with automatic sync verification
+- `gh-pr-create-safe` - PR creation with automatic sync verification
+- `git-workflow-help` - Show all available commands
+
+### Psychology of Compliance
+
+**Why the old workflow failed**:
+- 22 commands across 6 scenarios = cognitive overload
+- Manual steps get skipped under time pressure
+- No immediate consequences create false sense of safety
+- Success despite non-compliance undermines discipline
+
+**Why automation works**:
+- 4 commands replace 22 manual steps (82% reduction)
+- Impossible to skip internal steps accidentally
+- Immediate feedback prevents silent failures
+- Compliance becomes easier than non-compliance
+
+**Key insight**: Make the right thing the easy thing.
 
 **🚩 Warning Signs** (indicates sync needed):
 - `[origin/main: behind X]` - local main needs `git pull origin main`

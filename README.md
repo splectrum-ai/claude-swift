@@ -36,6 +36,9 @@ git clone https://github.com/SPlectrum/claude-swift.git
 # Deploy
 cd claude-swift/
 ./deploy fresh --target ../my-project
+
+# Setup automated git workflow (prevents sync issues)
+source scripts/git-workflow-helpers.sh
 ```
 
 ### Existing Project Migration
@@ -71,7 +74,7 @@ cd claude-swift/
 - **[Keyword Registry](claude/workflows/KEYWORD_REGISTRY.md)** - Complete workflow triggers
 - **[Session Start Workflow](claude/workflows/SESSION_START.md)** - Session initialization
 - **[Session End Workflow](claude/workflows/SESSION_END.md)** - Session completion
-- **[Git Workflow](claude/workflows/GIT_WORKFLOW.md)** - Version control procedures
+- **[Git Workflow](claude/workflows/GIT_WORKFLOW.md)** - Automated version control with sync helpers
 - **[GitHub Workflow](claude/workflows/GITHUB_WORKFLOW.md)** - Repository integration
 - **[Operational Rules](claude/workflows/OPERATIONAL_RULES.md)** - Core behavioral rules
 - **[Essential Commands](claude/workflows/ESSENTIAL_COMMANDS.md)** - Key operation commands
