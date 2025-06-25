@@ -2,6 +2,15 @@
 
 ## Current Topics for Discussion
 
+### Strategic Market Positioning
+- **Status**: ✅ RESEARCH COMPLETE
+- **Context**: Comprehensive ecosystem competitive analysis completed
+- **Key Findings**: Claude-swift pioneers new category "AI-Enhanced Development Operations Templates"
+- **Strategic Insights**: Unique market position with high differentiation from existing tools
+- **Competitive Threats**: Cursor IDE (high), Replit Agent (medium), traditional tools (low)
+- **Opportunities**: Ecosystem integration rather than direct competition
+- **Next Actions**: Focus on operational AI capabilities and ecosystem partnerships
+
 ### Template-Claude Sync Workflow Development
 - **Status**: 🔄 NEW PRIORITY  
 - **Context**: Internal sync rules for maintaining /claude/ source of truth and /template/ deployment
@@ -19,24 +28,18 @@
 - **Status**: 🔄 IN PROGRESS
 - **Context**: Converting this repository to claude-swift ways of working template system
 - **Current Phase**: Template creation and cleanup
-- **Completed Tasks**:
-  - ✅ Document project overview and objectives (`docs/preliminary/project-overview.md`)
-  - ✅ Document self-contained template update architecture (`docs/preliminary/self-contained-template-update-architecture.md`)
-  - ✅ Document template repository structure (`docs/preliminary/template-repository-structure.md`)
-  - ✅ Document event-driven workflow testing architecture (`docs/preliminary/event-driven-workflow-testing-architecture.md`)
-  - ✅ Create template folder structure and move root-level content (`template/`)
-  - ✅ Create deployment procedures folder (`deployment/`)
-  - ✅ Create template CLAUDE.md for project root deployment (`template/CLAUDE.md`)
-  - ✅ Document pre-deployment impact analysis (`deployment/pre-deployment-impact-analysis.md`)
-  - ✅ Document template cleanup procedures (`deployment/template-cleanup-procedures.md`)
-  - ✅ Document enhancement suggestions (`docs/preliminary/template-enhancement-suggestions.md`)
-  - ✅ Document event-driven reminder system (`docs/preliminary/event-driven-reminder-system.md`)
-
-- **Remaining Tasks**:
-  - ✅ Finish setting up git repository for WoW (create unplanned branch, fix branching workflow)
+- **Tasks**:
+  - ⏳ Implement deployment scripts in claude-swift
+  - ⏳ Test sidecar deployment on sample project
+  - ⏳ Restructure current `/claude/` → `/claude-wow/` in template
+  - ⏳ Create `/claude-project/` structure and content templates
+  - ⏳ Update all workflow references to use new folder structure
+  - ⏳ Test upgrade scenarios with both folders
+  - ⏳ Create migration analysis script (classify existing claude content)
+  - ⏳ Build data extraction procedures (preserve project-specific docs)
+  - ⏳ Test migration on this repository (claude-swift self-migration)
   - ⏳ Clean up project-specific data from template content (remove audit logs, project docs)
   - ⏳ Create basic template-merge-procedures.md for Claude
-  - ⏳ Create simple deployment-guide.md with step-by-step instructions
   - ⏳ Test template deployment on a sample project
   - ⏳ Implement standardized project information API (claude/project/ schema)
   - ⏳ Add missing information reporting rules to template workflows
@@ -51,3 +54,7 @@
 ---
 
 *This file maintains persistent todo items and discussion topics across development sessions.*
+
+---
+
+[← Back to Claude-Swift Home](../../README.md)

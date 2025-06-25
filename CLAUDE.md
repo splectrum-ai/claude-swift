@@ -255,6 +255,7 @@ Use natural language with "sesame" suffix:
 - `transition sesame` → VERSION_TRANSITION (complete 5-step automation)
 - `todo sesame` → REPO_TODO_WORKFLOW
 - `version planning sesame` → NEW_VERSION_PLANNING
+- `docs sesame` → DOCUMENTATION_WORKFLOW
 
 ### Technical Keywords (for documentation)
 **SESSION_START** → See [claude/workflows/SESSION_START.md](./claude/workflows/SESSION_START.md)
@@ -268,6 +269,7 @@ Use natural language with "sesame" suffix:
 **VERSION_TRANSITION** → See [claude/workflows/VERSION_TRANSITION.md](./claude/workflows/VERSION_TRANSITION.md)
 **REPO_TODO_WORKFLOW** → See [claude/workflows/REPO_TODO_WORKFLOW.md](./claude/workflows/REPO_TODO_WORKFLOW.md)
 **NEW_VERSION_PLANNING** → See [claude/workflows/NEW_VERSION_PLANNING.md](./claude/workflows/NEW_VERSION_PLANNING.md)
+**DOCUMENTATION_WORKFLOW** → See [claude/workflows/DOCUMENTATION_WORKFLOW.md](./claude/workflows/DOCUMENTATION_WORKFLOW.md)
 
 ## spl1 Context
 
@@ -312,3 +314,16 @@ At regular intervals, ask "What have I learned?" and update documentation in app
 ## Future Evolution
 
 See [Subdirectory CLAUDE.md Evolution Plan](./docs/subdirectory-claude-md-plan.md) for planned transition to federated repository architecture.
+
+## Documentation Standards
+
+**MANDATORY DOCUMENTATION RULES**:
+1. **File Location**: All documentation MUST be created in `docs/` directory or appropriate subdirectory
+2. **Homepage Back Links**: All documentation files MUST include back link to README.md at TOP of file
+3. **Back Link Format**: `[← Back to Claude-Swift Home](../README.md)` (adjust path as needed)
+4. **No External Documentation**: NEVER create documentation files outside `docs/` hierarchy
+
+**AUTOMATIC CORRECTION**: When documentation files are found outside `docs/`, Claude MUST:
+1. Move files to appropriate `docs/` subdirectory
+2. Update all references to new locations
+3. Fix homepage back links to be at top of files
