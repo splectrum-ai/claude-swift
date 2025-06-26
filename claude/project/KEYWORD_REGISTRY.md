@@ -4,22 +4,22 @@ This file maintains project-specific workflow trigger keywords that extend the b
 
 ## Epic-Specific Keywords
 
-Reserved for epic-specific workflows when needed:
+Reserved for claude-swift specific workflows when needed:
 
 | Epic | Potential Keywords | Status |
 |------|-------------------|--------|
-| **RR** | REPOSITORY_RESTRUCTURE | Not yet created |
-| **SE** | SPECTRUM_ENGINES | Not yet created |
-| **CAE** | CORE_API_ENHANCEMENT | Not yet created |
-| **TDD** | TEST_DRIVEN_DEVELOPMENT | Not yet created |
-| **BARE** | BARE_MIGRATION | Not yet created |
-| **NFD** | NEW_FUNCTIONALITY | Not yet created |
-| **AVRO** | AVRO_INTEGRATION | Not yet created |
+| **TEMPLATE** | TEMPLATE_ENHANCEMENT | Not yet created |
+| **DEPLOY** | DEPLOYMENT_AUTOMATION | Not yet created |
+| **DOCS** | DOCUMENTATION_WORKFLOW | Available |
+| **SIDECAR** | SIDECAR_DEPLOYMENT | Not yet created |
+| **HOOK** | HOOK_MANAGEMENT | Not yet created |
+| **TEMPLATE_PUBLISH** | TEMPLATE_PUBLISH_WORKFLOW | Not yet created |
+| **RELEASE** | PROJECT_RELEASE_PROCESS | Available |
 
 ## Project-Specific Customizations
 
 ### ESSENTIAL_COMMANDS Customization
-- **SPL Platform Operations**: Core SPL execution commands for SPlectrum platform
+- **Claude-Swift Operations**: Template management, sidecar deployment, and workflow automation commands
 
 ## Registry Inheritance
 

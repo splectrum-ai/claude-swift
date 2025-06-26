@@ -1,3 +1,5 @@
+[← Back to Claude-Swift Home](../../README.md)
+
 # Dual Report Strategy Implementation
 
 ## Overview
