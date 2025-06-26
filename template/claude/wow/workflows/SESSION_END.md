@@ -41,24 +41,24 @@
 - Follow REPO_TODO_WORKFLOW for todo completion and transient todo transfer
 - Document session learnings in appropriate docs/ files
 
-### **3. Git Operations and Clean Handoff (MANDATORY SEQUENCE)**
-**MUST execute this exact sequence - NO EXCEPTIONS:**
+### **3. Git Operations and Clean Handoff**
+**Complete implementation of OPERATIONAL_RULES branch transition protocol:**
 
-1. **MUST**: Archive current.log → `session_TIMESTAMP.log`
-2. **MUST**: Create fresh current.log with clean marker  
-3. **MUST**: Stash current.log before git operations
-4. **MUST**: `git add .` (stage all changes)
-5. **MUST**: `git commit` with comprehensive session summary
-6. **MUST**: `git push origin unplanned` 
-7. **MUST**: `gh pr create` with detailed description
-8. **MUST**: `gh pr merge --squash`
-9. **MUST**: `git checkout main && git pull origin main` (sync local main)
-10. **MUST**: `git checkout unplanned && git merge main` (update unplanned)
-11. **MUST**: `git push origin unplanned` (final sync)
-12. **MUST**: `git stash pop` (restore current.log)
-13. **MUST**: Log SESSION_END completion in current.log
+1. Archive current.log → `session_TIMESTAMP.log`
+2. Create fresh current.log with clean marker  
+3. Stage all changes: `git add .`
+4. Commit with comprehensive session summary
+5. Stash current.log before git operations: `git stash push -m "Stash current.log"`
+6. Push to remote: `git push origin unplanned`
+7. Create PR: `gh pr create` with detailed description
+8. Merge PR: `gh pr merge --squash`
+9. Switch to main and sync: `git checkout main && git pull origin main`
+10. Switch back to unplanned: `git checkout unplanned && git merge main`
+11. Push updated unplanned: `git push origin unplanned`
+12. Restore current.log: `git stash pop`
+13. Log SESSION_END completion per audit governance
 
-**CRITICAL**: This sequence prevents all git sync issues and ensures clean session handoff
+**Note**: This implements the complete OPERATIONAL_RULES "Branch Transition Protocol" ensuring clean session handoff with all changes integrated to main and branches synchronized.
 
 ## SESSION OUTCOME DOCUMENTATION
 

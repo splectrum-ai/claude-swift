@@ -26,8 +26,8 @@ All documentation and workflows are **optimized for AI execution** while remaini
 ```
 parent-directory/
 ├── target-project/              # User's actual project
-│   ├── claude-project/         # Project docs (tracked in git)
-│   └── claude-wow/             # WoW machinery (gitignored)
+│   ├── claude/project/         # Project docs (tracked)
+│   └── claude/wow/             # WoW machinery (tracked for operational risk mitigation)
 └── claude-swift/               # Template repo (sidecar)
 ```
 
@@ -37,13 +37,13 @@ parent-directory/
 - **Upgrade safety** - Template updates don't conflict with project documentation
 
 ### 2. Dual-Folder Architecture
-**claude-project/ (Tracked in Git):**
+**claude/project/ (Tracked):**
 - Project requirements and architecture documentation
 - Team agreements and coding standards  
 - Project-specific configuration and planning
 - Business context and domain knowledge
 
-**claude-wow/ (Git Ignored):**
+**claude/wow/ (Tracked for Operational Risk Mitigation):**
 - Operational workflows and automation scripts
 - Audit logs and session history
 - Ways of working machinery and tools

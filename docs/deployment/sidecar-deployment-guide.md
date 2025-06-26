@@ -22,8 +22,9 @@ Existing dual-folder project where operational data discipline was not maintaine
 ```
 parent-directory/
 ├── my-project/
-│   ├── claude-project/        # Project docs (tracked)
-│   └── claude-wow/            # WoW machinery (ignored)  
+│   └── claude/
+│       ├── project/           # Project docs (tracked)
+│       └── wow/               # WoW machinery (tracked for operational risk mitigation)
 └── claude-swift/              # Template repo (sidecar)
     ├── template/
     ├── deployment/

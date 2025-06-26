@@ -10,17 +10,14 @@
 
 **Everything else is automation and detail. Master these 3 commands and sync issues disappear.**
 
-## Branching Strategy
-Uses simplified GitHub Flow with issue-per-branch approach integrated with GitHub Projects.
+## Automation Overview
+Provides single-command automation for git operations following governance rules defined in OPERATIONAL_RULES.md.
 
-## Branch Types
-- `feature/issue-123` - Feature development tied to GitHub issue
-- `bugfix/issue-456` - Bug fixes with TDD workflow tied to GitHub issue
-- `unplanned` - Unplanned work (reused branch, minimize usage)
+**Note**: All governance rules (branch policies, PR protocols, etc.) are defined in OPERATIONAL_RULES.md. This workflow focuses on automation commands that implement those rules.
 
-## 🚨 CRITICAL: Automated Sync Commands
+## Automated Sync Commands
 
-**ROOT CAUSE OF SYNC ISSUES**: Manual multi-step processes are forgotten or skipped. **Solution**: Single-command automation.
+**Purpose**: Single-command automation prevents manual process errors and ensures compliance with OPERATIONAL_RULES governance.
 
 ### ⚠️ MANDATORY: Bundled Sync Commands
 ```bash

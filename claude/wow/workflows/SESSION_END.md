@@ -42,17 +42,23 @@
 - Document session learnings in appropriate docs/ files
 
 ### **3. Git Operations and Clean Handoff**
-**Implementation of OPERATIONAL_RULES branch transition protocol:**
+**Complete implementation of OPERATIONAL_RULES branch transition protocol:**
 
 1. Archive current.log → `session_TIMESTAMP.log`
 2. Create fresh current.log with clean marker  
-3. Stash current.log before git operations
-4. Execute governance-required staging and commit process
-5. Execute governance-required branch transition protocol (commit → push → PR → merge → switch)
-6. Restore current.log and complete audit requirements
-7. Log SESSION_END completion per audit governance
+3. Stage all changes: `git add .`
+4. Commit with comprehensive session summary
+5. Stash current.log before git operations: `git stash push -m "Stash current.log"`
+6. Push to remote: `git push origin unplanned`
+7. Create PR: `gh pr create` with detailed description
+8. Merge PR: `gh pr merge --squash`
+9. Switch to main and sync: `git checkout main && git pull origin main`
+10. Switch back to unplanned: `git checkout unplanned && git merge main`
+11. Push updated unplanned: `git push origin unplanned`
+12. Restore current.log: `git stash pop`
+13. Log SESSION_END completion per audit governance
 
-**Note**: All git governance rules (staging requirements, branch policies, PR protocols) are defined in OPERATIONAL_RULES.md. This workflow implements those rules procedurally.
+**Note**: This implements the complete OPERATIONAL_RULES "Branch Transition Protocol" ensuring clean session handoff with all changes integrated to main and branches synchronized.
 
 ## SESSION OUTCOME DOCUMENTATION
 
