@@ -1,6 +1,8 @@
-# RELEASE_PROCESS Workflow
+# RELEASE_PROCESS Sub-Workflow
 
-**Trigger**: `release sesame`
+**Note:** This is a sub-workflow called by the main VERSION workflow router.
+
+**Trigger**: Called via VERSION workflow router
 
 ## Overview
 
@@ -50,17 +52,27 @@ gh pr merge --squash
 
 ### 4. Release Artifact Creation
 ```bash
-# Create release archive
-./spl_execute spl boot usr/create_self_extract
+# Read project configuration
+source claude/project/version-config.md
+source claude/project/project-info.md
 
-# Test release installation
-mkdir spl-release-test && cd spl-release-test
-cp ../SPlectrum.7z . && 7z x SPlectrum.7z
-cd install/boot
-node spl.js usr/deploy_install
-node spl.js usr/deploy_modules  
-node spl.js usr/deploy_apps
-cd /mnt/c/SPlectrum/spl1 && rm -rf spl-release-test
+# Execute project-specific build commands
+for cmd in "${BUILD_COMMANDS[@]}"; do
+    echo "Executing: $cmd"
+    eval $cmd
+done
+
+# Execute project-specific test commands  
+for cmd in "${TEST_COMMANDS[@]}"; do
+    echo "Testing: $cmd"
+    eval $cmd
+done
+
+# Create release artifacts
+for cmd in "${ARTIFACT_COMMANDS[@]}"; do
+    echo "Creating artifact: $cmd"
+    eval $cmd
+done
 ```
 
 ### 5. GitHub Release Creation
@@ -70,7 +82,7 @@ git tag v{VERSION}
 git push origin v{VERSION}
 
 # Create GitHub release with version achievements as release notes
-gh release create v{VERSION} --title "SPlectrum v{VERSION}" --notes-file audit/v{VERSION}/learning_v{VERSION}.log SPlectrum.7z INSTALL.md
+gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file audit/v{VERSION}/learning_v{VERSION}.log {ARTIFACT_NAME}.7z
 ```
 
 ## Release Workflow Execution
@@ -87,11 +99,10 @@ gh release create v{VERSION} --title "SPlectrum v{VERSION}" --notes-file audit/v
 ```
 
 ## Version Strategy
-- **spl1 starts at 0.6.0** (continuation from spl0 which ended at 0.5.x)
-- **Target 1.0** when Repository Restructure (RR) reaches end goal state
-- **0.6.0 "Baseline"**: Seven-epic structure + initial analysis/planning issues
-- **0.6.1 "Sufficient Analysis & Planning"**: First pass analysis enabling implementation
-- **0.6.2+ progression**: PRINCE2 "just enough planning" approach
+**Loaded from Project Hooks:**
+- Version strategy and numbering patterns defined in `claude/project/hooks/version-config.md`
+- Project-specific release criteria and artifact configuration
+- Development phases and milestone structure
 
 ## Integration Points
 

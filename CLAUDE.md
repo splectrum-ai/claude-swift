@@ -257,6 +257,13 @@ Use natural language with "sesame" suffix:
 - `version planning sesame` → NEW_VERSION_PLANNING
 - `docs sesame` → DOCUMENTATION_WORKFLOW
 
+### Single-Word Sesame Magic Word
+**`sesame`** (standalone) → **Universal positive affirmation**
+- **Meaning**: "Yes", "I agree", "Go ahead", "Proceed", "Approved"
+- **Usage**: Response to proposals, options, or requests for confirmation
+- **Context**: Replaces verbose confirmations with elegant single-word approval
+- **Reference**: "Open Sesame" - the magic word that opens possibilities
+
 ### Technical Keywords (for documentation)
 **SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
 **GITHUB_WORKFLOW** → See [claude/wow/workflows/GITHUB_WORKFLOW.md](./claude/wow/workflows/GITHUB_WORKFLOW.md)  

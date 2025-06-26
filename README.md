@@ -12,8 +12,8 @@ Claude-swift provides a comprehensive template system that eliminates the confus
 ```
 parent-directory/
 ├── my-project/
-│   ├── claude-project/        # Project docs (tracked in git)
-│   └── claude-wow/            # WoW machinery (gitignored)
+│   ├── claude/project/        # Project docs (tracked)
+│   └── claude/wow/            # WoW machinery (tracked for operational risk mitigation)
 └── claude-swift/              # Template repo (sidecar)
 ```
 
@@ -114,8 +114,8 @@ deploy sesame
 - **Discipline Recovery**: Fix mixed content violations
 
 ### Content Separation Rules
-- **`/claude-project/` (Tracked)**: Project requirements, architecture, team agreements
-- **`/claude-wow/` (Ignored)**: Workflows, audit logs, operational machinery
+- **`/claude/project/` (Tracked)**: Project requirements, architecture, team agreements
+- **`/claude/wow/` (Tracked)**: Workflows, audit logs, operational machinery - tracked for operational risk mitigation
 
 ### Safety Mechanisms
 - **Built-in Rollback**: CLAUDE.md replacement + session restart
