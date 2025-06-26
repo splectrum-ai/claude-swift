@@ -25,39 +25,38 @@ parent-directory/
 
 ## Quick Start
 
-### Fresh Project Deployment
+### Template System Usage
 ```bash
-# Setup
-mkdir my-workspace/
-cd my-workspace/
-git clone https://github.com/user/my-project.git
+# Clone claude-swift template repository
 git clone https://github.com/SPlectrum/claude-swift.git
-
-# Deploy
 cd claude-swift/
-./deploy fresh --target ../my-project
 
-# Setup automated git workflow (prevents sync issues)
-source claude/scripts/git-workflow-helpers.sh
+# Setup automated git workflow helpers
+source claude/wow/automation/git-workflow-helpers.sh
+
+# Deploy to target project (Claude instance detects scenario and presents options)
+deploy sesame
+
+# Start working with Claude Code workflows
+# Use workflow triggers like: start sesame, git sesame, docs sesame
 ```
 
-### Existing Project Migration
-```bash
-# Migrate from legacy /claude/ structure
-cd claude-swift/
-./deploy migrate --target ../my-project --analyze
-./deploy migrate --target ../my-project --execute
-```
+### Development Status
+**Current Phase**: Template system implementation
+- ✅ Architecture design complete
+- ✅ Deployment guides created  
+- 🔄 Deployment scripts in development
+- 🔄 Testing and validation pending
 
 ## Documentation
 
-### Core Guides
+### Core Deployment Guides
 - **[Migration Deployment Guide](docs/deployment/migration-deployment-guide.md)** - Complete migration from legacy structure
 - **[Sidecar Deployment Guide](docs/deployment/sidecar-deployment-guide.md)** - Fresh installs and maintenance
 - **[Pre-Deployment Impact Analysis](docs/deployment/pre-deployment-impact-analysis.md)** - Safety procedures
 - **[Template Cleanup Procedures](docs/deployment/template-cleanup-procedures.md)** - Content preparation
 
-### Architecture Documents
+### Architecture & Design
 - **[Project Overview](docs/preliminary/project-overview.md)** - Template system objectives
 - **[Template Repository Structure](docs/preliminary/template-repository-structure.md)** - System organization
 - **[Self-Contained Template Update Architecture](docs/preliminary/self-contained-template-update-architecture.md)** - Update mechanisms
@@ -68,30 +67,43 @@ cd claude-swift/
 ### Research & Analysis
 - **[Ecosystem Competitive Analysis](docs/research/ecosystem-competitive-analysis.md)** - Market landscape and positioning
 
-### Operational Workflows
-- **[CLAUDE.md](CLAUDE.md)** - Master operational configuration
-- **[Repository Todo Workflow](claude/workflows/REPO_TODO_WORKFLOW.md)** - Todo management system
-- **[Keyword Registry](claude/workflows/KEYWORD_REGISTRY.md)** - Complete workflow triggers
-- **[Session Start Workflow](claude/workflows/SESSION_START.md)** - Session initialization
-- **[Session End Workflow](claude/workflows/SESSION_END.md)** - Session completion
-- **[Git Workflow](claude/workflows/GIT_WORKFLOW.md)** - Automated version control with sync helpers
-- **[GitHub Workflow](claude/workflows/GITHUB_WORKFLOW.md)** - Repository integration
-- **[Operational Rules](claude/workflows/OPERATIONAL_RULES.md)** - Core behavioral rules
-- **[Essential Commands](claude/workflows/ESSENTIAL_COMMANDS.md)** - Key operation commands
-- **[Release Process](claude/workflows/RELEASE_PROCESS.md)** - Version release procedures
-- **[Planned vs Unplanned Work](claude/workflows/PLANNED_VS_UNPLANNED.md)** - Work classification
-- **[Version Transition](claude/workflows/VERSION_TRANSITION.md)** - Version management
-- **[New Version Planning](claude/workflows/NEW_VERSION_PLANNING.md)** - Version planning
-- **[Workflow Recommendation](claude/workflows/WORKFLOW_RECOMMENDATION.md)** - Intelligent suggestions
-- **[Documentation Workflow](claude/workflows/DOCUMENTATION_WORKFLOW.md)** - Documentation standards and compliance
+## Claude Operational System
 
-### Project Planning
-- **[Phase-Based Development Strategy](claude/workflows/phase-based-development-strategy.md)** - PRINCE2-inspired approach
-- **[Phase-Based Implementation Guide](claude/workflows/phase-based-implementation-guide.md)** - Step-by-step workflow
-- **[Branching Strategy](claude/workflows/branching-strategy.md)** - GitHub Flow with TDD
-- **[Current Development Process](claude/project/docs/current-development-process.md)** - Active workflow
+### Master Configuration
+- **[CLAUDE.md](CLAUDE.md)** - Master operational configuration
+
+### Workflow System
+- **[Keyword Registry](claude/wow/KEYWORD_REGISTRY.md)** - Complete workflow triggers
+- **[Session Start Workflow](claude/wow/workflows/SESSION_START.md)** - Session initialization
+- **[Session End Workflow](claude/wow/workflows/SESSION_END.md)** - Session completion
+- **[Git Workflow](claude/wow/workflows/GIT_WORKFLOW.md)** - Automated version control
+- **[GitHub Workflow](claude/wow/workflows/GITHUB_WORKFLOW.md)** - Repository integration
+- **[Documentation Workflow](claude/wow/workflows/DOCUMENTATION_WORKFLOW.md)** - Documentation standards
+- **[Repository Todo Workflow](claude/wow/workflows/REPO_TODO_WORKFLOW.md)** - Todo management system
+
+### Operational Rules & Commands
+- **[Operational Rules](claude/wow/workflows/OPERATIONAL_RULES.md)** - Core behavioral rules
+- **[Essential Commands](claude/wow/workflows/ESSENTIAL_COMMANDS.md)** - Key operation commands
+- **[Planned vs Unplanned Work](claude/wow/workflows/PLANNED_VS_UNPLANNED.md)** - Work classification
+- **[Version Management](claude/wow/workflows/VERSION.md)** - Version orchestrator with state detection and routing
+- **[Version Transition](claude/wow/workflows/VERSION_TRANSITION.md)** - Version transition sub-workflow
+- **[Version Planning](claude/wow/workflows/NEW_VERSION_PLANNING.md)** - Version planning sub-workflow  
+- **[Release Process](claude/wow/workflows/RELEASE_PROCESS.md)** - Release execution sub-workflow
+- **[Workflow Recommendation](claude/wow/workflows/WORKFLOW_RECOMMENDATION.md)** - Intelligent suggestions
+
+### Development Strategy
+- **[Phase-Based Development Strategy](claude/wow/docs/phase-based-development-strategy.md)** - PRINCE2-inspired approach
+- **[Branching Strategy](claude/wow/docs/branching-strategy.md)** - GitHub Flow with TDD
+
+### Project Management
 - **[Repository Todo List](claude/project/todo.md)** - Cross-session continuity
 - **[Dual Report Strategy](claude/project/docs/dual-report-strategy.md)** - Process improvement
+- **[Project Development Workflow](claude/project/docs/project-development-workflow.md)** - Current workflow practices
+
+### Deployment Workflows
+- **[Deployment](claude/project/workflows/DEPLOYMENT.md)** - Main deployment orchestrator with scenario detection
+- **[Fresh Deployment](claude/project/workflows/FRESH_DEPLOYMENT.md)** - Clean installation for new projects
+- **[Migration Deployment](claude/project/workflows/MIGRATION_DEPLOYMENT.md)** - Legacy structure migration
 
 ## Key Features
 
@@ -114,22 +126,23 @@ cd claude-swift/
 ## Workflow Triggers
 
 Use natural language with "sesame" suffix:
+- `deploy sesame` → Deployment orchestrator (detects scenario and presents options)
 - `start sesame` → Session initialization
 - `finish sesame` → Session completion  
 - `git sesame` → Git workflow
 - `github sesame` → GitHub workflow
 - `todo sesame` → Repository todo management
+- `version sesame` → Version management orchestrator (detects state and presents options)
 - `planning sesame` → Planned vs unplanned work
 - `next sesame` → Next issue selection
-- `transition sesame` → Version transition
 - `docs sesame` → Documentation workflow
 
 ## Development Status
 
 **Current Phase**: Template system implementation
 - ✅ Architecture design complete
-- ✅ Deployment guides created
-- 🔄 Script implementation in progress
+- ✅ Deployment guides created  
+- 🔄 Deployment scripts in development
 - 🔄 Testing and validation pending
 
 ## Contributing
@@ -142,10 +155,10 @@ This template system follows strict operational discipline:
 
 ## Support
 
-For deployment issues:
-1. Run pre-deployment analysis
-2. Check deployment guides for procedures
-3. Use rollback mechanisms if needed
+For template usage and workflow questions:
+1. Check documentation in docs/ directory
+2. Review workflow guides in claude/wow/workflows/
+3. Use workflow triggers (start sesame, docs sesame, etc.)
 4. Review audit logs for troubleshooting
 
 ---

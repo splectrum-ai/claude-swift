@@ -1,10 +1,12 @@
-# NEW_VERSION_PLANNING Workflow
+# VERSION_PLANNING Sub-Workflow
+
+**Note:** This is a sub-workflow called by the main VERSION workflow router. Renamed from NEW_VERSION_PLANNING for consistency.
 
 ## ⚠️ MANDATORY NEW VERSION PLANNING ⚠️
 
 **MANDATORY NEW VERSION PLANNING**: After VERSION_TRANSITION workflow completion, Claude MUST execute this systematic planning workflow to establish scope, priorities, and work organization for the next version.
 
-**Trigger**: Mandatory execution after VERSION_TRANSITION workflow completion
+**Trigger**: Called via VERSION workflow router
 
 **Input**: Clean knowledge base and repository from VERSION_TRANSITION
 **Output**: Fully planned and organized next version with defined scope and work breakdown

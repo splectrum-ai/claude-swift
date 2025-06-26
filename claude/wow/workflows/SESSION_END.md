@@ -41,24 +41,18 @@
 - Follow REPO_TODO_WORKFLOW for todo completion and transient todo transfer
 - Document session learnings in appropriate docs/ files
 
-### **3. Git Operations and Clean Handoff (MANDATORY SEQUENCE)**
-**MUST execute this exact sequence - NO EXCEPTIONS:**
+### **3. Git Operations and Clean Handoff**
+**Implementation of OPERATIONAL_RULES branch transition protocol:**
 
-1. **MUST**: Archive current.log → `session_TIMESTAMP.log`
-2. **MUST**: Create fresh current.log with clean marker  
-3. **MUST**: Stash current.log before git operations
-4. **MUST**: `git add .` (stage all changes)
-5. **MUST**: `git commit` with comprehensive session summary
-6. **MUST**: `git push origin unplanned` 
-7. **MUST**: `gh pr create` with detailed description
-8. **MUST**: `gh pr merge --squash`
-9. **MUST**: `git checkout main && git pull origin main` (sync local main)
-10. **MUST**: `git checkout unplanned && git merge main` (update unplanned)
-11. **MUST**: `git push origin unplanned` (final sync)
-12. **MUST**: `git stash pop` (restore current.log)
-13. **MUST**: Log SESSION_END completion in current.log
+1. Archive current.log → `session_TIMESTAMP.log`
+2. Create fresh current.log with clean marker  
+3. Stash current.log before git operations
+4. Execute governance-required staging and commit process
+5. Execute governance-required branch transition protocol (commit → push → PR → merge → switch)
+6. Restore current.log and complete audit requirements
+7. Log SESSION_END completion per audit governance
 
-**CRITICAL**: This sequence prevents all git sync issues and ensures clean session handoff
+**Note**: All git governance rules (staging requirements, branch policies, PR protocols) are defined in OPERATIONAL_RULES.md. This workflow implements those rules procedurally.
 
 ## SESSION OUTCOME DOCUMENTATION
 

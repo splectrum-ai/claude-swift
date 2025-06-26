@@ -322,6 +322,7 @@ See [Subdirectory CLAUDE.md Evolution Plan](./docs/subdirectory-claude-md-plan.m
 2. **Homepage Back Links**: All documentation files MUST include back link to README.md at TOP of file
 3. **Back Link Format**: `[← Back to Claude-Swift Home](../README.md)` (adjust path as needed)
 4. **No External Documentation**: NEVER create documentation files outside `docs/` hierarchy
+5. **README.md Content Organization** (claude-swift rule): README.md contents MUST reflect docs/ folder contents FIRST, followed by claude/ folder contents of interest to users
 
 **AUTOMATIC CORRECTION**: When documentation files are found outside `docs/`, Claude MUST:
 1. Move files to appropriate `docs/` subdirectory
