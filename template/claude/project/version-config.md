@@ -13,19 +13,31 @@
 - **RELEASE_TYPE**: [application/library/service]
 
 ## Version Numbering Rules
-- **Major Version**: [breaking changes criteria]
-- **Minor Version**: [feature addition criteria]
-- **Patch Version**: [bug fix criteria]
+- **Major Version**: [Breaking changes, major features]
+- **Minor Version**: [New features, backward compatible]
+- **Patch Version**: [Bug fixes, minor improvements]
 
 ## Release Configuration
-- **RELEASE_ARTIFACTS**: [list of files/directories to include]
-- **ARTIFACT_COMMANDS**: [commands to build release artifacts]
+- **RELEASE_ARTIFACTS**: ["[list of release artifacts]"]
+- **ARTIFACT_COMMANDS**: [
+  "[artifact creation commands]"
+]
 
 ## Build and Test Configuration
-- **BUILD_COMMANDS**: [build commands]
-- **TEST_COMMANDS**: [test commands]
-- **VALIDATION_COMMANDS**: [validation commands]
+- **BUILD_COMMANDS**: ["[build commands]"]
+- **TEST_COMMANDS**: ["[test commands]"]
+- **VALIDATION_COMMANDS**: ["[validation commands]"]
+
+## Development Phases
+- **Phase 1**: [Description] ([STATUS])
+- **Phase 2**: [Description] ([STATUS])
+
+## Integration Points
+- **DEPLOYMENT_TYPE**: [deployment approach]
+- **TARGET_PROJECTS**: [target project types]
+- **COMPATIBILITY**: [compatibility requirements]
+- **DEPENDENCIES**: [required dependencies]
 
 ---
 
-*Project Hook - Configure project version management*
+*Project Hook - Version configuration for [project-name]*
