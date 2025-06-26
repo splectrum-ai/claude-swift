@@ -1,10 +1,12 @@
-# VERSION_TRANSITION Workflow
+# VERSION_TRANSITION Sub-Workflow
+
+**Note:** This is a sub-workflow called by the main VERSION workflow router.
 
 ## ⚠️ MANDATORY VERSION TRANSITION ⚠️
 
 **MANDATORY VERSION TRANSITION**: After any version release completion, Claude MUST execute this systematic transition workflow to process development knowledge and prepare for next version.
 
-**Trigger**: Mandatory execution after RELEASE_PROCESS workflow completion
+**Trigger**: Called via VERSION workflow router
 
 **Input**: Closed version audit logs in `claude/audit/v{version}/`
 **Output**: Updated knowledge base, onboarding documentation, and clean next version preparation

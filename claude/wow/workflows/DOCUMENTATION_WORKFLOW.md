@@ -10,33 +10,27 @@
 
 **SCOPE**: All `.md` files in repository (excluding root CLAUDE.md and README.md)
 
-## MANDATORY DOCUMENTATION STANDARDS
+## Documentation Procedures
 
-### 1. File Location Rules
-**MANDATORY LOCATION REQUIREMENTS**:
-- **ALL documentation** MUST be created in `docs/` directory or appropriate subdirectory
-- **Deployment guides**: `docs/deployment/`
-- **Architecture docs**: `docs/preliminary/` or `docs/architecture/`
-- **Process docs**: `docs/processes/`
-- **API docs**: `docs/api/`
-- **NEVER create documentation** in root directory (except CLAUDE.md, README.md)
+**Note**: All documentation governance rules (file location, back links, naming conventions) are defined in OPERATIONAL_RULES.md. This workflow focuses on procedural implementation of those standards.
 
-### 2. Homepage Back Link Rules
-**MANDATORY BACK LINK REQUIREMENTS**:
-- **Position**: MUST be at TOP of file (first line)
-- **Format**: `[← Back to Claude-Swift Home](../../README.md)` (adjust path as needed)
-- **Spacing**: Must have blank line after back link before title
-- **Path Calculation**: 
-  - `docs/deployment/`: `../../README.md`
-  - `docs/preliminary/`: `../../README.md`
-  - `docs/processes/`: `../../README.md`
-  - Root workflows: `../README.md`
+### File Creation Procedures
+**Implementation of OPERATIONAL_RULES documentation standards:**
+- Create files in appropriate `docs/` subdirectories per governance rules
+- Add required back links per governance format requirements
+- Follow naming conventions defined in governance rules
 
-### 3. File Naming Rules
-**MANDATORY NAMING CONVENTIONS**:
-- **Lowercase with hyphens**: `my-document-name.md`
-- **Descriptive names**: Clear purpose from filename
-- **No spaces**: Use hyphens for word separation
+### Back Link Implementation
+**Automated back link formatting:**
+- Apply governance-required back link format to all new documentation
+- Calculate correct path depth based on file location
+- Ensure compliance with governance spacing requirements
+
+### File Naming Implementation
+**Procedural implementation of governance naming rules:**
+- Apply lowercase-with-hyphens pattern per governance standards
+- Ensure descriptive names following governance requirements
+- Implement governance-required hyphen word separation
 - **Version neutral**: Avoid version numbers in filenames
 
 ### 4. Content Structure Rules
