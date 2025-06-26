@@ -57,12 +57,15 @@ deploy sesame
 - **[Template Cleanup Procedures](docs/deployment/template-cleanup-procedures.md)** - Content preparation
 
 ### Architecture & Design
-- **[Project Overview](docs/preliminary/project-overview.md)** - Template system objectives
-- **[Template Repository Structure](docs/preliminary/template-repository-structure.md)** - System organization
-- **[Self-Contained Template Update Architecture](docs/preliminary/self-contained-template-update-architecture.md)** - Update mechanisms
-- **[Event-Driven Workflow Testing Architecture](docs/preliminary/event-driven-workflow-testing-architecture.md)** - Testing framework
-- **[Event-Driven Reminder System](docs/preliminary/event-driven-reminder-system.md)** - Automation capabilities
-- **[Template Enhancement Suggestions](docs/preliminary/template-enhancement-suggestions.md)** - Future improvements
+- **[Template System Architecture](docs/architecture/template-system-architecture.md)** - Comprehensive system architecture
+- **[Claude-Swift Approach Overview](docs/claude-swift-approach-overview.md)** - Template system foundation
+- **[Architecture Update: Pragmatic Deployment](docs/architecture-update-pragmatic-deployment.md)** - Validated deployment patterns
+
+### Future Enhancement Concepts
+- **[Self-Contained Template Update Architecture](docs/future/self-contained-template-update-architecture.md)** - Update mechanisms (v1.1.0+)
+- **[Event-Driven Workflow Testing Architecture](docs/future/event-driven-workflow-testing-architecture.md)** - Testing framework (v1.1.0+)
+- **[Event-Driven Reminder System](docs/future/event-driven-reminder-system.md)** - Automation capabilities (v1.1.0+)
+- **[Template Enhancement Suggestions](docs/future/template-enhancement-suggestions.md)** - Future improvements (v1.1.0+)
 
 ### Research & Analysis
 - **[Ecosystem Competitive Analysis](docs/research/ecosystem-competitive-analysis.md)** - Market landscape and positioning
@@ -97,8 +100,9 @@ deploy sesame
 
 ### Project Management
 - **[Repository Todo List](claude/project/todo.md)** - Cross-session continuity
-- **[Dual Report Strategy](claude/project/docs/dual-report-strategy.md)** - Process improvement
-- **[Project Development Workflow](claude/project/docs/project-development-workflow.md)** - Current workflow practices
+- **[Release Type Architecture](docs/management/release-type-architecture.md)** - Version vs fix release strategy
+- **[Documentation Organization Strategy](docs/management/docs-organization-strategy.md)** - Documentation lifecycle policies
+- **[v1.0.0 Audit Analysis](claude/project/docs/v1.0.0-audit-analysis-operational.md)** - Development insights report
 
 ### Deployment Workflows
 - **[Deployment](claude/project/workflows/DEPLOYMENT.md)** - Main deployment orchestrator with scenario detection

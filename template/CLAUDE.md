@@ -257,6 +257,13 @@ Use natural language with "sesame" suffix:
 - `version planning sesame` → NEW_VERSION_PLANNING
 - `docs sesame` → DOCUMENTATION_WORKFLOW
 
+### Single-Word Sesame Magic Word
+**`sesame`** (standalone) → **Universal positive affirmation**
+- **Meaning**: "Yes", "I agree", "Go ahead", "Proceed", "Approved"
+- **Usage**: Response to proposals, options, or requests for confirmation
+- **Context**: Replaces verbose confirmations with elegant single-word approval
+- **Reference**: "Open Sesame" - the magic word that opens possibilities
+
 ### Technical Keywords (for documentation)
 **SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
 **GITHUB_WORKFLOW** → See [claude/wow/workflows/GITHUB_WORKFLOW.md](./claude/wow/workflows/GITHUB_WORKFLOW.md)  
@@ -273,7 +280,7 @@ Use natural language with "sesame" suffix:
 
 ## spl1 Context
 
-**Transition Repository**: spl1 focuses on repository restructure, external install workflows, and core API enhancements. See [Federated Monorepo Design](./docs/federated-monorepo-design.md) for transition strategy.
+**Transition Repository**: claude-swift focuses on template system architecture and deployment patterns. See [Template System Architecture](./docs/architecture/template-system-architecture.md) for system strategy.
 
 **Development Strategy**: Uses [Phase-Based Development](./claude/wow/docs/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas, following PRINCE2 "just enough planning" principles.
 
@@ -290,11 +297,11 @@ Use natural language with "sesame" suffix:
 ## Key Files for Understanding
 
 **Core Platform**:
-- `modules/spl/spl.js` - Core utility library
-- `docs/project-overview.md` - Architecture and components  
-- `docs/app-development.md` - Application development patterns
-- `docs/code-quality-patterns.md` - Critical coding standards
-- `docs/testing-frameworks.md` - Testing methodologies
+- `template/` - Claude-swift template system
+- `docs/claude-swift-approach-overview.md` - Architecture and approach  
+- `docs/architecture/template-system-architecture.md` - System architecture
+- `docs/deployment/` - Deployment guides and procedures
+- `claude/wow/` - Ways of Working framework
 
 **spl1 Strategy**:
 - `claude/wow/docs/phase-based-development-strategy.md` - PRINCE2-inspired roadmap execution approach
@@ -313,7 +320,7 @@ At regular intervals, ask "What have I learned?" and update documentation in app
 
 ## Future Evolution
 
-See [Subdirectory CLAUDE.md Evolution Plan](./docs/subdirectory-claude-md-plan.md) for planned transition to federated repository architecture.
+See [Template Enhancement Suggestions](./docs/future/template-enhancement-suggestions.md) for planned template system enhancements.
 
 ## Documentation Standards
 

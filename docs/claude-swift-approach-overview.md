@@ -42,12 +42,14 @@ parent-directory/
 - Team agreements and coding standards  
 - Project-specific configuration and planning
 - Business context and domain knowledge
+- **Mandatory hooks**: Essential project configuration files (project-info.md, version-config.md, KEYWORD_REGISTRY.md)
 
 **claude/wow/ (Tracked for Operational Risk Mitigation):**
 - Operational workflows and automation scripts
 - Audit logs and session history
 - Ways of working machinery and tools
-- Temporary files and runtime data
+- **WoW system configuration**: Template architecture settings (config.md)
+- **Base workflow library**: Reusable workflows for any project
 
 ### 3. Template System Design
 **Generic WoW Templates:**
@@ -60,6 +62,8 @@ parent-directory/
 - Project-specific data in claude/project/ root for visibility
 - Template variables for customization ({PROJECT_NAME}, {ARTIFACT_NAME})
 - Clean separation between generic workflows and project identity
+- **Hook system discovery**: Extensible project customization within standard WoW framework
+- **Release process hooks**: PROJECT_RELEASE_PROCESS for project-specific pre-release steps
 
 ## Governance Architecture
 
