@@ -3,41 +3,43 @@
 # Project Version Configuration
 
 ## Project Identity
-- **PROJECT_NAME**: [project-name]
-- **ARTIFACT_NAME**: [artifact-name]
-- **REPOSITORY**: [organization/repository]
+- **PROJECT_NAME**: [PROJECT_NAME]
+- **ARTIFACT_NAME**: [PROJECT_NAME]-release
+- **INSTALL_PATH**: [INSTALL_PATH]
+- **REPOSITORY**: [ORGANIZATION]/[REPOSITORY_NAME]
 
 ## Version Strategy
-- **CURRENT_VERSION**: [0.1.0]
-- **VERSION_PATTERN**: [semantic/date/custom]
-- **RELEASE_TYPE**: [application/library/service]
+- **CURRENT_VERSION**: [CURRENT_VERSION]
+- **VERSION_PATTERN**: semantic (major.minor.patch)
+- **RELEASE_TYPE**: [RELEASE_TYPE]
+- **TARGET_VERSION**: [TARGET_VERSION] ([MILESTONE_DESCRIPTION])
 
 ## Version Numbering Rules
-- **Major Version**: [Breaking changes, major features]
-- **Minor Version**: [New features, backward compatible]
-- **Patch Version**: [Bug fixes, minor improvements]
+- **Major Version**: [MAJOR_VERSION_CRITERIA]
+- **Minor Version**: [MINOR_VERSION_CRITERIA]
+- **Patch Version**: [PATCH_VERSION_CRITERIA]
 
 ## Release Configuration
-- **RELEASE_ARTIFACTS**: ["[list of release artifacts]"]
-- **ARTIFACT_COMMANDS**: [
-  "[artifact creation commands]"
-]
+- **RELEASE_ARTIFACTS**: [RELEASE_ARTIFACTS_LIST]
+- **ARTIFACT_COMMANDS**: [ARTIFACT_COMMANDS_LIST]
 
 ## Build and Test Configuration
-- **BUILD_COMMANDS**: ["[build commands]"]
-- **TEST_COMMANDS**: ["[test commands]"]
-- **VALIDATION_COMMANDS**: ["[validation commands]"]
+- **BUILD_COMMANDS**: [BUILD_COMMANDS_LIST]
+- **TEST_COMMANDS**: [TEST_COMMANDS_LIST]
+- **VALIDATION_COMMANDS**: [VALIDATION_COMMANDS_LIST]
 
 ## Development Phases
-- **Phase 1**: [Description] ([STATUS])
-- **Phase 2**: [Description] ([STATUS])
+- **Phase 1**: [PHASE_1_DESCRIPTION] ([PHASE_1_STATUS])
+- **Phase 2**: [PHASE_2_DESCRIPTION] ([PHASE_2_STATUS])
+- **Phase 3**: [PHASE_3_DESCRIPTION] ([PHASE_3_STATUS])
+- **Phase 4**: [PHASE_4_DESCRIPTION] ([PHASE_4_STATUS])
 
 ## Integration Points
-- **DEPLOYMENT_TYPE**: [deployment approach]
-- **TARGET_PROJECTS**: [target project types]
-- **COMPATIBILITY**: [compatibility requirements]
-- **DEPENDENCIES**: [required dependencies]
+- **DEPLOYMENT_TYPE**: [DEPLOYMENT_TYPE]
+- **TARGET_PROJECTS**: [TARGET_PROJECT_DESCRIPTION]
+- **COMPATIBILITY**: [COMPATIBILITY_REQUIREMENTS]
+- **DEPENDENCIES**: [DEPENDENCY_LIST]
 
 ---
 
-*Project Hook - Version configuration for [project-name]*
+*Project Hook - Version configuration for [PROJECT_NAME]*
