@@ -4,7 +4,7 @@
 
 ## Overview
 
-Project-specific VERSION_TRANSITION customization hook for claude-swift. This hook is called during VERSION_TRANSITION workflow to provide claude-swift specific customizations.
+Project-specific VERSION_TRANSITION customization hook for [PROJECT_NAME]. This hook is called during VERSION_TRANSITION workflow to provide project-specific customizations.
 
 **Trigger**: Called automatically during `transition sesame` execution within WoW VERSION_TRANSITION Step 3 (Repository Maintenance)
 
@@ -23,7 +23,7 @@ Project-specific VERSION_TRANSITION customization hook for claude-swift. This ho
 ### 2. Project File Reset to Generic Template Format
 ```bash
 # Reset version-config.md to generic template values
-# - PROJECT_NAME: claude-swift → [project-name]
+# - PROJECT_NAME: [CURRENT_PROJECT] → [new-project]
 # - Remove claude-swift specific configuration values
 # - Reset to template placeholder format
 
@@ -39,7 +39,7 @@ Project-specific VERSION_TRANSITION customization hook for claude-swift. This ho
 ```
 
 **Configuration Reset Requirements**:
-- Replace claude-swift specific values with template placeholders
+- Replace project-specific values with template placeholders
 - Remove completed project-specific content
 - Preserve generic template structure and workflow framework
 - Ensure template deployability to any project
@@ -92,7 +92,7 @@ echo "YYYY-MM-DDTHH:MM:SSZ|PROJECT_VERSION_TRANSITION|workflow_complete|template
 - **Workflow Framework Preservation**: Maintain complete WoW system in template
 
 ### Template Purity Standards
-- Zero claude-swift specific content in project configuration files
+- Zero project-specific content in template configuration files
 - All project placeholders properly formatted for template deployment
 - Complete workflow framework available for new projects
 - Template deployable to any target project without modification
