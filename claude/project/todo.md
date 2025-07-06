@@ -23,6 +23,14 @@
 - [ ] Create instructions for populating project directories after deployment
 - [ ] Create TEMPLATE_PUBLISH workflow
 - [ ] Design and implement FIX_RELEASE workflow for v1.0.x maintenance
+- [ ] Create project-specific content hook system for CLAUDE.md during template deployment
+  - Allow projects to preserve custom context sections when applying template updates
+  - Pattern: Template provides structure, project provides content references
+- [ ] Fix TEMPLATE_SYNCHRONIZATION workflow - KEYWORD_REGISTRY.md contamination
+  - Template contains claude-swift specific content instead of placeholders
+  - Should follow pattern of other hook files with `[EPIC_NAME]` placeholders
+  - Found during spl1 migration (2025-07-06)
+
 
 **Key Discovery**: claude-swift already implements battle-tested sidecar deployment pattern with dual-folder architecture.
 

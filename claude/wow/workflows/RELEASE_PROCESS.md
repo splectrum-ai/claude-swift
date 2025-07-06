@@ -207,7 +207,7 @@ Based on the first "release sesame" execution for v0.6.1, the following refineme
 - **Planning Phases**: Increment minor version (0.6.0 → 0.6.1)
 - **Implementation Phases**: Increment patch version (0.6.1 → 0.6.2)
 - **Major Features**: Increment minor version (0.6.x → 0.7.0)
-- **Breaking Changes**: Increment major version (0.x.x → 1.0.0)
+- **Breaking Changes**: Increment major version (0.x.x → 1.0.0, 1.x.x → 2.0.0)
 
 #### **Release Criteria**
 **Planning Release Criteria:**
