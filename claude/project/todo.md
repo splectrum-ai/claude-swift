@@ -24,6 +24,7 @@
 - [ ] Create TEMPLATE_PUBLISH workflow
 - [ ] Design and implement FIX_RELEASE workflow for v1.0.x maintenance
 
+
 **Key Discovery**: claude-swift already implements battle-tested sidecar deployment pattern with dual-folder architecture.
 
 **Critical Insight**: All files in /claude/project/ root are mandatory hooks - template correctly preserves only audit/ and todo.md structure.

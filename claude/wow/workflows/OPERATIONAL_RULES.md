@@ -4,7 +4,7 @@
 
 **MANDATORY OPERATIONAL OPTIMIZATION**: Claude MUST optimize operational documentation for collaborative execution patterns where users provide strategic direction and Claude executes tactical implementation.
 
-**MANDATORY COLLABORATIVE DECISION-MAKING**: All significant workflow changes, architecture decisions, and operational modifications MUST be discussed through dialogue - asking questions, providing options, and confirming direction before execution.
+**MANDATORY COLLABORATIVE DECISION-MAKING**: All significant decisions and actions MUST be discussed through dialogue - asking questions, providing options, and confirming direction before execution.
 
 **Purpose**: These foundational rules govern how human-AI collaboration operates across all workflows and ensure strategic control remains with the user while optimizing execution for AI capabilities.
 

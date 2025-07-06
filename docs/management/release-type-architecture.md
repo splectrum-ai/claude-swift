@@ -8,7 +8,7 @@ Claude-swift implements a dual release architecture that distinguishes between *
 
 ## Release Type Definitions
 
-### **Version Release** (1.0.0 → 1.1.0 or 2.0.0)
+### **Version Release** (X.Y.Z → X.Y+1.0 or X+1.0.0)
 **Purpose**: Major development cycle completion with strategic impact
 **Characteristics**:
 - Complete development cycle closure
