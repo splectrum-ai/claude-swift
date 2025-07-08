@@ -5,13 +5,18 @@ This file provides essential operational guidance for Claude Code when working w
 ## Quick Reference
 
 **Essential Workflow Commands:**
-- `start sesame` → SESSION_START workflow
-- `finish sesame` → SESSION_END workflow  
-- `git sesame` → GIT_WORKFLOW
-- `next sesame` → NEXT_ISSUE
-- `planning sesame` → PLANNED_VS_UNPLANNED
+- `start sesame` → SESSION_START workflow (explicit trigger only - ignore otherwise)
+- `finish sesame` → SESSION_END workflow (explicit trigger only - ignore otherwise)
+- `next sesame` → NEXT_ISSUE (what should I work on next?)
+- `planning sesame` → PLANNED_VS_UNPLANNED (general planning activities)
+- `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
+- `todo sesame` → REPO_TODO_WORKFLOW (repository todo list operations)
 
 **Critical Workflow Principles:**
+- **Outcome-First Optimization**: Question when rules add value vs. create overhead - optimize for outcomes, activate process only when needed
+- **Ceremonial Workflow Boundaries**: `start sesame` and `finish sesame` workflows exist for critical session boundaries but should be completely ignored during normal work - zero cognitive load until explicitly triggered
+- **Todo-Triggered Audit Logging**: Audit logging triggers automatically when completing repository todo items - all required fields (timestamp, workflow, step_type as action executed, context, file_path, description) are available at completion point. Log any observations about what went badly or issues encountered, then forget - fire and forget approach
+- **Single Todo System**: Use repository todo list (`claude/project/todo.md`) only - no dual TodoWrite/TodoRead system
 - **Single-Step Completion**: Each step is DONE, then choose next action
 - **File Path Specification**: All references MUST specify exact paths
 - **Version Scope Control**: Project contains only current version work
@@ -106,17 +111,17 @@ This enables detection of incomplete workflow executions and ensures proper work
 
 ### 3. Item Granularity
 - ALL work items MUST be single completable steps
-- ❌ "Implement AVRO service" 
-- ✅ "Create GitHub issue for AVRO prototype"
-- ✅ "Research AVRO library options"
-- ✅ "Write AVRO schema example"
+- ❌ "Implement user authentication" 
+- ✅ "Create GitHub issue for auth prototype"
+- ✅ "Research authentication library options"
+- ✅ "Write login flow example"
 
 ### 4. Progress Recognition
 - Celebrate each completed step as meaningful progress
-- **MANDATORY**: Update current audit log with step completion using correct format: `TIMESTAMP|WORKFLOW|step|context|file_path|description`
-- **MANDATORY**: Follow REPO_TODO_WORKFLOW for repository todo list management - See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
+- **AUTOMATIC**: Audit logging triggered when repository todo items are completed - all required fields naturally available at completion point
+- **SINGLE SYSTEM**: Use repository todo list (`claude/project/todo.md`) only for all work tracking
 
-**Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking, and creates natural stopping points for session management.
+**Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking.
 
 ## Critical Version Management Rule
 
@@ -174,7 +179,7 @@ This enables detection of incomplete workflow executions and ensures proper work
 
 **Purpose**: Bridges strategic planning with executable implementation through granular task decomposition.
 
-**Reference**: See `docs/backlog-to-completion-workflow.md` for complete workflow documentation.
+**Reference**: See `claude/wow/docs/backlog-to-completion-workflow.md` for complete workflow documentation.
 
 ## Critical Branch Management Rule
 
@@ -251,19 +256,15 @@ issue-branch: accumulate commits → PR when transitioning → continue or compl
 Use natural language with "sesame" suffix:
 - `start sesame` → SESSION_START workflow
 - `finish sesame` → SESSION_END workflow  
-- `git sesame` → GIT_WORKFLOW
-- `github sesame` → GITHUB_WORKFLOW
-- `rules sesame` → OPERATIONAL_RULES
-- `commands sesame` → ESSENTIAL_COMMANDS
 - `release sesame` → RELEASE_PROCESS
 - `planning sesame` → PLANNED_VS_UNPLANNED
-- `project sesame` → PROJECT_AUTOMATION
 - `next sesame` → NEXT_ISSUE
-- `recommend sesame` → WORKFLOW_RECOMMENDATION (experimental)
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
 - `todo sesame` → REPO_TODO_WORKFLOW
-- `version planning sesame` → NEW_VERSION_PLANNING
-- `docs sesame` → DOCUMENTATION_WORKFLOW
+- `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
+- `project sesame` → Template synchronization and project updates
+- `issue sesame` → Manual issue creation for occasional needs
+- `close sesame` → Manual issue closure for occasional needs
 
 ### Single-Word Sesame Magic Word
 **`sesame`** (standalone) → **Universal positive affirmation**
@@ -274,23 +275,19 @@ Use natural language with "sesame" suffix:
 
 ### Technical Keywords (for documentation)
 **SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
-**GITHUB_WORKFLOW** → See [claude/wow/workflows/GITHUB_WORKFLOW.md](./claude/wow/workflows/GITHUB_WORKFLOW.md)  
-**GIT_WORKFLOW** → See [claude/wow/workflows/GIT_WORKFLOW.md](./claude/wow/workflows/GIT_WORKFLOW.md)
-**OPERATIONAL_RULES** → See [claude/wow/workflows/OPERATIONAL_RULES.md](./claude/wow/workflows/OPERATIONAL_RULES.md)
-**ESSENTIAL_COMMANDS** → See [claude/wow/workflows/ESSENTIAL_COMMANDS.md](./claude/wow/workflows/ESSENTIAL_COMMANDS.md)
 **RELEASE_PROCESS** → See [claude/wow/workflows/RELEASE_PROCESS.md](./claude/wow/workflows/RELEASE_PROCESS.md)
 **PLANNED_VS_UNPLANNED** → See [claude/wow/workflows/PLANNED_VS_UNPLANNED.md](./claude/wow/workflows/PLANNED_VS_UNPLANNED.md)
-**WORKFLOW_RECOMMENDATION** → See [claude/wow/workflows/WORKFLOW_RECOMMENDATION.md](./claude/wow/workflows/WORKFLOW_RECOMMENDATION.md)
 **VERSION_TRANSITION** → See [claude/wow/workflows/VERSION_TRANSITION.md](./claude/wow/workflows/VERSION_TRANSITION.md)
 **REPO_TODO_WORKFLOW** → See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
 **NEW_VERSION_PLANNING** → See [claude/wow/workflows/NEW_VERSION_PLANNING.md](./claude/wow/workflows/NEW_VERSION_PLANNING.md)
-**DOCUMENTATION_WORKFLOW** → See [claude/wow/workflows/DOCUMENTATION_WORKFLOW.md](./claude/wow/workflows/DOCUMENTATION_WORKFLOW.md)
 
-## spl1 Context
+## Project Context
 
-**Transition Repository**: claude-swift focuses on template system architecture and deployment patterns. See [Template System Architecture](./docs/architecture/template-system-architecture.md) for system strategy.
+**Template System**: claude-swift provides structured collaboration workflows for Claude Code users. See [Template System Architecture](./docs/architecture/template-system-architecture.md) for system strategy.
 
-**Development Strategy**: Uses [Phase-Based Development](./claude/wow/docs/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas, following PRINCE2 "just enough planning" principles.
+**Project-Specific Information**: For project-specific context, epic definitions, and version configuration, read the project hook file at `claude/project/project-info.md`.
+
+**Development Strategy**: Uses [Phase-Based Development](./claude/wow/docs/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas.
 
 
 ## Essential Development Tools
@@ -306,29 +303,21 @@ Use natural language with "sesame" suffix:
 
 **Core Platform**:
 - `template/` - Claude-swift template system
-- `docs/claude-swift-approach-overview.md` - Architecture and approach  
 - `docs/architecture/template-system-architecture.md` - System architecture
 - `docs/deployment/` - Deployment guides and procedures
 - `claude/wow/` - Ways of Working framework
 
-**spl1 Strategy**:
-- `claude/wow/docs/phase-based-development-strategy.md` - PRINCE2-inspired roadmap execution approach
-- `claude/wow/workflows/phase-based-implementation-guide.md` - Step-by-step workflow implementation guide
-- `claude/wow/workflows/branching-strategy.md` - Simplified GitHub Flow with integrated TDD
-- `claude/project/docs/current-development-process.md` - Current development workflow and process
+**Development Strategy**:
+- `claude/wow/docs/phase-based-development-strategy.md` - Roadmap execution approach
+- `claude/wow/docs/branching-strategy.md` - GitHub Flow with integrated TDD
+- `claude/project/todo.md` - Repository todo list for session continuity
 
 
-## Persistent Todo Management
+## Unified Todo Management
 
-**Repository Todo List**: `claude/project/todo.md` - Maintains discussion topics and todos across sessions to ensure continuity.
+**Repository Todo List**: `claude/project/todo.md` - Single system for all work tracking across sessions. Todo completion automatically triggers audit logging with all required fields naturally available at completion point.
 
-## Learning Rule
 
-At regular intervals, ask "What have I learned?" and update documentation in appropriate docs/ files.
-
-## Future Evolution
-
-See [Template Enhancement Suggestions](./docs/future/template-enhancement-suggestions.md) for planned template system enhancements.
 
 ## Documentation Standards
 

@@ -1,61 +1,63 @@
 [← Back to Claude-Swift Home](../../README.md)
 
-# Claude-Swift Quick Start Guide
+# Get Started with Claude-Swift
 
-*Get productive with claude-swift in 10 minutes*
+*Start collaborating with Claude more effectively in your project*
 
-## Prerequisites Checklist
+## What You'll Achieve
 
-### Required Tools
-- ✅ **Claude Code CLI** - Primary development environment
-- ✅ **Git** - Version control (claude-swift uses git workflows)
-- ✅ **GitHub CLI (gh)** - Release and PR management
-- ✅ **Basic shell environment** - Windows/WSL, macOS, or Linux
+After following this guide, you'll have:
+- ✅ **Structured collaboration** - Clear workflows for working with Claude
+- ✅ **Session management** - Organized starts and stops for your work
+- ✅ **Progress tracking** - Automatic logging of what gets done
+- ✅ **Consistent handoffs** - Clean transitions between work sessions
 
-### Required Knowledge
-- **Basic Git operations** - commit, push, pull, branch management
-- **Command line comfort** - navigating directories, running commands
-- **Text editor familiarity** - editing markdown and configuration files
+## What You Need
 
-### Project Prerequisites
-- **GitHub repository** - Where you want to deploy claude-swift
-- **Development branch strategy** - Recommended: main + unplanned branches
-- **Project documentation** - At least a basic README.md
+- **Claude Code CLI** - Your primary development environment
+- **A GitHub repository** - Where your project lives
+- **Basic Git knowledge** - You can commit, push, and pull
 
-## 5-Minute Deployment
+## Quick Setup
 
-### Step 1: Download Claude-Swift Template
+### 1. Add Claude-Swift to Your Project
 ```bash
-# Download the latest release
-gh release download --repo SPlectrum/claude-swift --pattern "claude-swift-template.7z"
-
-# Extract to your project directory
-7z x claude-swift-template.7z
-cp -r claude-swift-template/* /path/to/your/project/
+# In your project directory
+curl -L https://github.com/SPlectrum/claude-swift/releases/latest/download/claude-swift-template.zip -o claude-swift.zip
+unzip claude-swift.zip
 ```
 
-### Step 2: Configure Your Project
-```bash
-# Edit project configuration
-edit claude/project/project-info.md
-edit claude/project/version-config.md
-
-# Initialize your first session
-claude code  # (Claude Code CLI)
-```
-
-### Step 3: First Workflow Test
-In Claude Code, try your first workflow:
+### 2. Start Your First Session
+Open Claude Code in your project and type:
 ```
 start sesame
 ```
-You should see session initialization and branch verification.
 
-### Step 4: Verify Installation
+Claude will:
+- Set up your workspace structure
+- Initialize session tracking
+- Prepare your project for structured collaboration
+
+### 3. Try a Basic Workflow
+Ask Claude to help with something, then end cleanly:
+```
+finish sesame
+```
+
+This ensures all your work is properly saved and tracked.
+
+## What Just Happened?
+
+Claude-swift created an organized workspace in your project:
+- **Session tracking** - Every work session is logged
+- **Clean handoffs** - You can stop and start work cleanly
+- **Progress continuity** - Claude remembers what you were working on
+
+Test your installation by typing:
 ```
 commands sesame
 ```
-This displays available workflow commands - if you see the list, installation is successful!
+If you see a list of available workflows, installation is successful!
 
 ## Essential Workflows (Your Daily Tools)
 
