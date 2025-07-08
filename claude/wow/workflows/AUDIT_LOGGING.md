@@ -56,6 +56,28 @@ TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION
 2025-06-21T19:29:05Z|WORKFLOW_NAME|workflow_complete|context|file_path|Completion summary
 ```
 
+### 4. New File Creation (MANDATORY)
+**MANDATORY FILE CREATION LOGGING**: When ANY new file is created during workflow execution, Claude MUST log the file creation activity:
+
+```
+2025-06-21T19:29:05Z|WORKFLOW_NAME|file_created|context|path/to/new/file.ext|Created new file: filename.ext - purpose description
+```
+
+**Requirements:**
+- **FILE_PATH**: MUST contain the complete path to the newly created file
+- **DESCRIPTION**: MUST include filename and brief purpose description
+- **TIMING**: Log entry MUST be created immediately after file creation
+- **CONTEXT**: Should reflect the domain or purpose of the file creation
+
+**Examples:**
+```
+2025-06-21T19:29:05Z|DOCUMENTATION_WORKFLOW|file_created|documentation|docs/api/authentication.md|Created new file: authentication.md - API authentication guide
+2025-06-21T19:29:05Z|FEATURE_IMPLEMENTATION|file_created|testing|tests/unit/user-service.test.js|Created new file: user-service.test.js - unit tests for user service
+2025-06-21T19:29:05Z|PROJECT_SETUP|file_created|configuration|config/database.json|Created new file: database.json - database configuration settings
+```
+
+**Purpose**: Provides complete audit trail of all new files created during workflows, enabling tracking of project evolution and supporting accountability for file system changes.
+
 ## Appending Procedure
 
 ### 1. Read Current Log

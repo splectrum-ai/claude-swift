@@ -51,7 +51,15 @@ This file provides essential operational guidance for Claude Code when working w
 3. Log the correction activity itself
 4. Reference `claude/wow/workflows/AUDIT_LOGGING.md` for definitive rules
 
-**Purpose**: Prevents audit format drift and ensures consistent operational logging across all sessions.
+**MANDATORY NEW FILE CREATION LOGGING**: When ANY new file is created during workflow execution, Claude MUST immediately log:
+```
+TIMESTAMP|WORKFLOW|file_created|context|path/to/new/file.ext|Created new file: filename.ext - purpose description
+```
+- **FILE_PATH field**: MUST contain complete path to newly created file
+- **DESCRIPTION field**: MUST include filename and brief purpose description
+- Reference `claude/wow/workflows/AUDIT_LOGGING.md` section 4 for complete requirements
+
+**Purpose**: Prevents audit format drift, ensures consistent operational logging across all sessions, and provides complete audit trail of all file system changes.
 ## Critical Workflow Execution Rule
 
 **MANDATORY WORKFLOW LOGGING**: When any custom workflow is recognized, Claude MUST:
