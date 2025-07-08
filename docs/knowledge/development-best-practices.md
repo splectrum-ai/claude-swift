@@ -1,206 +1,165 @@
 [← Back to Claude-Swift Home](../../README.md)
 
-# Development Best Practices
+# Best Practices for Claude-Swift Users
 
-*Extracted from claude-swift v1.0.0 successful patterns*
+*Practical tips for getting the most out of your collaboration with Claude*
 
-## Session Management Excellence
+## Starting Your Work Sessions
 
-### Operational Discipline (100% Compliance Achieved)
-**SESSION_START Protocol**:
-- Verify branch state (unplanned default)
-- Check system time for accurate audit timestamps
-- Initialize audit logging infrastructure
-- Confirm MANDATORY rule compliance
+### Begin with Clear Intent
+- Use `start sesame` to let Claude handle session setup
+- Let Claude review previous session context from audit log
+- Focus on your strategic goals while Claude manages workspace details
 
-**SESSION_END Protocol**:
-- Archive session accomplishments
-- Verify clean repository state
-- Update persistent todo management
-- Log completion with next steps
+### Let Claude Handle Setup
+- Claude will verify git status and branch state
+- Claude will access project documentation from historical context
+- You focus on decisions while Claude handles execution details
 
-**Benefits Proven**:
-- Complete audit trail for accountability
-- Clean handoffs between sessions
-- Consistent operational state management
-- Systematic progress tracking
+## During Development
 
-### Choice Point Architecture
-**Pattern**: After every completed step, present options:
-- Continue with related next step
-- Switch to different priority item  
-- Address urgent issues
-- End session cleanly
+### Work in Small Steps
+- Break large tasks into smaller pieces
+- Complete one piece at a time
+- Test each piece before moving on
+- Celebrate small wins along the way
 
-**Success Metrics**:
-- Prevents tunnel vision and scope creep
-- Enables dynamic re-prioritization
-- Provides natural stopping points
-- Maintains user control over direction
+### Communicate Clearly
+- Be specific about what you want
+- Explain your constraints and preferences
+- Ask for clarification when needed
+- Give feedback on Claude's suggestions
 
-## Architecture Development Best Practices
+### Keep Things Organized
+- Update your documentation as you go
+- Use meaningful commit messages
+- Keep your workspace tidy
+- Track your progress in notes
 
-### Front-Loading Strategy (64% Efficiency Gain)
-**Proven Approach**:
-1. **Comprehensive Problem Analysis**: Document all requirements and constraints
-2. **Solution Design Documentation**: Create detailed architectural blueprints
-3. **Prototype Validation**: Test core concepts before full implementation
-4. **Breakthrough Execution**: Concentrated implementation using prepared foundation
+## Managing Your Project
 
-**Quality Indicators**:
-- 95%+ workflow completion rate when architecture is prepared
-- Minimal rework cycles (2-3 corrections maximum)
-- High stakeholder satisfaction with outcomes
-- Successful real-world deployment validation
+### Documentation That Helps
+- Keep a simple project overview
+- Document your key decisions and why
+- Maintain a list of known issues
+- Update your setup instructions
 
-### Component Interaction Management
-**Dependency Cascade Pattern**:
-CLAUDE.md → README.md → Implementation Files
+### Version Control Habits
+- Commit early and often
+- Use descriptive commit messages
+- Keep your branches organized
+- Review changes before committing
 
-**Integration Strategy**:
-- Central configuration drives all other changes
-- Documentation updates reflect implementation state
-- Template system maintains deployment readiness
-- Audit trail tracks all component relationships
+### Planning and Priorities
+- Maintain a backlog of tasks
+- Prioritize the most important work
+- Break large features into smaller parts
+- Plan for testing and validation
 
-## Template System Best Practices
+## Collaboration Patterns
 
-### Sidecar Deployment Excellence
-**Dual-Folder Pattern Success**:
-- `claude/wow/`: Ways of Working framework (shared)
-- `claude/project/`: Project-specific configuration (customized)
-- Clean separation prevents contamination
-- Template system remains deployable
+### Making Decisions Together
+- You decide what needs to be done
+- Claude suggests how to do it
+- You approve the approach
+- Work together on implementation
 
-**Project Hook Architecture**:
-- Generic workflows with project-specific hooks
-- Configuration management without framework modification
-- Template purity maintained through placeholder system
-- Deployment validation ensures quality
+### When You're Stuck
+- Explain the problem clearly
+- Share relevant context
+- Ask for different approaches
+- Try the simplest solution first
 
-### Synchronization Recipe (Production Validated)
-```bash
-# 1. Archive current state (safety net)
-mkdir -p template/archive && mv template/* template/archive/
+### Learning New Things
+- Ask for explanations in your own words
+- Request examples in your context
+- Build understanding step by step
+- Practice with small examples
 
-# 2. Blind copy current repository state
-cp -r claude/ template/ && cp CLAUDE.md template/
+## Quality Practices
 
-# 3. Reset project files to generic template format
-# (Compare against template/archive/ for reference)
+### Code Quality
+- Write code that your team can understand
+- Add comments for complex logic
+- Use consistent naming conventions
+- Keep functions small and focused
 
-# 4. Remove project-specific contamination
-# (Version reports, audit archives, project workflows)
+### Testing Approach
+- Test the happy path first
+- Add error handling
+- Test edge cases
+- Document any known limitations
 
-# 5. Validate template purity and deployability
-```
+### Review Process
+- Review your own work before asking for help
+- Have Claude review your code
+- Ask specific questions about quality
+- Learn from the feedback
 
-**Benefits**:
-- Simple, reliable, foolproof execution
-- Complete synchronization without missed files
-- Template maintains deployment readiness
-- Archive provides rollback capability
+## Troubleshooting Common Issues
 
-## Quality Assurance Framework
+### When Things Don't Work
+- Read the error message carefully
+- Check your recent changes
+- Try the simplest fix first
+- Ask for help with specific details
 
-### Compliance Automation Targets
-**Current Manual Processes** (Automation Candidates):
-- File reference validation (broken link detection)
-- Documentation back-link verification
-- Template purity checking
-- Workflow completion validation
+### Getting Unstuck
+- Take a step back and explain the problem
+- Ask for alternative approaches
+- Try a different part of the task
+- Come back to difficult problems later
 
-**Quality Gate Integration**:
-- Pre-commit validation hooks
-- Template deployment readiness checking
-- Documentation compliance verification
-- Audit log format validation
+### Maintaining Momentum
+- Focus on progress, not perfection
+- Solve problems incrementally
+- Document what you learn
+- Keep your goals realistic
 
-### Process Effectiveness Measurement
-**Key Metrics to Track**:
-- Workflow completion rate (target: 95%+)
-- Session management compliance (target: 100%)
-- First-attempt deployment success (target: 90%+)
-- Documentation effort ratio (target: <25%)
+## Building Effective Collaboration
 
-## Collaboration Optimization
+### Consistent Session Management
+- Always start and end sessions cleanly so Claude can track context
+- Let Claude maintain documentation using audit log history
+- Use workflows to automate routine review and planning tasks
+- Focus on strategic decisions while Claude handles execution
 
-### Human-AI Interface Best Practices
-**Strategic Control Points**:
-- Architecture decisions and quality gates
-- Process optimization and efficiency improvements
-- Risk assessment and mitigation strategies
-- User experience and workflow design
+### Continuous Context Building
+- Let the audit log accumulate project knowledge for Claude to reference
+- Use workflows to build systematic patterns Claude can follow
+- Allow Claude to identify areas for improvement from historical data
+- Enable Claude to suggest next steps based on project history
 
-**AI Execution Excellence**:
-- Systematic implementation following patterns
-- Comprehensive documentation maintenance
-- Compliance checking and validation
-- Pattern recognition and optimization suggestions
+## Success Indicators
 
-### Communication Efficiency
-**"Sesame" Protocol Success**:
-- Single-word approval for streamlined decisions
-- Reduces communication overhead
-- Maintains human control while enabling AI efficiency
-- Creates clear approval audit trail
+You're following good practices when:
+- ✅ Claude handles routine execution while you focus on strategic decisions
+- ✅ The audit log provides rich context for Claude to assist you
+- ✅ Workflows automate organizational tasks that previously required manual effort
+- ✅ Claude can reference project history to provide contextual support
+- ✅ Documentation maintains itself using accumulated audit log information
+- ✅ Collaboration patterns become systematic and repeatable
 
-**Decision Point Management**:
-- Present clear options at choice points
-- Provide context for decision-making
-- Enable easy direction changes
-- Maintain progress visibility
+## Common Pitfalls to Avoid
 
-## Workflow Development Excellence
+### Planning Mistakes
+- Don't skip the planning phase
+- Don't try to do everything at once
+- Don't ignore testing until the end
+- Don't forget to update documentation
 
-### Router Pattern Success
-**VERSION Workflow Router**: Centralizes version-related workflow dispatch
-**DEPLOYMENT Workflow Router**: Manages scenario-specific deployment paths
+### Communication Issues
+- Don't assume Claude knows your context
+- Don't be vague about what you want
+- Don't ignore Claude's questions
+- Don't hesitate to ask for clarification
 
-**Benefits**:
-- Clear workflow organization and discovery
-- Consistent execution patterns
-- Easy maintenance and enhancement
-- Scalable pattern for new workflow types
-
-### Sub-Workflow Architecture
-**TEMPLATE_SYNCHRONIZATION**: Shared recipe for multiple parent workflows
-**PROJECT_*_PROCESS**: Hook pattern for project-specific customization
-
-**Design Principles**:
-- Reusable components reduce duplication
-- Clear separation of concerns
-- Project customization without framework modification
-- Consistent execution patterns across workflows
-
-## Performance Optimization Insights
-
-### Documentation Efficiency (30% Effort Reduction Target)
-**Automation Opportunities**:
-- Reference documentation generation
-- Link validation and updates
-- Template compliance checking
-- Audit report generation
-
-**Human Focus Areas**:
-- Strategic architecture documentation
-- Process design and optimization
-- User experience and workflow design
-- Quality gate definition
-
-### Development Speed Enhancement (30% Target Increase)
-**Pattern Reuse Strategy**:
-- Proven architectural patterns as templates
-- Workflow router expansion for common scenarios
-- Sub-workflow library for shared functionality
-- Configuration management automation
-
-**Efficiency Multipliers**:
-- Architecture-first breakthrough sessions
-- Interactive validation for real-world testing
-- Template system for deployment automation
-- Compliance automation for quality assurance
+### Technical Problems
+- Don't commit untested code
+- Don't ignore error messages
+- Don't skip proper git workflows
+- Don't work directly on main branch
 
 ---
 
-*Best Practices Knowledge Base - Proven patterns for effective claude-swift development*
+*Practical guidance for productive development with Claude*

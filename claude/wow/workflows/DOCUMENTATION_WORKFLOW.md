@@ -70,6 +70,7 @@
    - Write clear, actionable content
    - Include file path references where relevant
    - Follow existing documentation style
+   - **Tone**: Not too celebratory, to the point, not beyond necessary
 
 4. **Compliance Validation**
    - Verify file location in `docs/` hierarchy
