@@ -2,7 +2,7 @@
 
 ## Overview
 
-The AUDIT_LOGGING workflow defines mandatory rules and procedures for maintaining the operational audit log in `claude/audit/current/current.log`. This workflow ensures consistent, trackable logging of all workflow activities and session management.
+The AUDIT_LOGGING workflow defines mandatory rules and procedures for maintaining the operational audit log in `claude/project/audit/current/current.log`. This workflow ensures consistent, trackable logging of all workflow activities and session management.
 
 ## Core Principles
 
@@ -34,7 +34,7 @@ TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION
 **Components:**
 - **TIMESTAMP**: ISO format with timezone (e.g., `2025-06-21T19:29:05Z`)
 - **WORKFLOW**: Workflow name (e.g., `SESSION_START`, `METRICS_ANALYSIS`)
-- **STEP_TYPE**: Activity type (`workflow_start`, `step`, `workflow_complete`, `complete`, `final`)
+- **STEP_TYPE**: Activity type (`workflow_start`, `step`, `workflow_complete`, `complete`, `final`, `item_complete`)
 - **CONTEXT**: Activity category or domain
 - **FILE_PATH**: Relevant file path (optional, use `||` if none)
 - **DESCRIPTION**: Clear description of activity performed
@@ -56,7 +56,25 @@ TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION
 2025-06-21T19:29:05Z|WORKFLOW_NAME|workflow_complete|context|file_path|Completion summary
 ```
 
-### 4. New File Creation (MANDATORY)
+### 4. Item Start/Complete Logging (PRIMARY PATTERN)
+**ITEM-TRIGGERED AUDIT LOGGING**: The primary logging pattern for tracking work completion on discrete work items:
+
+```
+# Item complete (multiple entries reflecting workflows used)
+2025-06-21T19:29:05Z|WORKFLOW_NAME|item_complete|context|file_path|Specific workflow activity completed
+2025-06-21T19:29:05Z|ANOTHER_WORKFLOW|item_complete|context|file_path|Another workflow activity completed
+2025-06-21T19:29:05Z|WORK_ITEM|item_complete|work_completion|relevant_file|Completed: Description of work item
+```
+
+**Pattern:**
+- **Work execution**: Execute the work completely without logging interruption
+- **Completion tracking**: After work is done, log multiple `item_complete` entries reflecting each workflow used during completion
+- **Final completion entry**: Summary entry for the overall work item
+- **Timestamp grouping**: All completion entries use same timestamp for grouped tracking
+- **Decoupled from repository todo list** - applies to any discrete work item
+- **No start logging**: Focus on outcomes, not process initiation
+
+### 5. New File Creation (MANDATORY)
 **MANDATORY FILE CREATION LOGGING**: When ANY new file is created during workflow execution, Claude MUST log the file creation activity:
 
 ```
@@ -154,19 +172,19 @@ When using the Edit tool to append audit entries:
 
 ### SESSION_START Logging
 ```
-2025-06-21T19:29:05Z|SESSION_START|workflow_start|session_management|claude/audit/current/current.log|Starting new session - workflow initialization
+2025-06-21T19:29:05Z|SESSION_START|workflow_start|session_management|claude/project/audit/current/current.log|Starting new session - workflow initialization
 2025-06-21T19:29:05Z|SESSION_START|step|branch_management|unplanned|Verified on unplanned branch as required
-2025-06-21T19:29:05Z|SESSION_START|workflow_complete|session_management|claude/audit/current/current.log|SESSION_START complete - session initialized, ready for work
+2025-06-21T19:29:05Z|SESSION_START|workflow_complete|session_management|claude/project/audit/current/current.log|SESSION_START complete - session initialized, ready for work
 ```
 
 ### SESSION_END Archival
 Before session end, current log may be archived:
 ```bash
 # Archive current log with timestamp
-cp claude/audit/current/current.log claude/audit/current/session_$(date -u +"%Y-%m-%dT%H-%M-%S").log
+cp claude/project/audit/current/current.log claude/project/audit/current/session_$(date -u +"%Y-%m-%dT%H-%M-%S").log
 
 # Reset current log with clean marker
-echo "##APPEND_MARKER_UNIQUE##" > claude/audit/current/current.log
+echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log
 ```
 
 ## Quality Assurance
@@ -182,10 +200,10 @@ Regular validation should check:
 ### Automated Checks
 ```bash
 # Check for clean marker
-grep -c "^##APPEND_MARKER_UNIQUE##$" claude/audit/current/current.log
+grep -c "^##APPEND_MARKER_UNIQUE##$" claude/project/audit/current/current.log
 
 # Verify no line number contamination  
-grep -c "→##APPEND_MARKER_UNIQUE##" claude/audit/current/current.log
+grep -c "→##APPEND_MARKER_UNIQUE##" claude/project/audit/current/current.log
 
 # Should return 0 (no contamination found)
 ```

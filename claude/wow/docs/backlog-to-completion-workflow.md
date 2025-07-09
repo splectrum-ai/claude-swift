@@ -233,15 +233,9 @@ Backlog → Planned (Task Creation) → Implementation → Completion
 - **Child Issues**: Implementation tasks with parent references
 - **Labels**: Epic labels inherited from parent to child
 
-### GitHub Projects
-- **Current Version Project**: Contains only child issues for active implementation
-- **Backlog View**: Shows parent issues without milestones
-- **Progress Tracking**: Child issue completion drives milestone progress
-
 ### Branch Management
-- **Feature Branches**: One per child issue following `feature/issue-N` pattern
-- **Integration Branches**: Parent issue branch for complex integrations (optional)
-- **Main Integration**: All work flows through main branch
+- **Feature Branches**: One per issue following `feature/issue-N` pattern
+- **Bugfix Branches**: One per issue following `bugfix/issue-N` pattern
 
 ## Best Practices
 
