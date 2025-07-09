@@ -252,7 +252,7 @@ Use natural language with "sesame" suffix:
 - `project sesame` → PROJECT_AUTOMATION
 - `next sesame` → NEXT_ISSUE
 - `recommend sesame` → WORKFLOW_RECOMMENDATION (experimental)
-- `transition sesame` → VERSION_TRANSITION (complete 5-step automation)
+- `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
 - `todo sesame` → REPO_TODO_WORKFLOW
 - `version planning sesame` → NEW_VERSION_PLANNING
 - `docs sesame` → DOCUMENTATION_WORKFLOW
@@ -278,9 +278,9 @@ Use natural language with "sesame" suffix:
 **NEW_VERSION_PLANNING** → See [claude/wow/workflows/NEW_VERSION_PLANNING.md](./claude/wow/workflows/NEW_VERSION_PLANNING.md)
 **DOCUMENTATION_WORKFLOW** → See [claude/wow/workflows/DOCUMENTATION_WORKFLOW.md](./claude/wow/workflows/DOCUMENTATION_WORKFLOW.md)
 
-## spl1 Context
+## Project Context
 
-**Transition Repository**: claude-swift focuses on template system architecture and deployment patterns. See [Template System Architecture](./docs/architecture/template-system-architecture.md) for system strategy.
+**Project Repository**: [PROJECT_NAME] focuses on [PROJECT_FOCUS_AREA]. See [Project Documentation](./docs/[PROJECT_DOCS_PATH]) for project strategy.
 
 **Development Strategy**: Uses [Phase-Based Development](./claude/wow/docs/phase-based-development-strategy.md) - breaking roadmap items into phases that combine efficiently across different areas, following PRINCE2 "just enough planning" principles.
 
@@ -297,17 +297,15 @@ Use natural language with "sesame" suffix:
 ## Key Files for Understanding
 
 **Core Platform**:
-- `template/` - Claude-swift template system
-- `docs/claude-swift-approach-overview.md` - Architecture and approach  
-- `docs/architecture/template-system-architecture.md` - System architecture
-- `docs/deployment/` - Deployment guides and procedures
+- `[CORE_PLATFORM_FILES]` - [CORE_PLATFORM_DESCRIPTION]
+- `docs/[PROJECT_DOCS]` - [PROJECT_DOCS_DESCRIPTION]
 - `claude/wow/` - Ways of Working framework
 
-**spl1 Strategy**:
+**Project Strategy**:
 - `claude/wow/docs/phase-based-development-strategy.md` - PRINCE2-inspired roadmap execution approach
 - `claude/wow/workflows/phase-based-implementation-guide.md` - Step-by-step workflow implementation guide
 - `claude/wow/workflows/branching-strategy.md` - Simplified GitHub Flow with integrated TDD
-- `claude/project/docs/current-development-process.md` - Current development workflow and process
+- `claude/project/docs/[PROJECT_PROCESS_DOCS]` - Current development workflow and process
 
 
 ## Persistent Todo Management
@@ -320,16 +318,16 @@ At regular intervals, ask "What have I learned?" and update documentation in app
 
 ## Future Evolution
 
-See [Template Enhancement Suggestions](./docs/future/template-enhancement-suggestions.md) for planned template system enhancements.
+See [Project Enhancement Plans](./docs/[PROJECT_ENHANCEMENT_DOCS]) for planned project enhancements.
 
 ## Documentation Standards
 
 **MANDATORY DOCUMENTATION RULES**:
 1. **File Location**: All documentation MUST be created in `docs/` directory or appropriate subdirectory
 2. **Homepage Back Links**: All documentation files MUST include back link to README.md at TOP of file
-3. **Back Link Format**: `[← Back to Claude-Swift Home](../README.md)` (adjust path as needed)
+3. **Back Link Format**: `[← Back to Project Home](../README.md)` (adjust path as needed)
 4. **No External Documentation**: NEVER create documentation files outside `docs/` hierarchy
-5. **README.md Content Organization** (claude-swift rule): README.md contents MUST reflect docs/ folder contents FIRST, followed by claude/ folder contents of interest to users
+5. **README.md Content Organization**: README.md contents MUST reflect docs/ folder contents FIRST, followed by claude/ folder contents of interest to users
 
 **AUTOMATIC CORRECTION**: When documentation files are found outside `docs/`, Claude MUST:
 1. Move files to appropriate `docs/` subdirectory

@@ -32,33 +32,42 @@ cp CLAUDE.md template/
 
 ### 3. Reset Project-Specific Files to Generic Template Format
 ```bash
-# Compare template/claude/project/ against template/archive/claude/project/
-# Reset project-specific configuration files to template placeholders
+# Copy clean hook files from archive as starting point
+cp template/archive/claude/project/*.md template/claude/project/
+# Review and make any additional cleanup if necessary
 ```
 
-**Files to Reset**:
+**Optimization**: Copy cleaned hook files from archive backup, then review for any additional cleanup needed
+
+**Project Hook Files Reset** (copied from archive, then reviewed):
 - `template/claude/project/version-config.md` → Generic template placeholders
-- `template/claude/project/project-info.md` → Generic template placeholders
-- `template/claude/project/audit/current/current.log` → Empty state with marker only
+- `template/claude/project/project-info.md` → Generic template placeholders  
+- `template/claude/project/KEYWORD_REGISTRY.md` → Empty sections for project-specific content
+- `template/claude/project/todo.md` → Empty sections for project-specific content
 
 **Reset Pattern**:
-- Replace project-specific values with `[placeholder]` format
-- Remove completed project-specific content
+- Start with clean archive versions (avoids manual placeholder replacement)
+- Review copied files for any remaining project-specific content
+- Make targeted fixes only where needed
 - Preserve template structure and workflow framework
 
 ### 4. Remove Project-Specific Files Not Needed in Template
 ```bash
-# Remove claude-swift specific files that shouldn't be in template
-rm -f template/claude/project/docs/v*.md  # Version-specific reports
-rm -rf template/claude/project/audit/v*/  # Version audit archives
-rm -f template/claude/project/workflows/PROJECT_*  # Project-specific workflows (keep hook pattern docs)
+# Remove all files and folders from all project subfolders
+rm -rf template/claude/project/*/
+# Put clean audit log in place
+mkdir -p template/claude/project/audit/current
+echo "##APPEND_MARKER_UNIQUE##" > template/claude/project/audit/current/current.log
+# Create empty docs folder with generic README to preserve structure
+mkdir -p template/claude/project/docs
+echo -e "# Project Documentation\n\nThis directory is reserved for project-specific documentation.\n\nCurrently empty - no project-specific documentation files are maintained.\n\n---\n\n*Project documentation structure maintained for future use.*" > template/claude/project/docs/README.md
 ```
 
 **Cleanup Scope**:
-- Version-specific documentation and reports
-- Historical audit archives
-- Project-specific workflow implementations
-- Any claude-swift contamination
+- **Remove all files and folders from all project subfolders** (docs/, workflows/, audit/, etc.)
+- **No historical documentation preserved** - templates start completely clean
+- **Create clean audit/current/current.log** with only the append marker
+- **Create empty docs/ folder with generic README** to preserve directory structure
 
 ### 5. Template Validation
 ```bash

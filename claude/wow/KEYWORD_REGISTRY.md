@@ -10,7 +10,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **SESSION_END** | `SESSION_END.md` | Session termination & learning capture | End of Claude session | `finish sesame` |
 | **GIT_WORKFLOW** | `GIT_WORKFLOW.md` | Branching, commits, releases | Git operations, version releases | `git sesame` |
 | **OPERATIONAL_RULES** | `OPERATIONAL_RULES.md` | Development rules framework | Development decisions, coding standards | `rules sesame` |
-| **RELEASE_PROCESS** | `RELEASE_PROCESS.md` | Complete release workflow with log archiving | Creating platform releases, version closure | `release sesame` |
+| **RELEASE_PROCESS** | `RELEASE_PROCESS.md` | Complete release workflow with log archiving | Creating platform releases, version closure | `release sesame`, `patch sesame` |
 | **PLANNED_VS_UNPLANNED** | `PLANNED_VS_UNPLANNED.md` | Work classification strategy | Deciding whether to create issues | `planning sesame` |
 | **NEXT_ISSUE** | `NEXT_ISSUE.md` | Automated next issue selection workflow | Determining which GitHub issue to work on next | `next sesame` |
 | **VERSION_TRANSITION** | `VERSION_TRANSITION.md` | Mandatory post-release knowledge processing and next version preparation | After RELEASE_PROCESS completion | `transition sesame` |
@@ -61,7 +61,8 @@ start sesame     → SESSION_START
 finish sesame    → SESSION_END  
 git sesame       → GIT_WORKFLOW
 rules sesame     → OPERATIONAL_RULES
-release sesame   → RELEASE_PROCESS
+release sesame   → RELEASE_PROCESS (full version)
+patch sesame     → RELEASE_PROCESS (patch mode)
 planning sesame  → PLANNED_VS_UNPLANNED
 next sesame      → NEXT_ISSUE
 todo sesame      → REPO_TODO_WORKFLOW

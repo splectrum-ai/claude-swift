@@ -8,7 +8,8 @@ This file provides essential operational guidance for Claude Code when working w
 Use natural language with "sesame" suffix:
 - `start sesame` → SESSION_START workflow
 - `finish sesame` → SESSION_END workflow  
-- `release sesame` → RELEASE_PROCESS
+- `release sesame` → RELEASE_PROCESS (full version)
+- `patch sesame` → RELEASE_PROCESS (patch mode)
 - `planning sesame` → PLANNED_VS_UNPLANNED
 - `next sesame` → NEXT_ISSUE
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)

@@ -12,14 +12,9 @@
 - [x] **Note**: Step 7 removed as redundant (objectives accomplished by Steps 4-6)
 
 **Infrastructure Enhancement Items**:
-- [ ] Check correctness of claude-swift documentation against actual implementation
-- [ ] Create instructions for populating project directories after deployment
-- [ ] Create TEMPLATE_PUBLISH workflow
-- [ ] Design and implement FIX_RELEASE workflow for v1.0.x maintenance
-- [ ] Create project-specific content hook system for CLAUDE.md during template deployment
-  - Allow projects to preserve custom context sections when applying template updates
-  - Pattern: Template provides structure, project provides content references
-- [ ] Fix TEMPLATE_SYNCHRONIZATION workflow - KEYWORD_REGISTRY.md contamination
+- [x] Create user documentation for first-time deployment setup (project-specific information requirements) - Issue #32
+- [x] Create PATCH_RELEASE workflow - Added `patch sesame` trigger pointing to RELEASE_PROCESS in patch mode
+- [x] Fix TEMPLATE_SYNCHRONIZATION workflow - KEYWORD_REGISTRY.md contamination - Updated Step 3 to clarify all project hook files need genericization
   - Template contains claude-swift specific content instead of placeholders
   - Should follow pattern of other hook files with `[EPIC_NAME]` placeholders
   - Found during spl1 migration (2025-07-06)
