@@ -7,8 +7,7 @@
 Shared template synchronization workflow for claude-swift. Used by multiple workflows that need to keep template/ folder synchronized with main repository state.
 
 **Used By**: 
-- VERSION_TRANSITION (Step 3: Repository Maintenance)
-- RELEASE_PROCESS (Publish workflow)
+- Standalone `template sesame` trigger
 - Any workflow requiring template synchronization
 
 ## Synchronization Recipe
@@ -142,4 +141,4 @@ TIMESTAMP|PARENT_WORKFLOW|step|template_validation||Validated template structure
 
 ---
 
-*Shared Sub-Workflow - Template synchronization recipe for claude-swift*
+*Project Workflow - Template synchronization recipe for claude-swift*

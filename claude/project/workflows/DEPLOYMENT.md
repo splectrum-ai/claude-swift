@@ -6,7 +6,7 @@
 Main deployment workflow that detects target environment and routes to appropriate deployment strategy.
 
 ## Trigger Keywords
-- `deploy sesame`
+- `deployment sesame`
 - `DEPLOYMENT`
 
 ## Overview

@@ -27,7 +27,7 @@
 
 **Common MANDATORY Rules:**
 - Branch Policy: Clean repository state or completed PR cycle
-- Workflow Logging: Proper timelog format and accountability
+- Workflow Logging: Proper audit log format and accountability
 - File Path Specification: All references must specify exact paths
 - Step-by-Step Execution: Single-step completion with choice points
 

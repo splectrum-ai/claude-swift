@@ -100,12 +100,12 @@ finish sesame
 - Follow established naming conventions
 **Prevention**: Use `docs sesame` workflow for documentation creation
 
-### Pitfall: Incorrect Audit Log Format
-**Symptom**: Workflow tracking failures, inconsistent logging
-**Cause**: Manual audit log edits not following required format
-**Solution**: Never manually edit audit logs - let workflows handle logging
-**Format**: `TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION`
-**Prevention**: Use workflow commands instead of manual log edits
+### Pitfall: Inconsistent Work Tracking
+**Symptom**: Lost context between sessions, unclear progress
+**Cause**: Not using repository todo list for task management
+**Solution**: Use `todo sesame` workflow consistently for task tracking
+**Benefit**: Todo completion automatically triggers audit logging with proper context
+**Prevention**: Make todo management part of your regular workflow routine
 
 ## Development Process Pitfalls
 

@@ -40,6 +40,13 @@
 - **USABILITY**: Clear workflow triggers and guidance for users
 - **MAINTAINABILITY**: Template updates don't conflict with project documentation
 
+## Key Files for Understanding
+
+**Core Platform**:
+- `template/` - Claude-swift template system
+- `docs/architecture/template-system-architecture.md` - System architecture
+- `docs/deployment/` - Deployment guides and procedures
+
 ---
 
 *Project Hook - General project information for claude-swift template system*
