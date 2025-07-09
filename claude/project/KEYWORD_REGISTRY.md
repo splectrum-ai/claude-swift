@@ -18,7 +18,6 @@ Reserved for claude-swift specific workflows when needed:
 | **DEPLOY** | DEPLOYMENT_AUTOMATION | Not yet created |
 | **SIDECAR** | SIDECAR_DEPLOYMENT | Not yet created |
 | **HOOK** | HOOK_MANAGEMENT | Not yet created |
-| **TEMPLATE_PUBLISH** | TEMPLATE_PUBLISH_WORKFLOW | Not yet created |
 
 ## Sesame Alias Mapping
 
