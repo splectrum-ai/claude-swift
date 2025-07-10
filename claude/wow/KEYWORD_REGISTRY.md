@@ -17,7 +17,8 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **REPO_TODO_WORKFLOW** | `REPO_TODO_WORKFLOW.md` | Repository todo list management and cross-session continuity | Todo operations, status updates, completion tracking | `todo sesame` |
 | **NEW_VERSION_PLANNING** | `NEW_VERSION_PLANNING.md` | Next version planning and roadmap development | Version planning, feature prioritization | `version sesame` |
 | **DOCUMENTATION_WORKFLOW** | `DOCUMENTATION_WORKFLOW.md` | Documentation standards and compliance management | Documentation creation, maintenance, compliance | `docs sesame` |
-| **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | *No sesame alias* |
+| **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | `audit sesame` |
+| **MANDATORY_RULES_REFRESH** | `MANDATORY_RULES_REFRESH.md` | Systematic scanning and validation of all mandatory rules | Rule compliance, violation detection, corrective actions | `mandatory sesame` |
 
 ## Built-in Claude Code Keywords
 
@@ -66,6 +67,8 @@ patch sesame     → RELEASE_PROCESS (patch mode)
 planning sesame  → PLANNED_VS_UNPLANNED
 next sesame      → NEXT_ISSUE
 todo sesame      → REPO_TODO_WORKFLOW
+audit sesame     → AUDIT_LOGGING
+mandatory sesame → MANDATORY_RULES_REFRESH
 ```
 
 ## Registry Maintenance Rules

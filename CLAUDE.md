@@ -15,6 +15,8 @@ Use natural language with "sesame" suffix:
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
 - `todo sesame` → REPO_TODO_WORKFLOW
 - `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
+- `audit sesame` → AUDIT_LOGGING (audit log management and format validation)
+- `mandatory sesame` → MANDATORY_RULES_REFRESH (scan and validate all mandatory rules)
 - `issue sesame` → Manual issue creation for occasional needs
 - `close sesame` → Manual issue closure for occasional needs
 
