@@ -21,7 +21,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **COMMIT** | `COMMIT.md` | Intelligent commit workflow with automatic issue closure | Change staging, commit message generation, issue management | `commit sesame` |
 | **CREATE_ISSUE** | `CREATE_ISSUE.md` | Manual issue creation with standardized metadata structure | Ad-hoc issue creation, structured backlog management | `issue sesame` |
 | **INITIALISE** | `INITIALISE.md` | One-time workspace setup and multi-project configuration | Workspace initialization, symlink setup, project directory structure | `initialise sesame`, `init sesame` |
-| **PROJECT_SWITCH** | `PROJECT_SWITCH.md` | Automated project switching with symlink management | Directory context switching, repository navigation, framework sharing | `switch [org/repo] sesame` |
+| **PROJECT_REGISTER** | `PROJECT_REGISTER.md` | Automated project registration with symlink creation and registry tracking | Project setup for claude-swift framework, symlink management, registry updates | `register [org/repo] sesame` |
 
 ## Built-in Claude Code Keywords
 
@@ -74,7 +74,7 @@ mandatory sesame → MANDATORY_RULES_REFRESH
 issue sesame     → CREATE_ISSUE
 initialise sesame → INITIALISE
 init sesame      → INITIALISE
-switch sesame    → PROJECT_SWITCH
+register sesame  → PROJECT_REGISTER
 ```
 
 ## Registry Maintenance Rules

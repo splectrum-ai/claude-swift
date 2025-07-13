@@ -9,18 +9,18 @@
 - **PURPOSE**: Eliminate confusion of mixing project-specific content with operational machinery
 
 ## Repository Configuration
-- **REPOSITORY**: SPlectrum/claude-swift
+- **REPOSITORY**: sesameh/claude-swift
 - **PRIMARY_BRANCH**: main
-- **DEVELOPMENT_BRANCH**: unplanned
-- **DEPLOYMENT_PATTERN**: sidecar (adjacent to target projects)
+- **DEPLOYMENT_PATTERN**: Clone repository into workspace structure
 
 ## Architecture
-- **DEPLOYMENT_MODEL**: dual-folder (claude-project/ + claude-wow/)
-- **CONTENT_SEPARATION**: Project docs (tracked) vs Operational machinery (ignored)
+- **DEPLOYMENT_MODEL**: Multi-project with shared framework via symlinks
+- **CONTENT_SEPARATION**: Project-specific content vs shared operational machinery  
 - **TEMPLATE_STRUCTURE**: Reusable WoW workflows with project-specific hooks
+- **PROJECT_REGISTRY**: Central tracking of registered projects for event-driven choreography
 
 ## Development Team
-- **PRIMARY_MAINTAINER**: SPlectrum organization
+- **PRIMARY_MAINTAINER**: sesameh organization  
 - **DEVELOPMENT_APPROACH**: Human-AI collaborative development using claude-swift workflows
 - **COLLABORATION_MODEL**: Strategic direction (human) + tactical execution (Claude)
 
