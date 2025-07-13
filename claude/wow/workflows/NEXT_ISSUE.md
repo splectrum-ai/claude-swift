@@ -5,47 +5,62 @@ Automated workflow for selecting the next GitHub issue to work on, combining rec
 
 ## Workflow Steps
 
-### 1. Get Automated Recommendations
+### 1. Get Issue List and Metadata
 ```bash
-node status/project-automation.js recommend
+gh issue list --limit 10 --json number,title,labels,body
 ```
-**Output**: Top 5 prioritized issues with decision scores
+**Output**: Current issues with embedded metadata for scoring analysis
 
-### 2. Apply Context Filters
+### 2. Parse Issue Metadata and Calculate Scores
 
-#### Version Focus
-- **Current Version (0.6.1)**: Planning/analysis tasks (Score 85)
-- **Future Versions**: Implementation tasks (Score 60-75)
-- **Priority**: Complete current version before moving to next
+#### Metadata Extraction
+From issue body text, extract:
+- **Priority**: HIGH/MEDIUM/LOW (Priority Weight: HIGH=3, MEDIUM=2, LOW=1)
+- **Effort**: S/M/L/XL (Effort Factor: S=1, M=2, L=3, XL=4)
+- **Dependencies**: Blocks/Blocked by/Related (Impact Factor: blocks count + 1)
+- **Work Area**: Epic/label context
 
-#### Epic Consideration
-- **Strategic Balance**: Avoid working only on one epic
-- **Dependencies**: Consider cross-epic blocking relationships
-- **Container Pioneer**: SE epic has strategic importance for RR epic
+#### Score Calculation
+```
+Score = (Priority Weight × Impact Factor × Readiness) / Effort Factor
+Where Readiness = 1 if no blockers, 0.5 if partial, 0 if blocked
+```
+
+### 3. Apply Context Filters
+
+#### Milestone Focus
+- **Current Milestone**: Active milestone work takes priority
+- **Template System**: Core TMPL and TPUB workflow development
+- **Priority**: Complete milestone goals systematically
+
+#### Label Consideration
+- **Strategic Balance**: Balance milestone features with ongoing maintenance
+- **Dependencies**: Consider blocking relationships in issue metadata
+- **Project Focus**: Project-specific labels indicate local priority areas
 
 #### Session Context
 - **Available Time**: Match issue complexity to time available
 - **Current Focus**: Consider context switch costs
 - **Energy Level**: Match session type to current energy
 
-### 3. Selection Criteria
+### 4. Selection Criteria
 
 #### High Priority (Work Immediately)
-- Score 85 + Version 0.6.1 + Planning session type
-- No blocking dependencies
-- Low context switch cost from current work
+- HIGH priority + No blockers + Clear test criteria
+- Blocks multiple other issues (high impact)
+- Small effort with medium/high priority (quick wins)
 
 #### Medium Priority (Good Options)
-- Score 75-85 + Strategic value
-- Enables future work
-- Medium context switch cost acceptable
+- MEDIUM priority + Dependencies satisfied
+- Strategic value for template system
+- Reasonable effort estimate with clear scope
 
 #### Low Priority (Future Work)
-- Score 60-75 + Implementation focus
-- Version 0.6.2+ work
-- High context switch cost
+- LOW priority + Nice to have features
+- Large effort without clear dependencies
+- Background improvements or optimizations
 
-### 4. Decision Documentation
+### 5. Decision Documentation
 
 When selecting an issue, document:
 - **Issue Number**: `#XX`
@@ -56,22 +71,22 @@ When selecting an issue, document:
 ## Decision Framework
 
 ### Quick Selection (< 2 minutes)
-1. Run `recommend` command
-2. Pick first item with Score 85 + Version 0.6.1
+1. Run `gh issue list` command
+2. Find first HIGH priority issue with no blockers
 3. Start work immediately
 
 ### Thoughtful Selection (5-10 minutes)
-1. Run `recommend` command
-2. Review top 5 recommendations
-3. Consider current context and epic balance
-4. Select based on strategic value and fit
+1. Run `gh issue list` command
+2. Parse metadata from top 10 issues
+3. Calculate scores using metadata formula
+4. Select highest scoring available issue
 5. Document selection rationale
 
 ### Strategic Planning (15+ minutes)
-1. Review all Version 0.6.1 items
-2. Plan epic progression and dependencies
-3. Select items that build toward implementation readiness
-4. Consider cross-epic coordination needs
+1. Review all current milestone items
+2. Analyze dependency chains and label balance
+3. Select items that unblock future work
+4. Consider project-specific strategic needs
 
 ## Integration Patterns
 
@@ -108,34 +123,37 @@ Finish epic phase → **NEXT_ISSUE** → Move to different epic for balance
 
 ### Example 1: Planning Session Start
 ```bash
-# Get recommendations
-node status/project-automation.js recommend
+# Get current issues
+gh issue list --limit 10 --json number,title,labels,body
 
-# Output shows 5 Score-85 planning items
-# Select #10 (RR-1: Repository analysis) for strategic foundation
-# Document: "Selected for strategic foundation - enables other epics"
+# Parse metadata: Issue #32 shows Priority: HIGH, Effort: M, Dependencies: None
+# Calculate score: (3 × 1 × 1) / 2 = 1.5
+# Select #32 for strategic documentation foundation
+# Document: "Selected for strategic foundation - enables template adoption"
 ```
 
-### Example 2: Epic Balance Decision
+### Example 2: Project-Specific Focus
 ```bash
-# Just completed SE-1 work, need epic diversity
-# Recommendations show multiple Score-85 items
-# Select #14 (CAE-1: API analysis) for different perspective
-# Document: "Epic diversification after SE completion"
+# Review project-specific labeled issues
+# Issue #5 shows Priority: MEDIUM, Effort: L, Blocks: 3 issues
+# Calculate score: (2 × 4 × 1) / 3 = 2.67
+# Select #5 for project enhancement
+# Document: "High impact project work - enables multiple dependent issues"
 ```
 
 ### Example 3: Time-Constrained Session
 ```bash
 # Only 30 minutes available
-# Select highest-score item with "Quick Win" or "Planning" session type
-# Avoid "Deep Work" items that need longer focus periods
+# Filter for Effort: S (small) issues
+# Select highest-score small effort item
+# Avoid Large/XL items that need longer focus periods
 ```
 
 ## Success Metrics
 
 ### Effective Selection
-- Consistent progress across all epics
-- Version 0.6.1 completion before 0.6.2 start
+- Consistent progress across project areas
+- Milestone features completed systematically
 - Strategic foundation work completed early
 - Dependencies resolved before dependent work
 
