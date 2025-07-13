@@ -11,49 +11,67 @@ One-time workspace setup and configuration workflow that creates the foundationa
 Set up claude-swift workspace to manage multiple sub-projects through symlinked project directory structure.
 
 ## Prerequisites
-- Claude-swift repository cloned and operational
-- Write permissions in repository directory
-- Target workspace directory exists and is accessible
+- Claude-swift repository positioned correctly in workspace structure
+- Write permissions in repository and workspace directories  
+- Workspace follows org/repo directory pattern
+
+## ⚠️ IMPORTANT: Repository Structure Requirements
+
+**INITIALISE requires claude-swift to be positioned correctly in workspace structure.**
+
+**See setup documentation for detailed repository positioning requirements.**
 
 ## Workflow Steps
 
-### 1. Workspace Configuration Prompt
+### 1. Repository Structure Validation
 ```
-INITIALISE|step|workspace_prompt||Interactive workspace root configuration
-```
-
-**Prompt User:**
-```
-=== Claude-Swift Workspace Initialization ===
-
-This will set up a workspace for managing multiple projects.
-
-Enter the full path to your projects workspace root directory:
-(This is where your project repositories will be located)
-
-Example: /home/user/workspace
-Example: /Users/user/Development  
-Example: C:\Users\user\workspace
-
-Workspace root path: 
+INITIALISE|step|structure_validation||Validate claude-swift is properly positioned in workspace
 ```
 
-### 2. Path Validation
+**Repository Structure Requirements:**
+Claude-swift must be positioned so that:
+- **Workspace root** is `../..` from claude-swift repository
+- **Other repositories** exist as siblings at `../org/repo` level
+- **Example structure**:
 ```
-INITIALISE|step|path_validation||Validate workspace path accessibility
+workspace-root/                    # Workspace directory
+├── org1/
+│   ├── repo1/                     # Project repository
+│   ├── repo2/                     # Another project
+│   └── claude-swift/              # This repository ← YOU ARE HERE
+├── org2/
+│   └── repo3/                     # Different org's project
+└── personal/
+    └── myproject/                 # Personal projects
 ```
 
-**Validation Checks:**
-1. **Path Exists**: Verify the specified path exists
-2. **Directory Access**: Check read/write permissions
-3. **Absolute Path**: Ensure path is absolute, not relative
-4. **No Conflicts**: Check if `projects/` symlink already exists
+**Pre-requisites Check:**
+- Repository must be positioned correctly in workspace structure
+- Workspace root (`../..`) must be accessible and writable
+- Repository structure follows org/repo pattern
 
-**Error Handling:**
-- **Path doesn't exist**: Offer to create directory or prompt for different path
-- **Permission denied**: Request different path with proper permissions
-- **Relative path**: Convert to absolute or request absolute path
-- **Existing projects/**: Ask whether to overwrite or abort
+### 2. Automatic Workspace Detection
+```
+INITIALISE|step|workspace_detection||Automatically detect workspace root from repository position
+```
+
+**Automatic Detection:**
+```bash
+# Detect workspace root as ../.. from current repository
+WORKSPACE_PATH=$(cd ../.. && pwd)
+echo "Detected workspace root: $WORKSPACE_PATH"
+
+# Validate workspace structure
+if [ ! -d "$WORKSPACE_PATH" ]; then
+    echo "Error: Workspace root not accessible"
+    echo "Ensure claude-swift repository is positioned correctly"
+    exit 1
+fi
+
+# Check for existing repositories in workspace
+echo "Available repositories in workspace:"
+find "$WORKSPACE_PATH" -mindepth 2 -maxdepth 2 -type d | head -10
+```
 
 ### 3. Symlink Creation
 ```
@@ -62,19 +80,26 @@ INITIALISE|step|symlink_creation||Create projects symlink to workspace root
 
 **Actions:**
 ```bash
-# Remove existing projects/ if it exists (after user confirmation)
+# Check for existing projects/ directory or symlink
 if [ -e "projects" ]; then
+    echo "Existing projects/ found - removing to create fresh symlink"
     rm -rf projects/
 fi
 
-# Create symlink to workspace root
+# Create symlink to automatically detected workspace root
 ln -s "$WORKSPACE_PATH" projects
 
-# Verify symlink creation
+# Verify symlink creation and accessibility
 if [ -L "projects" ] && [ -d "projects" ]; then
     echo "✓ Symlink created: projects/ -> $WORKSPACE_PATH"
+    echo "✓ Workspace accessible through symlink"
+    
+    # Show available projects
+    echo "Available projects:"
+    ls -1 projects/ 2>/dev/null | head -10 || echo "  (workspace empty)"
 else
     echo "✗ Failed to create symlink"
+    echo "Check file permissions and workspace accessibility"
     exit 1
 fi
 ```
@@ -105,9 +130,9 @@ Add workspace configuration to `claude/project/project-info.md`:
 ```markdown
 ## Workspace Configuration
 - **Projects Directory**: Symlinked to $WORKSPACE_PATH
-- **Workspace Type**: External symlink
+- **Workspace Type**: Automatic detection (../..)
 - **Initialized**: $(date -u +"%Y-%m-%d")
-- **Initialization Method**: INITIALISE workflow
+- **Initialization Method**: INITIALISE workflow (automatic detection)
 ```
 
 ### 6. Validation and Summary
@@ -125,26 +150,35 @@ INITIALISE|step|validation||Verify complete workspace setup
 ```
 === Workspace Initialization Complete ===
 
-✓ Symlink created: projects/ -> $WORKSPACE_PATH
+✓ Workspace automatically detected: $WORKSPACE_PATH
+✓ Symlink created: projects/ -> $WORKSPACE_PATH  
 ✓ Git ignore updated
 ✓ Configuration stored
-✓ Workspace ready for project management
+✓ Repository structure validated
 
 Next steps:
-- Use 'switch [project] sesame' to clone and switch to projects
-- Projects will be cloned into: $WORKSPACE_PATH
-- Access projects through: ./projects/[project-name]
+- Use 'switch [org/repo] sesame' to switch to existing projects
+- Projects accessible through: ./projects/[org]/[repo]
+- Use 'switch . sesame' to return to claude-swift base
 
 Workspace ready for claude-swift multi-project operations!
+
+Available projects:
+[List of detected org/repo combinations]
 ```
 
 ## Error Recovery
 
 ### Common Issues and Solutions
-- **Permission Denied**: Guide user to choose accessible directory
-- **Symlink Failure**: Check filesystem support for symlinks
-- **Path Resolution**: Help resolve relative vs absolute path issues
-- **Existing Directory**: Handle conflicts with existing `projects/` gracefully
+- **Repository Positioning Error**: Claude-swift not in correct workspace structure
+  - **Solution**: Move claude-swift to `workspace/org/claude-swift/` structure
+  - **Check**: Ensure `../..` from claude-swift is the intended workspace root
+- **Permission Denied**: No write access to workspace or repository
+  - **Solution**: Ensure user has write permissions to both directories
+- **Symlink Failure**: Filesystem doesn't support symlinks
+  - **Solution**: Use filesystem that supports symlinks (not FAT32)
+- **Workspace Structure**: Existing workspace doesn't follow org/repo pattern
+  - **Solution**: Reorganize repositories into org/repo structure before INITIALISE
 
 ### Cleanup on Failure
 If initialization fails:

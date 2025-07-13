@@ -142,4 +142,16 @@
 2025-07-13T16:48:45Z|KEYWORD_REGISTRY|item_complete|initialise_integration|claude/wow/KEYWORD_REGISTRY.md|Added INITIALISE workflow with dual sesame aliases (initialise/init sesame)
 2025-07-13T16:48:45Z|CLAUDE_MD|item_complete|trigger_registration|CLAUDE.md|Added initialise sesame trigger to user-friendly sesame triggers section
 2025-07-13T16:48:45Z|INITIALISE|workflow_complete|workspace_foundation||INITIALISE workflow fully implemented - enables claude-swift multi-project workspace setup
+2025-07-14T01:20:30Z|PROJECT_SWITCH|item_complete|workflow_update|claude/wow/workflows/PROJECT_SWITCH.md|Updated PROJECT_SWITCH workflow with repository switching logic and symlink management
+2025-07-14T01:20:30Z|PROJECT_SWITCH|item_complete|base_detection|claude/wow/workflows/PROJECT_SWITCH.md|Implemented elegant base project detection using ../../projects check
+2025-07-14T01:20:30Z|PROJECT_SWITCH|item_complete|symlink_management|claude/wow/workflows/PROJECT_SWITCH.md|Added comprehensive CLAUDE.md and claude/wow symlink creation and validation
+2025-07-14T01:20:30Z|PROJECT_SWITCH|item_complete|interactive_support|claude/wow/workflows/PROJECT_SWITCH.md|Added support for both parameter-based and interactive repository input
+2025-07-14T01:20:30Z|KEYWORD_REGISTRY|item_complete|project_switch_integration|claude/wow/KEYWORD_REGISTRY.md|Added PROJECT_SWITCH workflow with switch sesame alias mapping
+2025-07-14T01:20:30Z|CLAUDE_MD|item_complete|switch_trigger|CLAUDE.md|Added switch [org/repo] sesame trigger to user-friendly sesame triggers
+2025-07-14T01:20:30Z|PROJECT_SWITCH|workflow_complete|repository_switching||PROJECT_SWITCH workflow fully integrated - enables seamless multi-project development
+2025-07-14T01:22:45Z|PROJECT_SWITCH|item_complete|dynamic_paths|claude/wow/workflows/PROJECT_SWITCH.md|Removed hardcoded paths - workflow now uses dynamic base project detection from INITIALISE settings
+2025-07-14T01:24:15Z|PROJECT_SWITCH|item_complete|symlink_validation|claude/wow/workflows/PROJECT_SWITCH.md|Added precise projects symlink validation - checks that projects target matches ../.. from base
+2025-07-14T01:26:00Z|INITIALISE|item_complete|automatic_detection|claude/wow/workflows/INITIALISE.md|Updated INITIALISE to use automatic workspace detection (../..) instead of user prompt
+2025-07-14T01:26:00Z|INITIALISE|item_complete|structure_documentation|claude/wow/workflows/INITIALISE.md|Added comprehensive repository structure requirements and setup instructions
+2025-07-14T01:26:00Z|INITIALISE|item_complete|error_handling_update|claude/wow/workflows/INITIALISE.md|Updated error handling for automatic detection and positioning validation
 ##APPEND_MARKER_UNIQUE##

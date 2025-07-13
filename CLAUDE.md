@@ -20,6 +20,7 @@ Use natural language with "sesame" suffix:
 - `issue sesame` → Manual issue creation for occasional needs
 - `close sesame` → Manual issue closure for occasional needs
 - `initialise sesame` → INITIALISE workflow (one-time workspace setup and multi-project configuration)
+- `switch [org/repo] sesame` → PROJECT_SWITCH workflow (automated project switching with symlink management)
 
 **Project-specific triggers**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
 

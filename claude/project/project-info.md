@@ -49,9 +49,9 @@
 
 ## Workspace Configuration
 - **Projects Directory**: Symlinked to /home/herma
-- **Workspace Type**: External symlink
+- **Workspace Type**: Automatic detection (../..)
 - **Initialized**: 2025-07-14
-- **Initialization Method**: INITIALISE workflow
+- **Initialization Method**: INITIALISE workflow (updated to automatic detection)
 
 ---
 
