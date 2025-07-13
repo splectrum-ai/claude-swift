@@ -47,6 +47,12 @@
 - `docs/architecture/template-system-architecture.md` - System architecture
 - `docs/deployment/` - Deployment guides and procedures
 
+## Workspace Configuration
+- **Projects Directory**: Symlinked to /home/herma
+- **Workspace Type**: External symlink
+- **Initialized**: 2025-07-14
+- **Initialization Method**: INITIALISE workflow
+
 ---
 
 *Project Hook - General project information for claude-swift template system*

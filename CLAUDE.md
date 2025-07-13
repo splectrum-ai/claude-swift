@@ -19,6 +19,7 @@ Use natural language with "sesame" suffix:
 - `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
 - `issue sesame` → Manual issue creation for occasional needs
 - `close sesame` → Manual issue closure for occasional needs
+- `initialise sesame` → INITIALISE workflow (one-time workspace setup and multi-project configuration)
 
 **Project-specific triggers**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
 

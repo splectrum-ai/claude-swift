@@ -136,4 +136,10 @@
 2025-07-13T16:40:15Z|SESSION_END|item_complete|streamline_audit_checks|claude/wow/workflows/SESSION_END.md|Removed redundant audit logging checks - now handled by COMMIT subworkflow
 2025-07-13T16:40:15Z|WORKFLOW_INTEGRATION|item_complete|audit_architecture||Streamlined audit validation to single entry point through COMMIT workflow
 2025-07-13T16:42:30Z|SESSION_END|item_complete|log_timing_fix|claude/wow/workflows/SESSION_END.md|Fixed audit log timing - archive after commit to ensure complete session record
+2025-07-13T16:48:45Z|INITIALISE|item_complete|workflow_creation|claude/wow/workflows/INITIALISE.md|Created comprehensive INITIALISE workflow for workspace setup
+2025-07-13T16:48:45Z|INITIALISE|item_complete|interactive_setup|claude/wow/workflows/INITIALISE.md|Added interactive workspace root prompt and symlink creation
+2025-07-13T16:48:45Z|INITIALISE|item_complete|gitignore_integration|claude/wow/workflows/INITIALISE.md|Implemented automatic .gitignore update for projects/ directory
+2025-07-13T16:48:45Z|KEYWORD_REGISTRY|item_complete|initialise_integration|claude/wow/KEYWORD_REGISTRY.md|Added INITIALISE workflow with dual sesame aliases (initialise/init sesame)
+2025-07-13T16:48:45Z|CLAUDE_MD|item_complete|trigger_registration|CLAUDE.md|Added initialise sesame trigger to user-friendly sesame triggers section
+2025-07-13T16:48:45Z|INITIALISE|workflow_complete|workspace_foundation||INITIALISE workflow fully implemented - enables claude-swift multi-project workspace setup
 ##APPEND_MARKER_UNIQUE##

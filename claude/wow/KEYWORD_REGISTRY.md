@@ -20,6 +20,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **MANDATORY_RULES_REFRESH** | `MANDATORY_RULES_REFRESH.md` | Systematic scanning and validation of all mandatory rules | Rule compliance, violation detection, corrective actions | `mandatory sesame` |
 | **COMMIT** | `COMMIT.md` | Intelligent commit workflow with automatic issue closure | Change staging, commit message generation, issue management | `commit sesame` |
 | **CREATE_ISSUE** | `CREATE_ISSUE.md` | Manual issue creation with standardized metadata structure | Ad-hoc issue creation, structured backlog management | `issue sesame` |
+| **INITIALISE** | `INITIALISE.md` | One-time workspace setup and multi-project configuration | Workspace initialization, symlink setup, project directory structure | `initialise sesame`, `init sesame` |
 
 ## Built-in Claude Code Keywords
 
@@ -70,6 +71,8 @@ todo sesame      → REPO_TODO_WORKFLOW
 audit sesame     → AUDIT_LOGGING
 mandatory sesame → MANDATORY_RULES_REFRESH
 issue sesame     → CREATE_ISSUE
+initialise sesame → INITIALISE
+init sesame      → INITIALISE
 ```
 
 ## Registry Maintenance Rules
