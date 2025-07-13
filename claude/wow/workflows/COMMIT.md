@@ -27,7 +27,30 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 
 ## Workflow Steps
 
-### 1. Change Assessment
+### 1. Audit Log Validation
+```
+COMMIT|step|audit_validation||Verify recent work has corresponding audit entries
+```
+
+**Actions:**
+1. Check `claude/project/audit/current/current.log` for recent entries
+2. Verify work items have corresponding `item_complete` entries
+3. Check for incomplete workflow logging patterns
+4. Validate audit log follows proper format and completion patterns
+5. Warn if recent work appears undocumented in audit log
+
+**Audit Validation Patterns:**
+- **Recent file changes** should have corresponding audit entries
+- **Completed work items** should have `item_complete` logging
+- **Workflow activities** should be properly documented
+- **File creation** should have `file_created` entries
+
+**Validation Outcomes:**
+- ✅ **Pass**: Recent work properly documented, proceed with commit
+- ⚠️ **Warning**: Some work may be undocumented, suggest adding audit entries
+- ❌ **Block**: Critical work undocumented, require audit completion before commit
+
+### 2. Change Assessment
 ```
 COMMIT|step|change_assessment||Analyze current changes and git status
 ```
@@ -38,7 +61,7 @@ COMMIT|step|change_assessment||Analyze current changes and git status
 3. Check for untracked files that should be included
 4. Validate changes represent a logical commit unit
 
-### 2. Issue Detection
+### 3. Issue Detection
 ```
 COMMIT|step|issue_detection||Scan changes and context for resolved issues
 ```
@@ -49,7 +72,7 @@ COMMIT|step|issue_detection||Scan changes and context for resolved issues
 3. Analyze changed files against open GitHub issues
 4. Identify issues that this work resolves
 
-### 3. Commit Message Generation
+### 4. Commit Message Generation
 ```
 COMMIT|step|message_generation||Generate descriptive commit message
 ```
@@ -88,7 +111,7 @@ Session complete: [session summary]
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-### 4. Commit Execution
+### 5. Commit Execution
 ```
 COMMIT|step|commit_execution||Stage, commit, and push changes
 ```
@@ -105,7 +128,7 @@ git commit -m "Generated commit message"
 git push origin main
 ```
 
-### 5. Issue Closure
+### 6. Issue Closure
 ```
 COMMIT|step|issue_closure||Close resolved GitHub issues
 ```

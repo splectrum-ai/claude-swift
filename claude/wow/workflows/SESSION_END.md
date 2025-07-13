@@ -27,7 +27,6 @@
 
 **Common Compliance Checks:**
 - Repository State: All changes committed to main
-- Workflow Logging: All session activities properly documented
 - Todo Management: All created todos have appropriate status
 - Step-by-Step Pattern: Work followed single-step completion rules
 
@@ -44,21 +43,24 @@
 ### **3. Git Operations and Clean Handoff**
 **INTELLIGENT: COMMIT workflow integration for session closure:**
 
-1. **Rename current.log** → `session_TIMESTAMP.log`
-2. **Execute COMMIT workflow:**
+1. **Execute COMMIT workflow:**
+   - Validate audit log completeness for session work
    - Automatically assess all session changes
    - Detect and resolve any GitHub issues worked on during session
    - Generate intelligent commit message with session context
    - Stage, commit, and push all changes to main
    - Close resolved issues with commit references
+2. **Archive complete session log** → `session_TIMESTAMP.log`
 3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log`
 4. **Log SESSION_END completion** in fresh audit log
 
 **Benefits**: 
+- **Audit validation** - COMMIT workflow validates complete session audit before committing
+- **Complete session archive** - Archived log contains complete session including commit entries
 - **Intelligent issue management** - Issues resolved during session are automatically closed
 - **Quality commit messages** - AI-generated descriptions of session work
 - **Zero manual overhead** - Issue tracking happens automatically
-- **Complete session closure** - All work properly documented and issues updated
+- **Perfect consistency** - Archived session log = complete session record
 
 ## SESSION OUTCOME DOCUMENTATION
 
