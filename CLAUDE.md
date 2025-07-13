@@ -59,7 +59,7 @@ Use natural language with "sesame" suffix:
 **Audit Format and Procedures**: See `claude/wow/workflows/AUDIT_LOGGING.md` for complete audit logging requirements, format specifications, and error handling procedures.
 ## Critical Workflow Execution Rule
 
-**SESSION_START SPECIAL REQUIREMENT**: When SESSION_START workflow is recognized, Claude MUST check system time first to ensure accurate timestamps for all session activities.
+**SESSION_START SPECIAL REQUIREMENT**: When SESSION_START workflow is recognized, Claude MUST check system time first to ensure accurate timestamps for all session activities. If significant uncommitted work is detected, SESSION_START will automatically execute SESSION_END to preserve work before continuing.
 
 ## Critical Step-by-Step Execution Rule
 

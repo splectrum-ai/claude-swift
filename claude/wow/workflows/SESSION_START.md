@@ -43,24 +43,58 @@
 **MANDATORY Uncommitted Work Assessment:**
 1. **Check Git Status**: Run `git status` to identify any uncommitted changes
 2. **Evaluate Significance**: Determine if changes represent meaningful work
-3. **Apply Insignificant Changes Rule**: Changes are insignificant if current audit log contains no work entries for this session
-4. **Handle Appropriately**: Commit meaningful work or discard insignificant changes
+3. **Apply Significance Rules**: Check audit log and change patterns
+4. **Execute Appropriate Action**: SESSION_END for significant, approval for unclear, discard for insignificant
 
-**Insignificant Changes Criteria:**
-- No work-related audit log entries in current session
-- Only minor formatting, whitespace, or documentation updates
-- No functional code changes or feature additions
-- No bug fixes or configuration changes
+**Significance Detection Rules:**
 
-**Insignificant Changes Actions:**
-- May be discarded without commit
-- Should be handled via `git checkout .` or `git reset --hard`
-- No SESSION_END workflow required for insignificant changes
+**Automatically Significant (triggers SESSION_END):**
+- Audit log contains work entries for current session (beyond SESSION_START)
+- Code file changes (*.js, *.py, *.ts, *.go, etc.)
+- Workflow file modifications (*.md in workflows/)
+- Configuration file changes
+- New files created
+- Multiple files changed
 
-**Significant Changes Actions:**
-- MUST be committed following proper workflow
-- Requires SESSION_END workflow if switching contexts
-- Should follow branch management rules from CLAUDE.md
+**Requires User Approval:**
+- Documentation-only changes (single file)
+- README updates only
+- Minor formatting changes
+- Changes without corresponding audit log entries
+- When significance is unclear
+
+**Insignificant Changes (auto-discard):**
+- Current audit log shows only SESSION_START entry
+- Whitespace or formatting only
+- No functional changes detected
+- Temporary or test files
+
+**Uncommitted Work Actions:**
+
+1. **Significant Changes Detected**:
+   ```
+   Significant uncommitted work detected. Executing SESSION_END to preserve work...
+   ```
+   - Automatically execute SESSION_END workflow
+   - Complete proper commit and session closure  
+   - Resume SESSION_START after SESSION_END completes
+
+2. **Unclear Significance**:
+   ```
+   Uncommitted changes detected:
+   [Show git diff --stat output]
+   
+   Are these changes significant? (yes/no):
+   ```
+   - If yes: Execute SESSION_END workflow
+   - If no: Discard with `git checkout .`
+
+3. **Insignificant Changes**:
+   ```
+   Minor uncommitted changes detected. Discarding...
+   ```
+   - Discard without commit using `git checkout .`
+   - Continue with SESSION_START
 
 ## INCOMPLETE WORKFLOW DETECTION
 
