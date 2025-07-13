@@ -21,6 +21,9 @@ Use natural language with "sesame" suffix:
 - `close sesame` → Manual issue closure for occasional needs
 - `initialise sesame` → INITIALISE workflow (one-time workspace setup and multi-project configuration)
 - `register [org/repo] sesame` → PROJECT_REGISTER workflow (automated project registration with symlink creation and registry tracking)
+- `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues)
+- `outbox sesame` → OUTBOX workflow (cross-repository task distribution and routing)
+- `task [org/repo] sesame` → TASK_CREATE workflow (interactive task creation for cross-repository communication)
 
 **Project-specific triggers**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
 

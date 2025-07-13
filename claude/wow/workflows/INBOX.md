@@ -1,0 +1,341 @@
+# INBOX
+
+## Overview
+Task ingestion workflow that processes inbox tasks by converting them to GitHub issues. Separates task reception from task execution, feeding tasks into the existing issue prioritization system.
+
+## Trigger
+**User-Friendly**: `inbox sesame`
+**Technical**: `INBOX`
+
+## Purpose
+- Process inbox tasks in chronological order
+- Convert task files to GitHub issues using CREATE_ISSUE workflow
+- Enable cross-repository task coordination through issue system
+- Maintain clean separation between task ingestion and execution
+
+## Prerequisites
+- Repository with inbox/ directory (created by OUTBOX workflow deliveries)
+- GitHub CLI authenticated for issue creation
+- CREATE_ISSUE workflow available for task conversion
+
+## Scope
+**Universal**: Can be executed from any project (base or registered)
+
+## Workflow Steps
+
+### 1. Inbox Scanning
+```
+INBOX|step|task_discovery||Scan inbox directory for pending tasks
+```
+
+**Task Discovery:**
+```bash
+# Ensure inbox directory exists
+mkdir -p inbox
+
+# Find all task files in inbox (*.md files with timestamp format)
+INBOX_TASKS=$(find inbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
+
+if [ -z "$INBOX_TASKS" ]; then
+    echo "No pending tasks in inbox"
+    echo "Inbox directory: $(pwd)/inbox"
+    exit 0
+fi
+
+TASK_COUNT=$(echo "$INBOX_TASKS" | wc -l)
+echo "Found $TASK_COUNT pending tasks in inbox"
+echo "Processing in chronological order..."
+```
+
+### 2. Task Processing Loop
+```
+INBOX|step|task_processing||Process each task file in timestamp order
+```
+
+**Sequential Processing:**
+```bash
+PROCESSED_COUNT=0
+FAILED_COUNT=0
+
+for TASK_FILE in $INBOX_TASKS; do
+    TASK_NAME=$(basename "$TASK_FILE")
+    echo ""
+    echo "Processing: $TASK_NAME"
+    
+    # Validate task file format
+    if ! [[ "$TASK_NAME" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3}Z_.*\.md$ ]]; then
+        echo "✗ Invalid task filename format: $TASK_NAME"
+        echo "  Expected: YYYY-MM-DDTHH-MM-SS-sssZ_source_task-name.md"
+        ((FAILED_COUNT++))
+        continue
+    fi
+    
+    # Parse task metadata from filename
+    TIMESTAMP=$(echo "$TASK_NAME" | cut -d'_' -f1)
+    SOURCE_INFO=$(echo "$TASK_NAME" | sed 's/^[^_]*_\([^_]*\)_.*$/\1/')
+    TASK_SUMMARY=$(echo "$TASK_NAME" | sed 's/^[^_]*_[^_]*_\(.*\)\.md$/\1/' | tr '-' ' ')
+    
+    echo "  Timestamp: $TIMESTAMP"
+    echo "  Source: $SOURCE_INFO"
+    echo "  Summary: $TASK_SUMMARY"
+    
+    # Extract task content and metadata
+    if ! TASK_CONTENT=$(cat "$TASK_FILE" 2>/dev/null); then
+        echo "✗ Failed to read task file: $TASK_FILE"
+        ((FAILED_COUNT++))
+        continue
+    fi
+    
+    # Create GitHub issue from task content
+    if create_issue_from_task "$TASK_FILE" "$TASK_CONTENT" "$SOURCE_INFO" "$TIMESTAMP"; then
+        echo "✓ Converted to GitHub issue successfully"
+        
+        # Delete processed task file
+        if rm "$TASK_FILE"; then
+            echo "✓ Task file removed from inbox"
+            ((PROCESSED_COUNT++))
+        else
+            echo "✗ Warning: Failed to remove task file"
+            ((PROCESSED_COUNT++))  # Still count as processed since issue was created
+        fi
+    else
+        echo "✗ Failed to create GitHub issue"
+        ((FAILED_COUNT++))
+    fi
+done
+```
+
+### 3. Issue Creation Integration
+```
+INBOX|step|issue_conversion||Convert task content to GitHub issue
+```
+
+**Task-to-Issue Conversion:**
+```bash
+create_issue_from_task() {
+    local task_file="$1"
+    local task_content="$2"
+    local source_info="$3"
+    local timestamp="$4"
+    
+    # Extract title from task content (first # heading or use filename)
+    local issue_title
+    issue_title=$(echo "$task_content" | grep -m 1 '^# ' | sed 's/^# //' || echo "Cross-repository task: $TASK_SUMMARY")
+    
+    # Build issue body with task metadata and original content
+    local issue_body
+    issue_body="## Cross-Repository Task
+
+**Source**: $source_info  
+**Received**: $timestamp  
+**Original Task File**: \`$TASK_NAME\`
+
+---
+
+$task_content
+
+---
+
+*This issue was automatically created from an inbox task by the INBOX workflow.*"
+    
+    # Create temporary file for issue content
+    local temp_file=$(mktemp)
+    echo "$issue_body" > "$temp_file"
+    
+    # Use gh CLI to create issue
+    if gh issue create --title "$issue_title" --body-file "$temp_file" --label "cross-repository,inbox-task"; then
+        rm "$temp_file"
+        return 0
+    else
+        rm "$temp_file"
+        return 1
+    fi
+}
+```
+
+### 4. Processing Summary
+```
+INBOX|step|completion_summary||Provide inbox processing completion summary
+```
+
+**Completion Report:**
+```bash
+echo ""
+echo "=== INBOX PROCESSING COMPLETE ==="
+echo "Tasks processed: $PROCESSED_COUNT"
+echo "Tasks failed: $FAILED_COUNT"
+echo "Total tasks: $TASK_COUNT"
+
+if [ $PROCESSED_COUNT -gt 0 ]; then
+    echo ""
+    echo "✓ Successfully converted $PROCESSED_COUNT tasks to GitHub issues"
+    echo "✓ Task files removed from inbox"
+    echo ""
+    echo "Next steps:"
+    echo "- Use 'next sesame' to see recommended issues for execution"
+    echo "- Check GitHub issues for task details and prioritization"
+fi
+
+if [ $FAILED_COUNT -gt 0 ]; then
+    echo ""
+    echo "⚠ Warning: $FAILED_COUNT tasks failed to process"
+    echo "Failed tasks remain in inbox for manual review"
+    echo "Check task file format and GitHub authentication"
+fi
+
+echo ""
+echo "Inbox status: $(find inbox -name "*.md" 2>/dev/null | wc -l) tasks remaining"
+```
+
+## Task File Processing
+
+**Expected Task File Format**:
+```markdown
+---
+source: jules-tenbos/splectrum
+target: sesameh/claude-swift
+created: 2025-07-14T15:30:45.123Z
+priority: normal
+type: workflow-update
+---
+
+# Task: Update to Latest Workflows
+
+## Description
+Update target repository to use latest v2 workflow patterns.
+
+## Requirements
+- [ ] Update SESSION_START workflow
+- [ ] Add MANDATORY_RULES_REFRESH workflow
+- [ ] Test all sesame triggers
+
+## Context
+Following claude-swift v1.1.0 release, workflow synchronization needed.
+```
+
+**Resulting GitHub Issue**:
+- **Title**: "Task: Update to Latest Workflows"
+- **Labels**: "cross-repository", "inbox-task"
+- **Body**: Includes source metadata + original task content
+- **Integration**: Enters normal NEXT_ISSUE prioritization flow
+
+## Error Handling
+
+### No Tasks Found
+```bash
+if [ -z "$INBOX_TASKS" ]; then
+    echo "No pending tasks in inbox"
+    echo "Tasks are delivered here by the OUTBOX workflow"
+    exit 0
+fi
+```
+
+### Invalid Task Format
+```bash
+if ! [[ "$TASK_NAME" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3}Z_.*\.md$ ]]; then
+    echo "Invalid task filename format: $TASK_NAME"
+    echo "Expected: YYYY-MM-DDTHH-MM-SS-sssZ_source_task-name.md"
+    # Task remains in inbox for manual review
+fi
+```
+
+### GitHub Issue Creation Failure
+```bash
+if ! gh issue create --title "$issue_title" --body-file "$temp_file"; then
+    echo "Failed to create GitHub issue for task: $TASK_NAME"
+    echo "Check GitHub CLI authentication and repository permissions"
+    # Task remains in inbox for retry
+fi
+```
+
+### File System Errors
+```bash
+if ! rm "$TASK_FILE"; then
+    echo "Warning: Task processed but file removal failed"
+    echo "Manual cleanup may be required: $TASK_FILE"
+    # Issue was created successfully, this is a minor cleanup issue
+fi
+```
+
+## Success Criteria
+- All valid inbox tasks converted to GitHub issues
+- Task files removed after successful processing
+- Issues created with appropriate labels and metadata
+- Failed tasks remain in inbox with clear error messages
+- Complete audit trail of processing operations
+
+## Integration Points
+- **OUTBOX**: Source workflow that delivers tasks to inbox
+- **CREATE_ISSUE**: Underlying workflow for GitHub issue creation
+- **NEXT_ISSUE**: Downstream workflow for issue prioritization
+- **AUDIT_LOGGING**: Log all inbox processing operations
+
+## Usage Examples
+
+### Process all inbox tasks
+```bash
+# Run from any project directory
+inbox sesame
+# Result: All inbox tasks converted to GitHub issues
+```
+
+### Empty inbox scenario
+```bash
+inbox sesame
+# Result: "No pending tasks in inbox" - normal state
+```
+
+### Error recovery
+```bash
+# After fixing GitHub authentication issues
+inbox sesame
+# Result: Retry processing of failed tasks
+```
+
+## Workflow Benefits
+
+### Separation of Concerns
+- **Task Reception**: OUTBOX handles delivery
+- **Task Ingestion**: INBOX converts to issues  
+- **Task Execution**: NEXT_ISSUE prioritizes work
+
+### GitHub Integration
+- **Issue Tracking**: Full GitHub issue lifecycle
+- **Prioritization**: Uses existing NEXT_ISSUE scoring
+- **Collaboration**: Standard GitHub issue workflows
+
+### Error Resilience
+- **Failed Processing**: Tasks remain for retry
+- **Partial Success**: Successful conversions proceed
+- **Audit Trail**: Complete processing history
+
+## Directory Structure
+
+**Before INBOX**:
+```
+project/inbox/
+├── 2025-07-14T15-30-45-123Z_splectrum_update-workflows.md
+├── 2025-07-14T15-31-02-456Z_claude-swift_migrate-to-v2.md
+└── 2025-07-14T15-31-15-789Z_spl1_workflow-refresh.md
+```
+
+**After INBOX**:
+```
+project/inbox/                       # Empty (all processed)
+GitHub Issues:                       # New issues created
+- "Task: Update to Latest Workflows"
+- "Task: Migrate to v2"  
+- "Task: Workflow Refresh"
+```
+
+## Trigger Pattern
+
+```markdown
+**INBOX** → See [workflows/INBOX.md](./workflows/INBOX.md)
+```
+
+Use when:
+- Processing received cross-repository tasks
+- Converting inbox tasks to actionable GitHub issues
+- Integrating external tasks into project workflow
+- Maintaining clean inbox state

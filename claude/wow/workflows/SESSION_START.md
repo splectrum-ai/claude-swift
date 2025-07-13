@@ -14,8 +14,10 @@
 
 **SESSION INITIALIZATION:**
 1. **PREVIOUS SESSION RECOVERY**: Complete any incomplete SESSION_END workflows detected
-2. **PRESENT TODO LIST**: Show complete repository todo list and ask for user selection
-3. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
+2. **INBOX PROCESSING**: Check and process any received cross-repository tasks
+3. **OUTBOX DISTRIBUTION**: For base repositories, optionally distribute pending outbox tasks
+4. **PRESENT TODO LIST**: Show complete repository todo list and ask for user selection
+5. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
 
 ## SYSTEM CHECK PROCEDURE
 
@@ -30,6 +32,61 @@
 - Workflow Logging: Proper audit log format and accountability
 - File Path Specification: All references must specify exact paths
 - Step-by-Step Execution: Single-step completion with choice points
+
+## INBOX/OUTBOX INTEGRATION
+
+### **Inbox Processing**
+At session start, check for incoming cross-repository tasks:
+```
+SESSION_START|step|inbox_check||Check for received cross-repository tasks
+```
+
+**Inbox Check Procedure:**
+1. **Scan Inbox Directory**: Check `inbox/` for any pending task files
+2. **Task Count Assessment**: If tasks found, show count and brief summary
+3. **Processing Recommendation**: Suggest running `inbox sesame` if tasks present
+4. **Optional Processing**: Allow user to process immediately or defer
+
+**Example Output:**
+```
+✓ Found 3 pending tasks in inbox:
+  - 2025-07-14T10-30-00Z_claude-swift_update-workflows.md (from splectrum)
+  - 2025-07-14T10-31-00Z_claude-swift_bug-fix.md (from spl1)
+  - 2025-07-14T10-32-00Z_claude-swift_documentation.md (from InfoMetis)
+
+Recommendation: Run 'inbox sesame' to convert tasks to GitHub issues
+Process now? (y/n): _
+```
+
+### **Outbox Distribution** 
+For base repositories (with `projects/` directory), check for pending distribution:
+```
+SESSION_START|step|outbox_check||Check for pending task distribution
+```
+
+**Outbox Check Procedure:**
+1. **Base Repository Detection**: Check if current repo has `projects/` directory
+2. **Registry Validation**: Verify project registry exists and is populated
+3. **Outbox Scanning**: Check registered projects for pending outbox tasks
+4. **Distribution Summary**: Show task count and target repositories
+5. **Optional Distribution**: Allow user to distribute immediately or defer
+
+**Example Output:**
+```
+✓ Base repository detected with 2 registered projects
+✓ Found 4 pending tasks for distribution:
+  - projects/jules-tenbos/splectrum/outbox: 2 tasks
+  - projects/sesameh/spl1/outbox: 2 tasks
+
+Recommendation: Run 'outbox sesame' to distribute tasks to target repositories
+Distribute now? (y/n): _
+```
+
+**Skip Conditions:**
+- **Not Base Repository**: Skip outbox check if no `projects/` directory
+- **No Registry**: Skip if project registry doesn't exist
+- **No Registered Projects**: Skip if registry is empty
+- **No Pending Tasks**: Skip if no outbox tasks found
 
 ## SESSION RECOVERY
 
@@ -146,6 +203,17 @@ Previous SESSION_END completed git operations but was interrupted before creatin
 - Implements the MANDATORY 13-step sequence to prevent sync issues
 - Includes branch synchronization that eliminates drift problems
 - Maintains separation of concerns: session management vs detailed git implementation
+
+### **Connection to INBOX/OUTBOX Workflows**
+- **INBOX Integration**: Automatically checks for received cross-repository tasks at session start
+- **OUTBOX Integration**: For base repositories, scans for pending task distribution
+- **Task Processing**: Offers immediate processing or defers to manual execution
+- **Issue Creation**: INBOX processing feeds into GitHub issue system for prioritization
+
+### **Connection to PROJECT_REGISTER**
+- Uses project registry to discover registered projects for outbox scanning
+- Validates workspace configuration before attempting task distribution
+- Enables multi-project coordination through session initialization
 
 ### **Connection to GITHUB_WORKFLOW**
 - Verify any issues assigned for session work are properly configured
