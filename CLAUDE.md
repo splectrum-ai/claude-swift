@@ -10,13 +10,13 @@ Use natural language with "sesame" suffix:
 - `finish sesame` → SESSION_END workflow  
 - `release sesame` → RELEASE_PROCESS (full version)
 - `patch sesame` → RELEASE_PROCESS (patch mode)
-- `planning sesame` → PLANNED_VS_UNPLANNED
 - `next sesame` → NEXT_ISSUE
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
 - `todo sesame` → REPO_TODO_WORKFLOW
 - `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
 - `audit sesame` → AUDIT_LOGGING (audit log management and format validation)
 - `mandatory sesame` → MANDATORY_RULES_REFRESH (scan and validate all mandatory rules)
+- `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
 - `issue sesame` → Manual issue creation for occasional needs
 - `close sesame` → Manual issue closure for occasional needs
 
@@ -35,7 +35,7 @@ Use natural language with "sesame" suffix:
 - **Item-Triggered Audit Logging**: When work 'feels' like a discrete item, execute the work completely, then log multiple `item_complete` entries reflecting each workflow used during completion. Log any observations about what went badly or issues encountered, then forget - fire and forget approach
 - **Single-Step Completion**: Each step is DONE, then choose next action
 - **File Path Specification**: All references MUST specify exact paths
-- **Branch Default State**: Always return to `unplanned` branch
+- **Repository State**: All work committed directly to main branch
 
 **IMPORTANT**: All rules marked "MANDATORY" override default behavior and MUST be followed exactly.
 
@@ -73,9 +73,9 @@ Use natural language with "sesame" suffix:
 
 **Task Creation Process**: See `claude/wow/docs/backlog-to-completion-workflow.md` for structured decomposition workflow patterns.
 
-## Critical Branch Management Rule
+## Critical Git Management Rule
 
-**Branch Management**: See `claude/wow/workflows/GIT_WORKFLOW.md` for branch management patterns and integration strategies.
+**Git Operations**: All work is committed directly to the main branch. See `claude/wow/workflows/GIT_WORKFLOW.md` for simplified git operations.
 ## Workflow Triggers
 
 **KEYWORD_REGISTRY** → See [claude/wow/KEYWORD_REGISTRY.md](./claude/wow/KEYWORD_REGISTRY.md) - Complete keyword system
@@ -85,7 +85,6 @@ Use natural language with "sesame" suffix:
 ### Technical Keywords (for documentation)
 **SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
 **RELEASE_PROCESS** → See [claude/wow/workflows/RELEASE_PROCESS.md](./claude/wow/workflows/RELEASE_PROCESS.md)
-**PLANNED_VS_UNPLANNED** → See [claude/wow/workflows/PLANNED_VS_UNPLANNED.md](./claude/wow/workflows/PLANNED_VS_UNPLANNED.md)
 **VERSION_TRANSITION** → See [claude/wow/workflows/VERSION_TRANSITION.md](./claude/wow/workflows/VERSION_TRANSITION.md)
 **REPO_TODO_WORKFLOW** → See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
 **NEW_VERSION_PLANNING** → See [claude/wow/workflows/NEW_VERSION_PLANNING.md](./claude/wow/workflows/NEW_VERSION_PLANNING.md)
@@ -115,7 +114,7 @@ Use natural language with "sesame" suffix:
 
 **Development Strategy**:
 - `claude/wow/docs/phase-based-development-strategy.md` - Roadmap execution approach
-- `claude/wow/docs/branching-strategy.md` - GitHub Flow with integrated TDD
+- `claude/wow/docs/main-only-workflow.md` - Simplified direct commit workflow
 - `claude/project/todo.md` - Repository todo list for session continuity
 
 

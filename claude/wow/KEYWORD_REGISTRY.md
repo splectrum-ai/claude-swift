@@ -11,7 +11,6 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **GIT_WORKFLOW** | `GIT_WORKFLOW.md` | Branching, commits, releases | Git operations, version releases | `git sesame` |
 | **OPERATIONAL_RULES** | `OPERATIONAL_RULES.md` | Development rules framework | Development decisions, coding standards | `rules sesame` |
 | **RELEASE_PROCESS** | `RELEASE_PROCESS.md` | Complete release workflow with log archiving | Creating platform releases, version closure | `release sesame`, `patch sesame` |
-| **PLANNED_VS_UNPLANNED** | `PLANNED_VS_UNPLANNED.md` | Work classification strategy | Deciding whether to create issues | `planning sesame` |
 | **NEXT_ISSUE** | `NEXT_ISSUE.md` | Automated next issue selection workflow | Determining which GitHub issue to work on next | `next sesame` |
 | **VERSION_TRANSITION** | `VERSION_TRANSITION.md` | Mandatory post-release knowledge processing and next version preparation | After RELEASE_PROCESS completion | `transition sesame` |
 | **REPO_TODO_WORKFLOW** | `REPO_TODO_WORKFLOW.md` | Repository todo list management and cross-session continuity | Todo operations, status updates, completion tracking | `todo sesame` |
@@ -19,6 +18,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **DOCUMENTATION_WORKFLOW** | `DOCUMENTATION_WORKFLOW.md` | Documentation standards and compliance management | Documentation creation, maintenance, compliance | `docs sesame` |
 | **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | `audit sesame` |
 | **MANDATORY_RULES_REFRESH** | `MANDATORY_RULES_REFRESH.md` | Systematic scanning and validation of all mandatory rules | Rule compliance, violation detection, corrective actions | `mandatory sesame` |
+| **COMMIT** | `COMMIT.md` | Intelligent commit workflow with automatic issue closure | Change staging, commit message generation, issue management | `commit sesame` |
 
 ## Built-in Claude Code Keywords
 
@@ -64,7 +64,6 @@ git sesame       → GIT_WORKFLOW
 rules sesame     → OPERATIONAL_RULES
 release sesame   → RELEASE_PROCESS (full version)
 patch sesame     → RELEASE_PROCESS (patch mode)
-planning sesame  → PLANNED_VS_UNPLANNED
 next sesame      → NEXT_ISSUE
 todo sesame      → REPO_TODO_WORKFLOW
 audit sesame     → AUDIT_LOGGING

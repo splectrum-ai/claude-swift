@@ -53,8 +53,8 @@
 - **Document learnings REQUIRED** - At session end, capture "What have I learned?" in appropriate docs/ files
 
 ### Version Control and Project Management
-- **Default Branch State**: Repository MUST default to `unplanned` branch at all times
-- **Branch Transition Protocol**: Complete work cycle before leaving ANY branch (commit → push → PR → merge → switch)
+- **Main Branch Only**: All work committed directly to main branch
+- **Commit Protocol**: Complete work with clear commits (stage → commit → push)
 - **Stage all files before commit** - Work packages are atomic, use `git add .`
 - **Assign issues to milestones** - All issues must be assigned to appropriate epic phase milestone
 

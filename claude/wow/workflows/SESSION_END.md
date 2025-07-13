@@ -15,7 +15,7 @@
 **SESSION TERMINATION:**
 1. **COMPLETE OUTSTANDING TODOS**: Follow REPO_TODO_WORKFLOW for todo completion and transient todo transfer - See [REPO_TODO_WORKFLOW.md](./REPO_TODO_WORKFLOW.md)
 2. **CAPTURE SESSION LEARNINGS**: Document insights in appropriate files
-3. **MANDATORY: EXECUTE GIT_WORKFLOW**: MUST handle all git operations with proper branching policy - commit all changes, create PR, merge to main
+3. **MANDATORY: COMMIT ALL WORK**: MUST commit all changes directly to main branch
 
 ## SYSTEM CHECK PROCEDURE
 
@@ -26,7 +26,7 @@
 - Execute required workflows to resolve any violations
 
 **Common Compliance Checks:**
-- Branch Policy: Repository in clean state for handoff
+- Repository State: All changes committed to main
 - Workflow Logging: All session activities properly documented
 - Todo Management: All created todos have appropriate status
 - Step-by-Step Pattern: Work followed single-step completion rules
@@ -42,24 +42,23 @@
 - Document session learnings in appropriate docs/ files
 
 ### **3. Git Operations and Clean Handoff**
-**UPDATED: Optimal audit log workflow to prevent merge conflicts:**
+**INTELLIGENT: COMMIT workflow integration for session closure:**
 
-1. **Rename current.log** → `session_TIMESTAMP.log` (don't create fresh yet)
-2. **Complete git workflow with renamed log:**
-   - Stage all changes: `git add .` (includes properly named archive)
-   - Commit with comprehensive session summary
-   - Push to remote: `git push origin unplanned`
-   - Create PR: `gh pr create` with detailed description
-   - Merge PR: `gh pr merge --squash`
-   - Switch to main and sync: `git checkout main && git pull origin main`
-   - Switch back to unplanned: `git checkout unplanned && git merge main`
-   - Push updated unplanned: `git push origin unplanned`
-3. **Create fresh current.log** with clean marker as final step: `echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log`
-4. **Log SESSION_END completion** in fresh audit log per audit governance
+1. **Rename current.log** → `session_TIMESTAMP.log`
+2. **Execute COMMIT workflow:**
+   - Automatically assess all session changes
+   - Detect and resolve any GitHub issues worked on during session
+   - Generate intelligent commit message with session context
+   - Stage, commit, and push all changes to main
+   - Close resolved issues with commit references
+3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log`
+4. **Log SESSION_END completion** in fresh audit log
 
-**Note**: This implements the complete OPERATIONAL_RULES "Branch Transition Protocol" ensuring clean session handoff with all changes integrated to main and branches synchronized.
-
-**Why this sequence prevents merge conflicts**: By renaming (not rotating) the audit log before git operations and creating the fresh log only after all git work completes, we avoid divergent audit log states between branches that cause merge conflicts.
+**Benefits**: 
+- **Intelligent issue management** - Issues resolved during session are automatically closed
+- **Quality commit messages** - AI-generated descriptions of session work
+- **Zero manual overhead** - Issue tracking happens automatically
+- **Complete session closure** - All work properly documented and issues updated
 
 ## SESSION OUTCOME DOCUMENTATION
 
@@ -105,21 +104,21 @@ Previous session had incomplete SESSION_END workflow. Completing missing steps:
 - Time tracking bookends enable session duration analysis
 - Learning capture builds on work accomplished since session start
 
-### **Connection to PLANNED_VS_UNPLANNED**
-- Review session work classification accuracy
-- Document effectiveness of planning decisions
-- Note any unplanned work that should have been planned
+### **Connection to Work Planning**
+- Review session accomplishments
+- Document effectiveness of work prioritization
+- Note any insights for future sessions
 
-### **Connection to GIT_WORKFLOW**
-- SESSION_END uses GIT_WORKFLOW patterns for git operations
-- Implements the MANDATORY 13-step sequence to prevent sync issues
-- Includes post-PR synchronization that eliminates branch drift problems
-- Maintains separation of concerns: session management vs detailed git implementation
+### **Connection to Git Operations**
+- SESSION_END commits all work directly to main
+- Simple 4-step process ensures clean handoff
+- No branch management or synchronization needed
+- Focus on preserving work and session continuity
 
 ### **Connection to GITHUB_WORKFLOW**
 - Ensure any issues created during session are properly configured
 - Check that issues have appropriate labels, milestones, and epic assignments
-- Verify any PRs created have proper context and documentation
+- Verify commit messages provide clear context for changes
 
 ## SUCCESS METRICS
 

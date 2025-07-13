@@ -45,9 +45,8 @@ git commit -m "Archive v{VERSION} audit logs and prepare for release
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# Create and merge PR
-gh pr create --title "Archive v{VERSION} logs and prepare for release"
-gh pr merge --squash
+# Commit and push directly to main
+git push origin main
 ```
 
 ### 4. Release Artifact Creation
@@ -92,7 +91,7 @@ gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file au
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | workflow_start: release sesame trigger
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: archive logs with version stamps
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: reset logs for next version
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: commit and merge archiving changes
+##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: commit archiving changes to main
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: create release artifacts and test installation
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: create version tag and GitHub release
 ##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | workflow_complete: v{VERSION} release created successfully
