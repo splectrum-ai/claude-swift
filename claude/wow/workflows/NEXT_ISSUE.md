@@ -60,27 +60,35 @@ Where Readiness = 1 if no blockers, 0.5 if partial, 0 if blocked
 - Large effort without clear dependencies
 - Background improvements or optimizations
 
-### 5. Decision Documentation
+### 5. Recommendation List Generation
 
-When selecting an issue, document:
-- **Issue Number**: `#XX`
-- **Epic**: Which epic it belongs to
-- **Rationale**: Why this issue was selected
-- **Context**: Current focus and decision factors
+Present top-ranked issues (up to 6) with compact format:
+- **Line 1**: Issue #XX: Title | Score: X.X | Priority/Effort
+- **Line 2**: Epic context | Rationale and readiness details
+- **Spacing**: One empty line between issues
+
+### 6. Selection Decision
+
+Document final choice:
+- **Selected Issue**: Chosen from recommendation list
+- **Selection Rationale**: Why this specific issue was chosen
+- **Alternative Options**: Other viable choices from the list
 
 ## Decision Framework
 
 ### Quick Selection (< 2 minutes)
 1. Run `gh issue list` command
-2. Find first HIGH priority issue with no blockers
-3. Start work immediately
+2. Generate top 3 recommendations with scores
+3. Select highest scoring available issue
+4. Start work immediately
 
 ### Thoughtful Selection (5-10 minutes)
 1. Run `gh issue list` command
 2. Parse metadata from top 10 issues
 3. Calculate scores using metadata formula
-4. Select highest scoring available issue
-5. Document selection rationale
+4. Present top 6 recommendations with rationale
+5. Select from recommendation list
+6. Document selection rationale
 
 ### Strategic Planning (15+ minutes)
 1. Review all current milestone items

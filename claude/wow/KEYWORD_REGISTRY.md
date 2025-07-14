@@ -13,7 +13,6 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **RELEASE_PROCESS** | `RELEASE_PROCESS.md` | Complete release workflow with log archiving | Creating platform releases, version closure | `release sesame`, `patch sesame` |
 | **NEXT_ISSUE** | `NEXT_ISSUE.md` | Automated next issue selection workflow | Determining which GitHub issue to work on next | `next sesame` |
 | **VERSION_TRANSITION** | `VERSION_TRANSITION.md` | Mandatory post-release knowledge processing and next version preparation | After RELEASE_PROCESS completion | `transition sesame` |
-| **REPO_TODO_WORKFLOW** | `REPO_TODO_WORKFLOW.md` | Repository todo list management and cross-session continuity | Todo operations, status updates, completion tracking | `todo sesame` |
 | **NEW_VERSION_PLANNING** | `NEW_VERSION_PLANNING.md` | Next version planning and roadmap development | Version planning, feature prioritization | `version sesame` |
 | **DOCUMENTATION_WORKFLOW** | `DOCUMENTATION_WORKFLOW.md` | Documentation standards and compliance management | Documentation creation, maintenance, compliance | `docs sesame` |
 | **AUDIT_LOGGING** | `AUDIT_LOGGING.md` | Audit log management rules and procedures | Workflow logging, marker management | `audit sesame` |
@@ -24,7 +23,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **PROJECT_REGISTER** | `PROJECT_REGISTER.md` | Automated project registration with symlink creation and registry tracking | Project setup for claude-swift framework, symlink management, registry updates | `register [org/repo] sesame` |
 | **INBOX** | `INBOX.md` | Task ingestion workflow converting inbox tasks to GitHub issues | Cross-repository task processing, task-to-issue conversion, inbox management | `inbox sesame` |
 | **OUTBOX** | `OUTBOX.md` | Cross-repository task distribution and routing workflow | Task collection from registered projects, central distribution to target inboxes | `outbox sesame` |
-| **TASK_CREATE** | `TASK_CREATE.md` | Interactive task creation workflow for cross-repository communication | Guided task creation, metadata collection, standardized formatting | `task [org/repo] sesame` |
+| **TASK_CREATE** | `TASK_CREATE.md` | Interactive task creation workflow for cross-repository communication | Guided task creation, metadata collection, standardized formatting | `task [org/repo] sesame`, `task . sesame` |
 
 ## Built-in Claude Code Keywords
 
@@ -71,7 +70,6 @@ rules sesame     → OPERATIONAL_RULES
 release sesame   → RELEASE_PROCESS (full version)
 patch sesame     → RELEASE_PROCESS (patch mode)
 next sesame      → NEXT_ISSUE
-todo sesame      → REPO_TODO_WORKFLOW
 audit sesame     → AUDIT_LOGGING
 mandatory sesame → MANDATORY_RULES_REFRESH
 issue sesame     → CREATE_ISSUE

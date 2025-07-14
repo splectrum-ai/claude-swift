@@ -157,9 +157,9 @@ INITIALISE|step|validation||Verify complete workspace setup
 ✓ Repository structure validated
 
 Next steps:
-- Use 'switch [org/repo] sesame' to switch to existing projects
+- Use 'register [org/repo] sesame' to register projects
 - Projects accessible through: ./projects/[org]/[repo]
-- Use 'switch . sesame' to return to claude-swift base
+- Create tasks with 'task [repo] sesame'
 
 Workspace ready for claude-swift multi-project operations!
 
@@ -189,10 +189,10 @@ If initialization fails:
 
 ## Integration Points
 
-### PROJECT_SWITCH Workflow
-- PROJECT_SWITCH validates workspace is initialized before operation
+### PROJECT_REGISTER Workflow
+- PROJECT_REGISTER validates workspace is initialized before operation
 - If workspace not initialized, suggests running `initialise sesame`
-- PROJECT_SWITCH uses symlinked `projects/` directory for repository management
+- PROJECT_REGISTER uses symlinked `projects/` directory for repository management
 
 ### Audit Logging
 All initialization steps logged for troubleshooting and verification.
@@ -215,8 +215,8 @@ Optional: Check workspace initialization status during session start.
 - [ ] Error handling for common failure scenarios
 - [ ] Complete audit trail of initialization process
 
-## Template Integration
-This workflow is part of the claude-swift WoW template and will be available in all deployed claude-swift instances for workspace initialization.
+## Orchestrator Integration
+This workflow is part of the claude-swift orchestrator and enables workspace initialization for multi-project coordination.
 
 ## Trigger Pattern
 

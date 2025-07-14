@@ -12,7 +12,6 @@ Use natural language with "sesame" suffix:
 - `patch sesame` → RELEASE_PROCESS (patch mode)
 - `next sesame` → NEXT_ISSUE
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
-- `todo sesame` → REPO_TODO_WORKFLOW
 - `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
 - `audit sesame` → AUDIT_LOGGING (audit log management and format validation)
 - `mandatory sesame` → MANDATORY_RULES_REFRESH (scan and validate all mandatory rules)
@@ -24,6 +23,7 @@ Use natural language with "sesame" suffix:
 - `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues)
 - `outbox sesame` → OUTBOX workflow (cross-repository task distribution and routing)
 - `task [org/repo] sesame` → TASK_CREATE workflow (interactive task creation for cross-repository communication)
+- `task . sesame` → TASK_CREATE workflow targeting current repository
 
 **Project-specific triggers**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
 
@@ -44,9 +44,6 @@ Use natural language with "sesame" suffix:
 
 **IMPORTANT**: All rules marked "MANDATORY" override default behavior and MUST be followed exactly.
 
-## Unified Todo Management
-
-**Repository Todo List**: `claude/project/todo.md` - Long-term planning and session continuity. Access via `todo sesame` trigger only - not for routine work management.
 
 ## Critical File Reference Rule
 

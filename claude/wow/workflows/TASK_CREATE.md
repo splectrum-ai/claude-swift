@@ -4,7 +4,7 @@
 Interactive task creation workflow that guides users through creating cross-repository tasks with proper metadata and formatting. Tasks are saved to the local outbox folder for distribution via the OUTBOX workflow.
 
 ## Trigger
-**User-Friendly**: `task sesame` or `task [org/repo] sesame`
+**User-Friendly**: `task sesame`, `task [org/repo] sesame`, or `task . sesame`
 **Technical**: `TASK_CREATE`
 
 ## Purpose
@@ -35,26 +35,49 @@ echo ""
 
 # Check if target repository provided as parameter
 if [ -n "$1" ]; then
-    TARGET_INPUT="$1"
-    echo "Target Repository: $TARGET_INPUT (from parameter)"
+    if [ "$1" = "." ]; then
+        # Use current repository as target
+        CURRENT_REPO_NAME=$(basename "$(pwd)")
+        TARGET_INPUT="$CURRENT_REPO_NAME"
+        TARGET_REPO="$CURRENT_REPO_NAME"
+        echo "Target Repository: $TARGET_INPUT (current repository)"
+    else
+        TARGET_INPUT="$1"
+        echo "Target Repository: $TARGET_INPUT (from parameter)"
+        
+        # Clean target repository name (extract repo name if org/repo provided)
+        if [[ "$TARGET_INPUT" == *"/"* ]]; then
+            TARGET_REPO=$(echo "$TARGET_INPUT" | cut -d'/' -f2)
+        else
+            TARGET_REPO="$TARGET_INPUT"
+        fi
+    fi
 else
     # Prompt for target repository
     echo "Target Repository:"
-    echo "Enter the repository that should receive this task (format: org/repo or just repo-name):"
+    echo "Enter the repository that should receive this task (format: org/repo, repo-name, or '.' for current):"
     read -p "Target: " TARGET_INPUT
-fi
-
-# Validate target input
-if [ -z "$TARGET_INPUT" ]; then
-    echo "Error: Target repository cannot be empty"
-    exit 1
-fi
-
-# Clean target repository name (extract repo name if org/repo provided)
-if [[ "$TARGET_INPUT" == *"/"* ]]; then
-    TARGET_REPO=$(echo "$TARGET_INPUT" | cut -d'/' -f2)
-else
-    TARGET_REPO="$TARGET_INPUT"
+    
+    # Validate target input
+    if [ -z "$TARGET_INPUT" ]; then
+        echo "Error: Target repository cannot be empty"
+        exit 1
+    fi
+    
+    # Handle dot notation for current repository
+    if [ "$TARGET_INPUT" = "." ]; then
+        CURRENT_REPO_NAME=$(basename "$(pwd)")
+        TARGET_INPUT="$CURRENT_REPO_NAME"
+        TARGET_REPO="$CURRENT_REPO_NAME"
+        echo "Using current repository: $TARGET_REPO"
+    else
+        # Clean target repository name (extract repo name if org/repo provided)
+        if [[ "$TARGET_INPUT" == *"/"* ]]; then
+            TARGET_REPO=$(echo "$TARGET_INPUT" | cut -d'/' -f2)
+        else
+            TARGET_REPO="$TARGET_INPUT"
+        fi
+    fi
 fi
 
 echo ""

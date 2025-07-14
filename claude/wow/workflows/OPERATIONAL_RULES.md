@@ -39,6 +39,40 @@
 
 **Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking, and ensures collaborative decision-making at every step.
 
+### Propose Before Execute Pattern
+
+**MANDATORY EXECUTION PATTERN**: All significant changes MUST follow the Propose → Review/Gate → Execute pattern.
+
+#### 1. Proposal Requirements
+- Present complete action plan before any execution
+- Include rationale for proposed changes
+- List specific steps to be taken
+- Identify potential impacts or risks
+- Enable quality gating for automation readiness
+
+#### 2. Execution Gates
+- **Structural Changes**: File/folder operations, workflow modifications
+- **Multi-Step Operations**: Any operation involving 3+ steps
+- **Irreversible Actions**: Deletions, major refactoring, API changes
+- **Cross-System Impact**: Changes affecting multiple workflows or projects
+
+#### 3. Pattern Examples
+```
+❌ BAD: Directly execute `rm -rf docs/old-folder/`
+✅ GOOD: "I propose to remove docs/old-folder/ because it contains outdated deployment documentation. This involves: 1) Verifying no active references, 2) Creating archive if needed, 3) Removing folder. May I proceed?"
+
+❌ BAD: Start refactoring without discussion
+✅ GOOD: "I propose to refactor the NEXT_ISSUE workflow to support multiple recommendations. This will involve updating 3 sections and modifying the output format. Here's my plan: [details]. Does this align with your vision?"
+```
+
+#### 4. Automation Readiness
+- Creates natural quality gates for future automation
+- Enables approve/reject decision points
+- Provides audit trail of proposed vs executed actions
+- Supports risk assessment before execution
+
+**Purpose**: Ensures collaborative control, prevents unintended changes, enables automation quality gates, and maintains clear decision audit trails.
+
 ### Universal Methodology
 - **Discuss, Think, Plan, Start**: For all significant work, follow this methodology - initiate discussions, request planning time, create planning documents, then implement
 - **Ask, Don't Assume**: Always confirm understanding before taking action - collaboration requires confirmation, not assumption
