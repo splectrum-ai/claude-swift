@@ -42,10 +42,10 @@ SESSION_START|step|inbox_check||Check for received cross-repository tasks
 ```
 
 **Inbox Check Procedure:**
-1. **Scan Inbox Directory**: Check `inbox/` for any pending task files
+1. **Scan Inbox Directory**: Check `claude/inbox/` for any pending task files
 2. **Task Count Assessment**: If tasks found, show count and brief summary
-3. **Processing Recommendation**: Suggest running `inbox sesame` if tasks present
-4. **Optional Processing**: Allow user to process immediately or defer
+3. **Mandatory Processing**: Automatically execute INBOX workflow if tasks present
+4. **Session Integration**: Process as part of SESSION_START workflow execution
 
 **Example Output:**
 ```
@@ -54,8 +54,7 @@ SESSION_START|step|inbox_check||Check for received cross-repository tasks
   - 2025-07-14T10-31-00Z_claude-swift_bug-fix.md (from spl1)
   - 2025-07-14T10-32-00Z_claude-swift_documentation.md (from InfoMetis)
 
-Recommendation: Run 'inbox sesame' to convert tasks to GitHub issues
-Process now? (y/n): _
+Executing INBOX workflow to convert tasks to GitHub issues...
 ```
 
 ### **Outbox Distribution** 
@@ -69,7 +68,8 @@ SESSION_START|step|outbox_check||Check for pending task distribution
 2. **Registry Validation**: Verify project registry exists and is populated
 3. **Outbox Scanning**: Check registered projects for pending outbox tasks
 4. **Distribution Summary**: Show task count and target repositories
-5. **Optional Distribution**: Allow user to distribute immediately or defer
+5. **Mandatory Distribution**: Automatically execute OUTBOX workflow if tasks present
+6. **Session Integration**: Process as part of SESSION_START workflow execution
 
 **Example Output:**
 ```
@@ -78,8 +78,7 @@ SESSION_START|step|outbox_check||Check for pending task distribution
   - projects/jules-tenbos/splectrum/outbox: 2 tasks
   - projects/sesameh/spl1/outbox: 2 tasks
 
-Recommendation: Run 'outbox sesame' to distribute tasks to target repositories
-Distribute now? (y/n): _
+Executing OUTBOX workflow to distribute tasks to target repositories...
 ```
 
 **Skip Conditions:**
@@ -207,7 +206,8 @@ Previous SESSION_END completed git operations but was interrupted before creatin
 ### **Connection to INBOX/OUTBOX Workflows**
 - **INBOX Integration**: Automatically checks for received cross-repository tasks at session start
 - **OUTBOX Integration**: For base repositories, scans for pending task distribution
-- **Task Processing**: Offers immediate processing or defers to manual execution
+- **Mandatory Processing**: Automatically executes INBOX and OUTBOX workflows when tasks are detected
+- **Session Automation**: Task processing is part of SESSION_START workflow execution, not optional
 - **Issue Creation**: INBOX processing feeds into GitHub issue system for prioritization
 
 ### **Connection to PROJECT_REGISTER**

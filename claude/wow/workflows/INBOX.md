@@ -14,7 +14,7 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 - Maintain clean separation between task ingestion and execution
 
 ## Prerequisites
-- Repository with inbox/ directory (created by OUTBOX workflow deliveries)
+- Repository with claude/inbox/ directory (created by OUTBOX workflow deliveries)
 - GitHub CLI authenticated for issue creation
 - CREATE_ISSUE workflow available for task conversion
 
@@ -31,14 +31,14 @@ INBOX|step|task_discovery||Scan inbox directory for pending tasks
 **Task Discovery:**
 ```bash
 # Ensure inbox directory exists
-mkdir -p inbox
+mkdir -p claude/inbox
 
 # Find all task files in inbox (*.md files with timestamp format)
-INBOX_TASKS=$(find inbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
+INBOX_TASKS=$(find claude/inbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
 
 if [ -z "$INBOX_TASKS" ]; then
     echo "No pending tasks in inbox"
-    echo "Inbox directory: $(pwd)/inbox"
+    echo "Inbox directory: $(pwd)/claude/inbox"
     exit 0
 fi
 
@@ -313,7 +313,7 @@ inbox sesame
 
 **Before INBOX**:
 ```
-project/inbox/
+project/claude/inbox/
 ├── 2025-07-14T15-30-45-123Z_splectrum_update-workflows.md
 ├── 2025-07-14T15-31-02-456Z_claude-swift_migrate-to-v2.md
 └── 2025-07-14T15-31-15-789Z_spl1_workflow-refresh.md
@@ -321,7 +321,7 @@ project/inbox/
 
 **After INBOX**:
 ```
-project/inbox/                       # Empty (all processed)
+project/claude/inbox/                       # Empty (all processed)
 GitHub Issues:                       # New issues created
 - "Task: Update to Latest Workflows"
 - "Task: Migrate to v2"  

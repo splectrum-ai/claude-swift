@@ -268,11 +268,11 @@ TASK_CREATE|step|outbox_setup||Ensure outbox directory exists and is properly co
 **Outbox Preparation:**
 ```bash
 # Ensure outbox directory exists
-mkdir -p outbox
+mkdir -p claude/outbox
 
 # Create outbox README if it doesn't exist
-if [ ! -f "outbox/README.md" ]; then
-    cat > "outbox/README.md" << 'EOF'
+if [ ! -f "claude/outbox/README.md" ]; then
+    cat > "claude/outbox/README.md" << 'EOF'
 # Outbox
 
 This directory contains cross-repository tasks awaiting distribution.
@@ -305,7 +305,7 @@ TASK_CREATE|step|file_creation||Write task file to outbox directory
 **File Writing:**
 ```bash
 # Write task content to file
-TASK_FILE_PATH="outbox/$TASK_FILENAME"
+TASK_FILE_PATH="claude/outbox/$TASK_FILENAME"
 
 if echo "$TASK_CONTENT" > "$TASK_FILE_PATH"; then
     echo "✓ Task file created: $TASK_FILE_PATH"
@@ -334,7 +334,7 @@ TASK_CREATE|step|completion_summary||Provide task creation completion summary
 echo ""
 echo "=== TASK CREATION COMPLETE ==="
 echo "Task file: $TASK_FILENAME"
-echo "Location: $(pwd)/outbox/"
+echo "Location: $(pwd)/claude/outbox/"
 echo "Target repository: $TARGET_REPO"
 echo "Task title: $TASK_TITLE"
 echo "Priority: $TASK_PRIORITY"
@@ -344,7 +344,7 @@ echo "File size: $(ls -lh "$TASK_FILE_PATH" | awk '{print $5}')"
 echo "Lines: $(wc -l < "$TASK_FILE_PATH")"
 echo ""
 echo "Next steps:"
-echo "1. Review task file: cat outbox/$TASK_FILENAME"
+echo "1. Review task file: cat claude/outbox/$TASK_FILENAME"
 echo "2. Distribute task: outbox sesame (from base repository)"
 echo "3. Target repository will receive task in their inbox"
 echo "4. Target can process: inbox sesame (converts to GitHub issue)"

@@ -90,7 +90,7 @@ OUTBOX|step|collection||Collect outbox tasks from all registered projects
 **Task Collection:**
 ```bash
 # Ensure base outbox directory exists
-mkdir -p outbox
+mkdir -p claude/outbox
 
 COLLECTED_COUNT=0
 echo "=== COLLECTION PHASE ==="
@@ -102,7 +102,7 @@ for PROJECT_PATH in $REGISTERED_PROJECTS; do
         ORG_NAME=$(basename "$(dirname "$PROJECT_PATH")")
         
         # Find outbox tasks (*.md files with timestamp format)
-        OUTBOX_TASKS=$(find "$PROJECT_PATH/outbox" -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null || true)
+        OUTBOX_TASKS=$(find "$PROJECT_PATH/claude/outbox" -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null || true)
         
         if [ -n "$OUTBOX_TASKS" ]; then
             echo "Collecting from $ORG_NAME/$PROJECT_NAME:"
@@ -111,7 +111,7 @@ for PROJECT_PATH in $REGISTERED_PROJECTS; do
                 TASK_NAME=$(basename "$TASK_FILE")
                 
                 # Move task to base outbox
-                mv "$TASK_FILE" "outbox/$TASK_NAME"
+                mv "$TASK_FILE" "claude/outbox/$TASK_NAME"
                 echo "  ✓ Collected: $TASK_NAME"
                 ((COLLECTED_COUNT++))
             done
@@ -132,7 +132,7 @@ OUTBOX|step|distribution||Distribute tasks to target project inboxes
 echo "=== DISTRIBUTION PHASE ==="
 
 # Find all tasks in base outbox
-BASE_OUTBOX_TASKS=$(find outbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
+BASE_OUTBOX_TASKS=$(find claude/outbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
 
 if [ -z "$BASE_OUTBOX_TASKS" ]; then
     echo "No tasks to distribute"
@@ -174,10 +174,10 @@ for project in data['registered_projects']:
     fi
     
     # Ensure target inbox exists
-    mkdir -p "$TARGET_PATH/inbox"
+    mkdir -p "$TARGET_PATH/claude/inbox"
     
     # Move task to target inbox
-    if mv "$TASK_FILE" "$TARGET_PATH/inbox/$TASK_NAME"; then
+    if mv "$TASK_FILE" "$TARGET_PATH/claude/inbox/$TASK_NAME"; then
         echo "✓ Delivered to $TARGET_REPO: $TASK_NAME"
         ((DISTRIBUTED_COUNT++))
     else
@@ -282,7 +282,7 @@ fi
 
 ### Collection Failures
 ```bash
-if ! mv "$TASK_FILE" "outbox/$TASK_NAME"; then
+if ! mv "$TASK_FILE" "claude/outbox/$TASK_NAME"; then
     echo "Warning: Failed to collect task from $PROJECT_PATH"
     echo "Check file permissions and disk space"
     # Original task remains in source outbox
@@ -326,17 +326,17 @@ outbox sesame
 
 **Before OUTBOX**:
 ```
-sesameh/claude-swift/outbox/          # Base outbox (empty)
-projects/org1/repo1/outbox/           # Has pending tasks
-projects/org2/repo2/outbox/           # Has pending tasks
+sesameh/claude-swift/claude/outbox/          # Base outbox (empty)
+projects/org1/repo1/claude/outbox/           # Has pending tasks
+projects/org2/repo2/claude/outbox/           # Has pending tasks
 ```
 
 **After OUTBOX**:
 ```
-sesameh/claude-swift/outbox/          # Empty (all distributed)
-projects/org1/repo1/outbox/           # Empty (collected)
-projects/org2/repo2/outbox/           # Empty (collected)
-projects/target-org/target-repo/inbox/  # Received tasks
+sesameh/claude-swift/claude/outbox/          # Empty (all distributed)
+projects/org1/repo1/claude/outbox/           # Empty (collected)
+projects/org2/repo2/claude/outbox/           # Empty (collected)
+projects/target-org/target-repo/claude/inbox/  # Received tasks
 ```
 
 ## Trigger Pattern

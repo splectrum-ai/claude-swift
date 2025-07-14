@@ -15,7 +15,7 @@ Examples:
 1. Items arrive from other repositories
 2. Process according to item type
 3. Delete after processing (audit log maintains history)
-4. If response needed, create item in `outbox/`
+4. If response needed, create item in `claude/outbox/`
 
 ## Item Types
 
