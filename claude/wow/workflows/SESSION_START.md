@@ -16,7 +16,7 @@
 1. **PREVIOUS SESSION RECOVERY**: Complete any incomplete SESSION_END workflows detected
 2. **INBOX PROCESSING**: Check and process any received cross-repository tasks
 3. **OUTBOX DISTRIBUTION**: For base repositories, optionally distribute pending outbox tasks
-4. **PRESENT TODO LIST**: Show complete repository todo list and ask for user selection
+4. **GITHUB ISSUE REVIEW**: Show current GitHub issues and ask for user selection
 5. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
 
 ## SYSTEM CHECK PROCEDURE
@@ -164,8 +164,8 @@ At the start of each session, Claude MUST:
 2. **Read the current audit log** to check the last entry
 3. If last entry is `SESSION_END | workflow_complete:` with no subsequent activities, previous session ended cleanly
 4. If last entry shows incomplete SESSION_END (workflow_start logged but no workflow_complete), complete the missing steps:
-   - Check TodoRead for incomplete todos from previous session
-   - Follow REPO_TODO_WORKFLOW for todo completion and transfer procedures
+   - Check audit log for incomplete workflows from previous session
+   - Complete any outstanding workflow steps identified
    - Capture any obvious learnings from previous session's work
    - Stage and commit any uncommitted changes with session summary
 
@@ -223,14 +223,14 @@ Previous SESSION_END completed git operations but was interrupted before creatin
 ## SUCCESS METRICS
 
 ### **Session Initialization Indicators**
-- Clear session goals established from todo list
+- Clear session goals established from GitHub issues
 - Previous session recovery completed successfully
 - Repository state verified as clean and compliant
 - Session boundaries clearly marked for analysis
 
 ### **Quality Indicators**
 - All audit log entries properly formatted
-- No orphaned todos or incomplete task tracking from previous session
+- No incomplete workflows or orphaned task tracking from previous session
 - Relevant documentation reflects current state
 - Clear starting point established for session work
 

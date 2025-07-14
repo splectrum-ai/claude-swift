@@ -34,8 +34,8 @@
 
 #### 4. Progress Recognition
 - Celebrate each completed step as meaningful progress
-- **AUTOMATIC**: Audit logging triggered when repository todo items are completed - all required fields naturally available at completion point
-- **SINGLE SYSTEM**: Use repository todo list only for all work tracking
+- **AUTOMATIC**: Audit logging triggered when work items are completed - all required fields naturally available at completion point
+- **SINGLE SYSTEM**: Use GitHub issues for all work tracking
 
 **Purpose**: Prevents tunnel vision, enables dynamic re-prioritization, provides clear progress tracking, and ensures collaborative decision-making at every step.
 

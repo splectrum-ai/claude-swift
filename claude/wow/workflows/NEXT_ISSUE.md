@@ -63,9 +63,21 @@ Where Readiness = 1 if no blockers, 0.5 if partial, 0 if blocked
 ### 5. Recommendation List Generation
 
 Present top-ranked issues (up to 6) with compact format:
-- **Line 1**: Issue #XX: Title | Score: X.X | Priority/Effort
-- **Line 2**: Epic context | Rationale and readiness details
+- **Line 1**: #XX [Score] [Priority] Title
+- **Line 2**: Metadata and rationale for selection
 - **Spacing**: One empty line between issues
+
+**Example Format:**
+```
+#5 [3.0] HIGH Enable project-specific workflow extensions without contaminating WoW template
+Critical template feature - enables extensibility, no blockers, high impact for adoption
+
+#32 [2.0] MEDIUM Create comprehensive first-time deployment setup documentation  
+User experience improvement - clear scope, ready to start, documentation effort
+
+#39 [1.33] MEDIUM Create INBOX/OUTBOX workflows for cross-repository task communication
+Large scope workflow - v1.1.0 feature, multiple components, significant implementation
+```
 
 ### 6. Selection Decision
 

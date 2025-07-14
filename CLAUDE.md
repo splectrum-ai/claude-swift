@@ -88,7 +88,6 @@ Use natural language with "sesame" suffix:
 **SESSION_START** → See [claude/wow/workflows/SESSION_START.md](./claude/wow/workflows/SESSION_START.md)
 **RELEASE_PROCESS** → See [claude/wow/workflows/RELEASE_PROCESS.md](./claude/wow/workflows/RELEASE_PROCESS.md)
 **VERSION_TRANSITION** → See [claude/wow/workflows/VERSION_TRANSITION.md](./claude/wow/workflows/VERSION_TRANSITION.md)
-**REPO_TODO_WORKFLOW** → See [claude/wow/workflows/REPO_TODO_WORKFLOW.md](./claude/wow/workflows/REPO_TODO_WORKFLOW.md)
 **NEW_VERSION_PLANNING** → See [claude/wow/workflows/NEW_VERSION_PLANNING.md](./claude/wow/workflows/NEW_VERSION_PLANNING.md)
 
 **Project-specific keywords**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
@@ -117,7 +116,6 @@ Use natural language with "sesame" suffix:
 **Development Strategy**:
 - `claude/wow/docs/phase-based-development-strategy.md` - Roadmap execution approach
 - `claude/wow/docs/main-only-workflow.md` - Simplified direct commit workflow
-- `claude/project/todo.md` - Repository todo list for session continuity
 
 
 ## Documentation Standards

@@ -39,6 +39,26 @@ Enter repository in format 'org/repo':
 - Format: `org/repo` pattern required
 - Repository must exist in workspace
 
+**Safety Check:**
+```bash
+# Extract organization from repository input
+ORG_NAME=$(echo "$REPOSITORY" | cut -d'/' -f1)
+
+# Prevent registration of sesameh org repositories (orchestrator repos)
+if [ "$ORG_NAME" = "sesameh" ]; then
+    echo "Error: Cannot register sesameh organization repositories"
+    echo "sesameh org contains orchestrator/base projects, not sub-projects"
+    echo "Repository '$REPOSITORY' should not be registered"
+    echo ""
+    echo "Valid patterns:"
+    echo "  ✓ org/repo (where org != sesameh)"
+    echo "  ✗ sesameh/repo (orchestrator repositories)"
+    exit 1
+fi
+
+echo "✓ Repository validation passed: $REPOSITORY"
+```
+
 ### 2. Base Project Detection
 ```
 PROJECT_REGISTER|step|base_detection||Detect base project path using directory structure
@@ -137,7 +157,52 @@ fi
 
 # Create inbox/outbox directories with correct structure
 mkdir -p claude/inbox claude/outbox
-echo "✓ Ensured claude/inbox and claude/outbox directories exist"
+
+# Create inbox README if it doesn't exist
+if [ ! -f "claude/inbox/README.md" ]; then
+    cat > "claude/inbox/README.md" << 'EOF'
+# Inbox
+
+This directory receives cross-repository tasks from other projects.
+
+## Workflow Integration
+- Tasks delivered here via OUTBOX workflow from other repositories
+- Tasks processed via `inbox sesame` (INBOX workflow)
+- Tasks converted to GitHub issues for project management
+
+## Status
+- Files in this directory are **pending processing**
+- Files are archived after conversion to issues
+- Empty directory indicates all tasks have been processed
+EOF
+    echo "✓ Created claude/inbox/README.md"
+fi
+
+# Create outbox README if it doesn't exist
+if [ ! -f "claude/outbox/README.md" ]; then
+    cat > "claude/outbox/README.md" << 'EOF'
+# Outbox
+
+This directory contains cross-repository tasks awaiting distribution.
+
+## File Format
+- **Filename**: `YYYY-MM-DDTHH-MM-SS-sssZ_target-repo_task-name.md`
+- **Content**: Standardized task format with metadata header
+
+## Workflow Integration
+- Tasks created here via `task sesame` (TASK_CREATE workflow)
+- Tasks distributed via `outbox sesame` (OUTBOX workflow)
+- Tasks processed at target via `inbox sesame` (INBOX workflow)
+
+## Status
+- Files in this directory are **pending distribution**
+- Files are moved during OUTBOX workflow execution
+- Empty directory indicates all tasks have been distributed
+EOF
+    echo "✓ Created claude/outbox/README.md"
+fi
+
+echo "✓ Ensured claude/inbox and claude/outbox directories exist with documentation"
 ```
 
 **Cleanup Rationale:**
@@ -184,7 +249,97 @@ else
 fi
 ```
 
-### 7. Registration Summary
+### 7. Registration Validation
+```
+PROJECT_REGISTER|step|registration_validation||Validate complete project registration
+```
+
+**Comprehensive Validation:**
+```bash
+echo "=== VALIDATING PROJECT REGISTRATION ==="
+
+# Track validation status
+VALIDATION_ERRORS=0
+
+# 1. Symlink Validation
+echo "Checking symlinks..."
+if [ -L "CLAUDE.md" ] && [ -e "CLAUDE.md" ]; then
+    echo "✓ CLAUDE.md symlink valid: $(readlink CLAUDE.md)"
+else
+    echo "✗ CLAUDE.md symlink invalid or broken"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+if [ -L "claude/wow" ] && [ -d "claude/wow" ]; then
+    echo "✓ claude/wow symlink valid: $(readlink claude/wow)"
+else
+    echo "✗ claude/wow symlink invalid or broken"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+# 2. Required Directory Structure
+echo "Checking directory structure..."
+REQUIRED_DIRS=("claude/project" "claude/inbox" "claude/outbox")
+for dir in "${REQUIRED_DIRS[@]}"; do
+    if [ -d "$dir" ]; then
+        echo "✓ $dir directory exists"
+    else
+        echo "✗ $dir directory missing"
+        VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+    fi
+done
+
+# 3. Required Files
+echo "Checking required files..."
+REQUIRED_FILES=("claude/inbox/README.md" "claude/outbox/README.md")
+for file in "${REQUIRED_FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo "✓ $file exists"
+    else
+        echo "✗ $file missing"
+        VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+    fi
+done
+
+# 4. Framework Accessibility Test
+echo "Testing framework accessibility..."
+if [ -f "claude/wow/workflows/SESSION_START.md" ]; then
+    echo "✓ Framework workflows accessible"
+else
+    echo "✗ Framework workflows not accessible"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+# 5. Template Cleanup Verification
+echo "Verifying template cleanup..."
+if [ -f "claude/project/todo.md" ]; then
+    echo "✗ Template file still present: claude/project/todo.md"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+else
+    echo "✓ Template files properly cleaned"
+fi
+
+# 6. Registry Verification
+echo "Verifying registry entry..."
+if grep -q "\"repository\": \"$REPOSITORY\"" "$REGISTRY_FILE"; then
+    echo "✓ Project found in registry"
+else
+    echo "✗ Project not found in registry"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+# 7. Validation Summary
+echo ""
+if [ $VALIDATION_ERRORS -eq 0 ]; then
+    echo "✅ All validation checks passed!"
+else
+    echo "❌ Validation failed with $VALIDATION_ERRORS errors"
+    echo "Registration may be incomplete. Please review and fix errors."
+    exit 1
+fi
+```
+
+### 8. Registration Summary
 ```
 PROJECT_REGISTER|step|completion_summary||Provide registration completion summary
 ```
@@ -203,6 +358,62 @@ echo ""
 echo "Project is now ready for claude-swift operations!"
 echo "Use absolute paths or navigate to project directory for work."
 ```
+
+## Error Handling and Rollback
+
+### Registration Failure Recovery
+If registration fails during validation, the workflow provides rollback procedures:
+
+```bash
+# Rollback procedure for failed registration
+PROJECT_REGISTER_ROLLBACK() {
+    echo "=== ROLLING BACK FAILED REGISTRATION ==="
+    
+    # Remove broken symlinks
+    if [ -L "CLAUDE.md" ]; then
+        rm "CLAUDE.md"
+        echo "✓ Removed CLAUDE.md symlink"
+    fi
+    
+    if [ -L "claude/wow" ]; then
+        rm "claude/wow"
+        echo "✓ Removed claude/wow symlink"
+    fi
+    
+    # Remove from registry if added
+    if grep -q "\"repository\": \"$REPOSITORY\"" "$REGISTRY_FILE" 2>/dev/null; then
+        python3 -c "
+import json
+with open('$REGISTRY_FILE', 'r') as f:
+    data = json.load(f)
+data['registered_projects'] = [p for p in data['registered_projects'] if p['repository'] != '$REPOSITORY']
+with open('$REGISTRY_FILE', 'w') as f:
+    json.dump(data, f, indent=2)
+"
+        echo "✓ Removed from registry"
+    fi
+    
+    echo "Registration rollback completed. Project state restored."
+}
+```
+
+### Common Issues and Solutions
+
+**Repository Validation Failures:**
+- **Cause**: Attempting to register sesameh org repositories (e.g., sesameh/claude-swift)
+- **Solution**: Only register external organization repositories as sub-projects. sesameh repos are orchestrators.
+
+**Symlink Creation Failures:**
+- **Cause**: File permissions, existing files, or invalid relative paths
+- **Solution**: Verify base project structure, check permissions, ensure target files exist
+
+**Registry Update Failures:**
+- **Cause**: JSON syntax errors, permission issues, missing python3
+- **Solution**: Verify JSON format, check file permissions, ensure python3 available
+
+**Validation Failures:**
+- **Cause**: Incomplete directory structure, broken symlinks, missing files
+- **Solution**: Run rollback and re-attempt registration after fixing underlying issues
 
 ## Workflow Architecture
 

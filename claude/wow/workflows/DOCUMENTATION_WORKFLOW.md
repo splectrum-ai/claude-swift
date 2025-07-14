@@ -223,9 +223,9 @@ done
 - **Compliance validation**: Ensure all new/modified docs are compliant
 - **Index updates**: Verify README.md reflects documentation changes
 
-### Built-in TODO_MANAGEMENT Integration
-- **Documentation todos**: Track documentation-related tasks
-- **Compliance todos**: Track compliance fixes needed
+### Built-in GitHub Issues Integration
+- **Documentation issues**: Track documentation-related tasks
+- **Compliance issues**: Track compliance fixes needed
 - **Clear separation**: Documentation tasks vs implementation tasks
 
 ## DOCUMENTATION TYPES AND STANDARDS

@@ -4,10 +4,7 @@ This file maintains project-specific workflow trigger keywords that extend the b
 
 ## Project-Specific Workflow Keywords
 
-| Keyword | File | Purpose | Trigger Context | Sesame Alias |
-|---------|------|---------|-----------------|--------------|
-| **TEMPLATE_SYNCHRONIZATION** | `TEMPLATE_SYNCHRONIZATION.md` | Template synchronization workflow | Template updates and synchronization | `template sesame` |
-| **DEPLOYMENT** | `DEPLOYMENT.md` | Main deployment workflow router | Sidecar deployment operations | `deployment sesame` |
+Currently no project-specific workflows are defined.
 
 ## Future Project Keywords
 
@@ -21,12 +18,7 @@ Reserved for claude-swift specific workflows when needed:
 
 ## Sesame Alias Mapping
 
-Project-specific sesame triggers:
-
-```
-template sesame → TEMPLATE_SYNCHRONIZATION
-deployment sesame → DEPLOYMENT
-```
+Currently no project-specific sesame triggers are defined.
 
 ## Registry Inheritance
 
