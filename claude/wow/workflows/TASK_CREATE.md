@@ -398,7 +398,7 @@ Detailed description of what needs to be implemented, including context and back
 
 **Filename Convention:**
 - **Format**: `YYYY-MM-DDTHH-MM-SS-sssZ_target-repo_task-name.md`
-- **Example**: `2025-07-14T16-30-45-123Z_claude-swift_implement-feature-x.md`
+- **Example**: `2025-07-14T16-30-45-123Z_target-project_implement-feature-x.md`
 
 ## Interactive Prompts
 
@@ -480,12 +480,12 @@ task sesame
 # Result: Guided prompts for all task details, file created in outbox/
 
 # Direct target specification
-task sesameh/claude-swift sesame
+task org/project sesame
 # Result: Target pre-filled, prompts for remaining details, file created in outbox/
 
 # Direct target with repo name only
-task splectrum sesame
-# Result: Target set to "splectrum", prompts for remaining details
+task project-name sesame
+# Result: Target set to "project-name", prompts for remaining details
 ```
 
 ### Example interaction flow
@@ -497,7 +497,7 @@ $ task sesame
 
 Target Repository:
 Enter the repository that should receive this task (format: org/repo or just repo-name):
-Target: sesameh/claude-swift
+Target: org/project
 
 Task Summary:
 Enter a brief task name (will be used in filename, use hyphens for spaces):
@@ -553,7 +553,7 @@ Enter any additional context or background information:
 Context: Following v1.1.0 release with INBOX/OUTBOX workflows
 
 === TASK SUMMARY ===
-Target: claude-swift
+Target: project
 Name: update-documentation
 Title: Update user documentation for v1.1.0
 Priority: HIGH (Critical for v1.1.0 adoption - users need current documentation)
@@ -566,15 +566,15 @@ Related: 24, 32
 Proceed with task creation? (y/n)
 Confirm: y
 
-✓ Task file created: outbox/2025-07-14T16-30-45-123Z_claude-swift_update-documentation.md
+✓ Task file created: outbox/2025-07-14T16-30-45-123Z_project_update-documentation.md
 ```
 
 **Parameter Mode (target specified):**
 ```bash
-$ task sesameh/claude-swift sesame
+$ task org/project sesame
 === CREATE CROSS-REPOSITORY TASK ===
 
-Target Repository: sesameh/claude-swift (from parameter)
+Target Repository: org/project (from parameter)
 
 Task Summary:
 Enter a brief task name (will be used in filename, use hyphens for spaces):
@@ -630,7 +630,7 @@ Enter any additional context or background information:
 Context: Introduced in v1.1.0 release, affecting production
 
 === TASK SUMMARY ===
-Target: claude-swift
+Target: project
 Name: fix-critical-bug
 Title: Fix critical authentication bug in v1.1.0
 Priority: HIGH (Blocking new user onboarding - affects production)
@@ -643,7 +643,7 @@ Related: 44
 Proceed with task creation? (y/n)
 Confirm: y
 
-✓ Task file created: outbox/2025-07-14T16-30-45-123Z_claude-swift_fix-critical-bug.md
+✓ Task file created: outbox/2025-07-14T16-30-45-123Z_project_fix-critical-bug.md
 ```
 
 ## Workflow Benefits

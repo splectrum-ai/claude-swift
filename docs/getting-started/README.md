@@ -1,3 +1,5 @@
+[← Back to Claude-Swift](../../README.md)
+
 # Getting Started with Claude-Swift Orchestrator
 
 ## Prerequisites
@@ -132,3 +134,7 @@ If you encounter issues:
 2. Review the audit log for error details
 3. Check GitHub issues for similar problems
 4. Create a new issue with reproduction steps
+
+---
+
+[← Back to Claude-Swift](../../README.md) | [Registered Project Guide →](../registered-project-guide.md) | [Workflow Architecture →](../workflow-architecture.md)

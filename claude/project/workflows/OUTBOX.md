@@ -13,6 +13,9 @@ Cross-repository task distribution workflow that collects tasks from registered 
 - Enable asynchronous cross-repository communication
 - Maintain audit trail of task routing operations
 
+## Scope
+**Orchestrator-Only**: This workflow is ONLY available in the claude-swift orchestrator repository. It is NOT available in registered/orchestrated projects.
+
 ## Prerequisites
 - INITIALISE workflow completed (projects/ symlink exists)
 - PROJECT_REGISTER registry populated with target projects
@@ -349,7 +352,7 @@ projects/target-org/target-repo/claude/inbox/  # Received tasks
 ## Trigger Pattern
 
 ```markdown
-**OUTBOX** → See [workflows/OUTBOX.md](./workflows/OUTBOX.md)
+**OUTBOX** → See [claude/project/workflows/OUTBOX.md](./claude/project/workflows/OUTBOX.md)
 ```
 
 Use when:

@@ -4,7 +4,11 @@ This file maintains project-specific workflow trigger keywords that extend the b
 
 ## Project-Specific Workflow Keywords
 
-Currently no project-specific workflows are defined.
+| Keyword | File | Purpose | Trigger Context | Sesame Alias |
+|---------|------|---------|-----------------|--------------|
+| **INITIALISE** | `workflows/INITIALISE.md` | One-time workspace setup and multi-project configuration | Workspace initialization, symlink setup, project directory structure | `initialise sesame`, `init sesame` |
+| **PROJECT_REGISTER** | `workflows/PROJECT_REGISTER.md` | Automated project registration with symlink creation and registry tracking | Project setup for claude-swift framework, symlink management, registry updates | `register [org/repo] sesame` |
+| **OUTBOX** | `workflows/OUTBOX.md` | Cross-repository task distribution and routing workflow | Task collection from registered projects, central distribution to target inboxes | `outbox sesame` |
 
 ## Future Project Keywords
 
@@ -18,7 +22,12 @@ Reserved for claude-swift specific workflows when needed:
 
 ## Sesame Alias Mapping
 
-Currently no project-specific sesame triggers are defined.
+```
+initialise sesame → INITIALISE
+init sesame      → INITIALISE
+register sesame  → PROJECT_REGISTER
+outbox sesame    → OUTBOX
+```
 
 ## Registry Inheritance
 

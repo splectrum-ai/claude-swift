@@ -14,10 +14,11 @@
 
 **SESSION INITIALIZATION:**
 1. **PREVIOUS SESSION RECOVERY**: Complete any incomplete SESSION_END workflows detected
-2. **INBOX PROCESSING**: Check and process any received cross-repository tasks
-3. **OUTBOX DISTRIBUTION**: For base repositories, optionally distribute pending outbox tasks
-4. **GITHUB ISSUE REVIEW**: Show current GitHub issues and ask for user selection
-5. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
+2. **ISSUE CACHE VALIDATION**: Execute ISSUE_CACHE workflow for complete cache synchronization
+3. **INBOX PROCESSING**: Check and process any received cross-repository tasks
+4. **OUTBOX DISTRIBUTION**: For base repositories, optionally distribute pending outbox tasks
+5. **GITHUB ISSUE REVIEW**: Show current GitHub issues and ask for user selection
+6. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
 
 ## SYSTEM CHECK PROCEDURE
 
@@ -204,6 +205,29 @@ Previous SESSION_END completed git operations but was interrupted before creatin
 - Implements the MANDATORY 13-step sequence to prevent sync issues
 - Includes branch synchronization that eliminates drift problems
 - Maintains separation of concerns: session management vs detailed git implementation
+
+### **Connection to ISSUE_CACHE Workflow**
+- **Automatic Cache Sync**: Executes complete ISSUE_CACHE workflow during session initialization
+- **Gap Detection**: Identifies and caches missing issues since last session
+- **Cache Cleanup**: Removes closed issues and milestones from local cache
+- **Performance Optimization**: Ensures cache is current for fast issue queries during session
+- **No Logic Duplication**: Delegates all cache management to specialized ISSUE_CACHE workflow
+
+### **Issue Cache Integration Step**
+```
+SESSION_START|step|issue_cache_validation||Execute ISSUE_CACHE workflow for complete cache sync
+```
+
+**Implementation:**
+```bash
+echo "Validating and updating issue cache..."
+# Execute complete ISSUE_CACHE workflow (issue sesame)
+# - Gap detection: Add missing issues
+# - Cache cleanup: Remove closed issues  
+# - Milestone sync: Update milestone data
+# - Metadata update: Record sync timestamp
+echo "✓ Cache validation completed"
+```
 
 ### **Connection to INBOX/OUTBOX Workflows**
 - **INBOX Integration**: Automatically checks for received cross-repository tasks at session start

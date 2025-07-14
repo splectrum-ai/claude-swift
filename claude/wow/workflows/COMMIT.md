@@ -139,7 +139,38 @@ COMMIT|step|issue_closure||Close resolved GitHub issues
    gh issue close #123 -c "Resolved in commit: [commit-hash]"
    ```
 2. Add comment explaining resolution
-3. Log issue closure in audit log
+3. **Cache-first closure**: Update cache first, then sync to GitHub
+   ```bash
+   # Check if issue exists in cache
+   ISSUE_IN_CACHE=$(python3 -c "
+   import json
+   try:
+       with open('claude/project/cache/issues.json', 'r') as f:
+           cache = json.load(f)
+       print('true' if '123' in cache else 'false')
+   except:
+       print('false')
+   ")
+   
+   if [ "$ISSUE_IN_CACHE" = "true" ]; then
+       # Issue in cache: Update cache first, then GitHub
+       python3 -c "
+       import json
+       with open('claude/project/cache/issues.json', 'r') as f:
+           cache = json.load(f)
+       del cache['123']
+       with open('claude/project/cache/issues.json', 'w') as f:
+           json.dump(cache, f, indent=2)
+       print('✓ Removed issue #123 from cache')
+       "
+       gh issue close #123 -c "Resolved in commit: [commit-hash]"
+   else
+       # Issue not in cache: Update GitHub first, then cache via gap detection
+       gh issue close #123 -c "Resolved in commit: [commit-hash]"
+       # Cache will be updated on next issue sesame or SESSION_START
+   fi
+   ```
+4. Log issue closure in audit log
 
 ## Interactive Prompts
 

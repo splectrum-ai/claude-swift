@@ -18,14 +18,11 @@ Use natural language with "sesame" suffix:
 - `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
 - `issue sesame` → Manual issue creation for occasional needs
 - `close sesame` → Manual issue closure for occasional needs
-- `initialise sesame` → INITIALISE workflow (one-time workspace setup and multi-project configuration)
-- `register [org/repo] sesame` → PROJECT_REGISTER workflow (automated project registration with symlink creation and registry tracking)
 - `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues)
-- `outbox sesame` → OUTBOX workflow (cross-repository task distribution and routing)
 - `task [org/repo] sesame` → TASK_CREATE workflow (interactive task creation for cross-repository communication)
 - `task . sesame` → TASK_CREATE workflow targeting current repository
 
-**Project-specific triggers**: See [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md)
+**MANDATORY**: When encountering a sesame trigger that is NOT in the above list, you MUST check [claude/project/KEYWORD_REGISTRY.md](./claude/project/KEYWORD_REGISTRY.md) for project-specific workflows before reporting it as unknown.
 
 **Single-Word Sesame Magic Word:**
 **`sesame`** (standalone) → **Universal positive affirmation**

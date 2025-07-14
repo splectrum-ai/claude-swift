@@ -13,6 +13,9 @@ Automated project registration that creates symlinks to the base project's claud
 - Track registered projects in a central registry
 - Validate project existence and structure
 
+## Scope
+**Orchestrator-Only**: This workflow is ONLY available in the claude-swift orchestrator repository. It is NOT available in registered/orchestrated projects.
+
 ## Prerequisites
 - INITIALISE workflow completed (projects/ symlink exists)
 - Base project contains claude/wow framework
@@ -573,7 +576,7 @@ Projects can be worked with using absolute paths or by navigating to their direc
 ## Trigger Pattern
 
 ```markdown
-**PROJECT_REGISTER** → See [workflows/PROJECT_REGISTER.md](./workflows/PROJECT_REGISTER.md)
+**PROJECT_REGISTER** → See [claude/project/workflows/PROJECT_REGISTER.md](./claude/project/workflows/PROJECT_REGISTER.md)
 ```
 
 Use when:

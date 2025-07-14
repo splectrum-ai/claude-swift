@@ -1,0 +1,149 @@
+[← Back to Claude-Swift](../README.md)
+
+# Workflow Architecture
+
+This document explains the distinction between universal WoW (Ways of Working) workflows and project-specific workflows in the Claude-Swift framework.
+
+## Overview
+
+Claude-Swift uses a **dual-layer workflow architecture**:
+
+1. **Universal WoW Workflows** - Available in ALL repositories using the framework
+2. **Project-Specific Workflows** - Only available in the orchestrator repository (claude-swift)
+
+## Workflow Categories
+
+### Universal WoW Workflows (`claude/wow/workflows/`)
+
+These workflows are part of the core framework and work identically in:
+- The orchestrator repository (claude-swift)
+- All registered/orchestrated repositories (e.g., splectrum, spl1, InfoMetis)
+
+**Universal Workflow List:**
+- `SESSION_START` / `SESSION_END` - Session management
+- `NEXT_ISSUE` - Issue prioritization and selection
+- `COMMIT` - Intelligent commit with issue closure
+- `CREATE_ISSUE` / `ISSUE_CACHE` - Issue management
+- `INBOX` / `TASK_CREATE` - Task reception and creation
+- `RELEASE_PROCESS` / `VERSION_TRANSITION` - Release management
+- `NEW_VERSION_PLANNING` - Version planning
+- `AUDIT_LOGGING` - Audit trail management
+- `MANDATORY_RULES_REFRESH` - Rule compliance
+- `GIT_WORKFLOW` - Git operations
+- `OPERATIONAL_RULES` - Development standards
+- `DOCUMENTATION_WORKFLOW` - Documentation management
+
+### Project-Specific Workflows (`claude/project/workflows/`)
+
+These workflows are **ONLY** available in the orchestrator repository (claude-swift) and enable multi-project management:
+
+**Orchestrator-Only Workflows:**
+- `INITIALISE` - One-time workspace setup for multi-project management
+- `PROJECT_REGISTER` - Register sub-projects with the orchestrator
+- `OUTBOX` - Distribute tasks across registered projects
+
+## Key Differences
+
+### Universal Workflows
+- Work in **any** repository with the WoW framework
+- Handle single-repository operations
+- No dependency on workspace structure
+- Can be used by both orchestrator and orchestrated repos
+
+### Project-Specific Workflows  
+- Work **only** in the orchestrator repository
+- Require `projects/` directory structure
+- Enable cross-repository operations
+- Manage the relationship between multiple projects
+
+## Architecture Diagram
+
+```
+claude-swift (orchestrator)
+├── claude/
+│   ├── wow/workflows/        # Universal workflows (work everywhere)
+│   │   ├── SESSION_START.md
+│   │   ├── NEXT_ISSUE.md
+│   │   ├── INBOX.md         # Receives tasks
+│   │   └── ...
+│   └── project/workflows/    # Orchestrator-only workflows
+│       ├── INITIALISE.md    # Setup workspace
+│       ├── PROJECT_REGISTER.md # Register projects
+│       └── OUTBOX.md        # Distribute tasks
+└── projects/                 # Symlink to workspace (orchestrator only)
+    ├── org1/repo1/
+    └── org2/repo2/
+
+registered-repo (e.g., splectrum)
+├── claude/
+│   └── wow/workflows/        # Universal workflows ONLY
+│       ├── SESSION_START.md
+│       ├── NEXT_ISSUE.md
+│       ├── INBOX.md         # Same workflow, receives tasks
+│       └── ...
+└── (no projects/ directory)  # Not an orchestrator
+```
+
+## Workflow Availability
+
+| Workflow | Orchestrator | Registered Repos | Trigger |
+|----------|--------------|------------------|---------|
+| SESSION_START | ✅ | ✅ | `start sesame` |
+| NEXT_ISSUE | ✅ | ✅ | `next sesame` |
+| INBOX | ✅ | ✅ | `inbox sesame` |
+| TASK_CREATE | ✅ | ✅ | `task [target] sesame` |
+| INITIALISE | ✅ | ❌ | `initialise sesame` |
+| PROJECT_REGISTER | ✅ | ❌ | `register [repo] sesame` |
+| OUTBOX | ✅ | ❌ | `outbox sesame` |
+
+## Usage Examples
+
+### In Orchestrator (claude-swift)
+```bash
+# Universal workflows work
+start sesame
+next sesame
+inbox sesame
+
+# Project-specific workflows also work
+initialise sesame
+register org/repo sesame
+outbox sesame
+```
+
+### In Registered Repo (e.g., splectrum)
+```bash
+# Universal workflows work
+start sesame
+next sesame
+inbox sesame
+
+# Project-specific workflows NOT available
+initialise sesame  # ❌ Error: workflow not found
+outbox sesame      # ❌ Error: workflow not found
+```
+
+## Implementation Notes
+
+1. **CLAUDE.md Behavior**: When a sesame trigger is not found in the universal list, Claude checks `claude/project/KEYWORD_REGISTRY.md` for project-specific workflows.
+
+2. **Workflow Discovery**: The MANDATORY rule in CLAUDE.md ensures project-specific workflows are found when working in the orchestrator.
+
+3. **Task Flow**: 
+   - Tasks created with `TASK_CREATE` (universal)
+   - Distributed by `OUTBOX` (orchestrator-only)
+   - Received by `INBOX` (universal)
+
+4. **Cache Management**: Both `CREATE_ISSUE` and `INBOX` workflows update the issue cache for `NEXT_ISSUE` performance.
+
+## Summary
+
+The dual-layer architecture enables:
+- **Portability**: Universal workflows work identically everywhere
+- **Specialization**: Orchestrator has additional capabilities
+- **Separation**: Clear boundaries between single-repo and multi-repo operations
+- **Consistency**: Same operational patterns across all projects
+
+---
+
+[← Back to Claude-Swift](../README.md) | [Registered Project Guide →](registered-project-guide.md)

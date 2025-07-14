@@ -10,6 +10,9 @@ One-time workspace setup and configuration workflow that creates the foundationa
 ## Purpose
 Set up claude-swift workspace to manage multiple sub-projects through symlinked project directory structure.
 
+## Scope
+**Orchestrator-Only**: This workflow is ONLY available in the claude-swift orchestrator repository. It is NOT available in registered/orchestrated projects.
+
 ## Prerequisites
 - Claude-swift repository positioned correctly in workspace structure
 - Write permissions in repository and workspace directories  
@@ -221,7 +224,7 @@ This workflow is part of the claude-swift orchestrator and enables workspace ini
 ## Trigger Pattern
 
 ```markdown
-**INITIALISE** → See [workflows/INITIALISE.md](./workflows/INITIALISE.md)
+**INITIALISE** → See [claude/project/workflows/INITIALISE.md](./claude/project/workflows/INITIALISE.md)
 ```
 
 Use when:

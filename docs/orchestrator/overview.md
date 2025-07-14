@@ -1,3 +1,5 @@
+[← Back to Claude-Swift](../../README.md)
+
 # Orchestrator Overview
 
 ## Architecture
@@ -86,3 +88,7 @@ register org/repo sesame
 - Consistent interaction patterns everywhere
 - Accumulated knowledge benefits all projects
 - Reduced learning curve for new domains
+
+---
+
+[← Back to Claude-Swift](../../README.md) | [Interactive Mode →](modes/interactive.md)

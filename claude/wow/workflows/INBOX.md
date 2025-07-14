@@ -114,21 +114,29 @@ INBOX|step|issue_conversion||Convert task content to GitHub issue
 ```bash
 create_issue_from_task() {
     local task_file="$1"
-    local task_content="$2"
-    local source_info="$3"
-    local timestamp="$4"
     
-    # Extract title from task content (first # heading or use filename)
+    # Extract task metadata from file
+    local source=$(grep "^source:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
+    local priority=$(grep "^priority:" "$task_file" | cut -d' ' -f2- | tr -d ' ' | tr '[:lower:]' '[:upper:]')
+    local task_type=$(grep "^type:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
+    local created=$(grep "^created:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
+    
+    # Extract title (remove "Task: " prefix if present)
     local issue_title
-    issue_title=$(echo "$task_content" | grep -m 1 '^# ' | sed 's/^# //' || echo "Cross-repository task: $TASK_SUMMARY")
+    issue_title=$(grep -m 1 "^# " "$task_file" | sed 's/^# //' | sed 's/^Task: //')
     
-    # Build issue body with task metadata and original content
+    # Extract main content (everything after the frontmatter)
+    local task_content
+    task_content=$(awk '/^---$/{f++; next} f==2' "$task_file")
+    
+    # Build CREATE_ISSUE compatible body with task metadata
     local issue_body
     issue_body="## Cross-Repository Task
 
-**Source**: $source_info  
-**Received**: $timestamp  
-**Original Task File**: \`$TASK_NAME\`
+**Source**: $source  
+**Type**: $task_type  
+**Created**: $created  
+**Priority**: ${priority:-MEDIUM}
 
 ---
 
@@ -136,15 +144,66 @@ $task_content
 
 ---
 
+## Dependencies
+**Blocks:** None (unless specified in task content)
+**Blocked by:** None (unless specified in task content)  
+**Related:** Cross-repository communication
+
+## Effort: M
+**Estimate:** Cross-repository task processing
+
+## Test Criteria
+**How to verify completion:**
+- [ ] Task requirements completed as specified
+- [ ] Cross-repository coordination successful
+
+## Work Area: cross-repository
+**Context:** Task distributed via OUTBOX/INBOX workflow
+
 *This issue was automatically created from an inbox task by the INBOX workflow.*"
     
-    # Create temporary file for issue content
+    # Use CREATE_ISSUE workflow for issue creation (includes cache sync)
     local temp_file=$(mktemp)
     echo "$issue_body" > "$temp_file"
     
-    # Use gh CLI to create issue
     if gh issue create --title "$issue_title" --body-file "$temp_file" --label "cross-repository,inbox-task"; then
         rm "$temp_file"
+        
+        # Execute CREATE_ISSUE cache refresh step
+        echo "Refreshing issue cache..."
+        python3 -c "
+import json
+import subprocess
+import sys
+from datetime import datetime
+
+try:
+    # Fetch current issues from GitHub
+    result = subprocess.run(['gh', 'issue', 'list', '--limit', '100', '--json', 'number,title,labels,state,milestone,createdAt,updatedAt'], 
+                          capture_output=True, text=True, check=True)
+    issues_list = json.loads(result.stdout)
+    
+    # Convert to cache format (keyed by issue number)
+    cache = {}
+    for issue in issues_list:
+        cache[str(issue['number'])] = {
+            **issue,
+            'cached_at': datetime.utcnow().isoformat() + 'Z'
+        }
+    
+    # Ensure cache directory exists
+    subprocess.run(['mkdir', '-p', 'claude/project/cache'], check=True)
+    
+    # Write updated cache
+    with open('claude/project/cache/issues.json', 'w') as f:
+        json.dump(cache, f, indent=2)
+    
+    print(f'✓ Issue cache updated with {len(cache)} issues')
+    
+except Exception as e:
+    print(f'⚠ Cache update failed: {e}', file=sys.stderr)
+    # Don't fail the workflow if cache update fails
+"
         return 0
     else
         rm "$temp_file"
@@ -192,29 +251,29 @@ echo "Inbox status: $(find inbox -name "*.md" 2>/dev/null | wc -l) tasks remaini
 **Expected Task File Format**:
 ```markdown
 ---
-source: jules-tenbos/splectrum
-target: sesameh/claude-swift
+source: org1/project1
+target: org2/project2
 created: 2025-07-14T15:30:45.123Z
 priority: normal
-type: workflow-update
+type: feature-request
 ---
 
-# Task: Update to Latest Workflows
+# Task: Implement Feature X
 
 ## Description
-Update target repository to use latest v2 workflow patterns.
+Add support for feature X as discussed in cross-team meeting.
 
 ## Requirements
-- [ ] Update SESSION_START workflow
-- [ ] Add MANDATORY_RULES_REFRESH workflow
-- [ ] Test all sesame triggers
+- [ ] Design API interface
+- [ ] Implement core functionality
+- [ ] Add comprehensive tests
 
 ## Context
-Following claude-swift v1.1.0 release, workflow synchronization needed.
+This feature enables better integration between our repositories.
 ```
 
 **Resulting GitHub Issue**:
-- **Title**: "Task: Update to Latest Workflows"
+- **Title**: "Task: Implement Feature X"
 - **Labels**: "cross-repository", "inbox-task"
 - **Body**: Includes source metadata + original task content
 - **Integration**: Enters normal NEXT_ISSUE prioritization flow
@@ -314,18 +373,18 @@ inbox sesame
 **Before INBOX**:
 ```
 project/claude/inbox/
-├── 2025-07-14T15-30-45-123Z_splectrum_update-workflows.md
-├── 2025-07-14T15-31-02-456Z_claude-swift_migrate-to-v2.md
-└── 2025-07-14T15-31-15-789Z_spl1_workflow-refresh.md
+├── 2025-07-14T15-30-45-123Z_project1_implement-feature.md
+├── 2025-07-14T15-31-02-456Z_project2_add-integration.md
+└── 2025-07-14T15-31-15-789Z_project3_update-api.md
 ```
 
 **After INBOX**:
 ```
 project/claude/inbox/                       # Empty (all processed)
 GitHub Issues:                       # New issues created
-- "Task: Update to Latest Workflows"
-- "Task: Migrate to v2"  
-- "Task: Workflow Refresh"
+- "Task: Implement Feature X"
+- "Task: Add Integration Support"  
+- "Task: Update API Interface"
 ```
 
 ## Trigger Pattern

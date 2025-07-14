@@ -20,10 +20,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **COMMIT** | `COMMIT.md` | Intelligent commit workflow with automatic issue closure | Change staging, commit message generation, issue management | `commit sesame` |
 | **ISSUE_CACHE** | `ISSUE_CACHE.md` | Local cache management for GitHub issues and milestones | Performance optimization, reduced API calls, offline access | `issue sesame` |
 | **CREATE_ISSUE** | `CREATE_ISSUE.md` | Manual issue creation with standardized metadata structure | Ad-hoc issue creation, structured backlog management | `issue sesame` |
-| **INITIALISE** | `INITIALISE.md` | One-time workspace setup and multi-project configuration | Workspace initialization, symlink setup, project directory structure | `initialise sesame`, `init sesame` |
-| **PROJECT_REGISTER** | `PROJECT_REGISTER.md` | Automated project registration with symlink creation and registry tracking | Project setup for claude-swift framework, symlink management, registry updates | `register [org/repo] sesame` |
 | **INBOX** | `INBOX.md` | Task ingestion workflow converting inbox tasks to GitHub issues | Cross-repository task processing, task-to-issue conversion, inbox management | `inbox sesame` |
-| **OUTBOX** | `OUTBOX.md` | Cross-repository task distribution and routing workflow | Task collection from registered projects, central distribution to target inboxes | `outbox sesame` |
 | **TASK_CREATE** | `TASK_CREATE.md` | Interactive task creation workflow for cross-repository communication | Guided task creation, metadata collection, standardized formatting | `task [org/repo] sesame`, `task . sesame` |
 
 ## Built-in Claude Code Keywords
@@ -74,11 +71,7 @@ next sesame      → NEXT_ISSUE
 audit sesame     → AUDIT_LOGGING
 mandatory sesame → MANDATORY_RULES_REFRESH
 issue sesame     → CREATE_ISSUE
-initialise sesame → INITIALISE
-init sesame      → INITIALISE
-register sesame  → PROJECT_REGISTER
 inbox sesame     → INBOX
-outbox sesame    → OUTBOX
 task sesame      → TASK_CREATE
 ```
 

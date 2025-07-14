@@ -62,6 +62,46 @@ If the issue has dependencies, update related issues:
 # For issues this is blocked by - add reference in their description
 ```
 
+### 5. Refresh Issue Cache
+After successful issue creation, update the local issue cache for NEXT_ISSUE performance:
+```bash
+# Refresh issue cache to include newly created issue
+echo "Refreshing issue cache..."
+python3 -c "
+import json
+import subprocess
+import sys
+from datetime import datetime
+
+try:
+    # Fetch current issues from GitHub
+    result = subprocess.run(['gh', 'issue', 'list', '--limit', '100', '--json', 'number,title,labels,state,milestone,createdAt,updatedAt'], 
+                          capture_output=True, text=True, check=True)
+    issues_list = json.loads(result.stdout)
+    
+    # Convert to cache format (keyed by issue number)
+    cache = {}
+    for issue in issues_list:
+        cache[str(issue['number'])] = {
+            **issue,
+            'cached_at': datetime.utcnow().isoformat() + 'Z'
+        }
+    
+    # Ensure cache directory exists
+    subprocess.run(['mkdir', '-p', 'claude/project/cache'], check=True)
+    
+    # Write updated cache
+    with open('claude/project/cache/issues.json', 'w') as f:
+        json.dump(cache, f, indent=2)
+    
+    print(f'✓ Issue cache updated with {len(cache)} issues')
+    
+except Exception as e:
+    print(f'⚠ Cache update failed: {e}', file=sys.stderr)
+    # Don't fail the workflow if cache update fails
+"
+```
+
 ## Metadata Standards
 
 ### Priority Levels

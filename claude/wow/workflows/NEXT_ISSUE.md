@@ -3,15 +3,37 @@
 ## Overview
 Automated workflow for selecting the next GitHub issue to work on, combining recommendation engine with contextual decision factors.
 
+## Cache Integration
+**Performance Optimization**: Uses local ISSUE_CACHE for instant issue queries instead of GitHub API calls. Requires cache to be populated via `issue sesame` or SESSION_START workflow.
+
 ## Workflow Steps
 
-### 1. Get Issue List and Metadata
+### 1. Cache Validation
 ```bash
-gh issue list --limit 10 --json number,title,labels,body
+# Ensure cache exists and is reasonably current
+if [ ! -f "claude/project/cache/issues.json" ]; then
+    echo "Issue cache not found. Running 'issue sesame' to populate cache..."
+    # Execute ISSUE_CACHE workflow to populate cache
+    echo "Cache populated. Continuing with issue analysis..."
+fi
 ```
-**Output**: Current issues with embedded metadata for scoring analysis
 
-### 2. Parse Issue Metadata and Calculate Scores
+### 2. Get Issue List from Cache
+```bash
+# Use local cache instead of GitHub API for performance
+python3 -c "
+import json
+with open('claude/project/cache/issues.json', 'r') as f:
+    cache = json.load(f)
+issues = [issue for issue in cache.values() if issue['state'] == 'OPEN']
+print(json.dumps(issues, indent=2))
+"
+```
+**Output**: Current open issues from local cache with metadata for scoring analysis
+
+**Performance Benefit**: Instant local query instead of GitHub API call
+
+### 3. Parse Issue Metadata and Calculate Scores
 
 #### Metadata Extraction
 From issue body text, extract:
@@ -26,7 +48,7 @@ Score = (Priority Weight × Impact Factor × Readiness) / Effort Factor
 Where Readiness = 1 if no blockers, 0.5 if partial, 0 if blocked
 ```
 
-### 3. Apply Context Filters
+### 4. Apply Context Filters
 
 #### Milestone Focus
 - **Current Milestone**: Active milestone work takes priority
@@ -43,7 +65,7 @@ Where Readiness = 1 if no blockers, 0.5 if partial, 0 if blocked
 - **Current Focus**: Consider context switch costs
 - **Energy Level**: Match session type to current energy
 
-### 4. Selection Criteria
+### 5. Selection Criteria
 
 #### High Priority (Work Immediately)
 - HIGH priority + No blockers + Clear test criteria
