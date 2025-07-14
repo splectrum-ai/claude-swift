@@ -51,7 +51,7 @@
    - Stage, commit, and push all changes to main
    - Close resolved issues with commit references
 2. **Archive complete session log** → `session_TIMESTAMP.log`
-3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log`
+3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
 4. **Log SESSION_END completion** in fresh audit log
 
 **Benefits**: 

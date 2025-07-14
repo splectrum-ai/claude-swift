@@ -74,7 +74,7 @@ git commit -m "Session complete: [summary of work done]"
 git push origin main
 
 # 3. Create fresh audit log
-echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log
+echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
 ```
 
 ## Issue-Based Work

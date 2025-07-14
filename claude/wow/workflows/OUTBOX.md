@@ -154,8 +154,14 @@ for TASK_FILE in $BASE_OUTBOX_TASKS; do
         continue
     fi
     
-    # Find target project path in registry
-    TARGET_PATH=$(python3 -c "
+    # Handle self-targeted tasks (target same as base repository)
+    BASE_REPO_NAME=$(basename "$(pwd)")
+    if [ "$TARGET_REPO" = "$BASE_REPO_NAME" ]; then
+        # Self-targeted task - route to base repository's inbox
+        TARGET_PATH="."
+    else
+        # Find target project path in registry
+        TARGET_PATH=$(python3 -c "
 import json
 with open('$REGISTRY_FILE', 'r') as f:
     data = json.load(f)
@@ -165,6 +171,7 @@ for project in data['registered_projects']:
         print(project['path'])
         break
 " 2>/dev/null)
+    fi
     
     if [ -z "$TARGET_PATH" ] || [ ! -d "$TARGET_PATH" ]; then
         echo "✗ Target repository '$TARGET_REPO' not found or inaccessible"

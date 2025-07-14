@@ -184,7 +184,7 @@ Before session end, current log may be archived:
 cp claude/project/audit/current/current.log claude/project/audit/current/session_$(date -u +"%Y-%m-%dT%H-%M-%S").log
 
 # Reset current log with clean marker
-echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log
+echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
 ```
 
 ## Quality Assurance

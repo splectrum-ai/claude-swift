@@ -66,15 +66,17 @@ SESSION_START|step|outbox_check||Check for pending task distribution
 **Outbox Check Procedure:**
 1. **Base Repository Detection**: Check if current repo has `projects/` directory
 2. **Registry Validation**: Verify project registry exists and is populated
-3. **Outbox Scanning**: Check registered projects for pending outbox tasks
-4. **Distribution Summary**: Show task count and target repositories
-5. **Mandatory Distribution**: Automatically execute OUTBOX workflow if tasks present
-6. **Session Integration**: Process as part of SESSION_START workflow execution
+3. **Self-Targeted Task Check**: Check base repository's own `claude/outbox/` for self-targeted tasks
+4. **Outbox Scanning**: Check registered projects for pending outbox tasks
+5. **Distribution Summary**: Show task count and target repositories
+6. **Mandatory Distribution**: Automatically execute OUTBOX workflow if tasks present
+7. **Session Integration**: Process as part of SESSION_START workflow execution
 
 **Example Output:**
 ```
 ✓ Base repository detected with 2 registered projects
-✓ Found 4 pending tasks for distribution:
+✓ Found 6 pending tasks for distribution:
+  - claude/outbox: 2 self-targeted tasks
   - projects/jules-tenbos/splectrum/outbox: 2 tasks
   - projects/sesameh/spl1/outbox: 2 tasks
 
@@ -159,7 +161,7 @@ At the start of each session, Claude MUST:
 1. **Check audit log existence**: Verify `claude/project/audit/current/current.log` exists
    - If missing, check for recent session archives in `claude/project/audit/`
    - If session archive exists but no current.log, this indicates interrupted SESSION_END after git operations
-   - Create fresh current.log: `echo "##APPEND_MARKER_UNIQUE##" > claude/project/audit/current/current.log`
+   - Create fresh current.log: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
    - Log recovery: Add entry indicating SESSION_END recovery completed
 2. **Read the current audit log** to check the last entry
 3. If last entry is `SESSION_END | workflow_complete:` with no subsequent activities, previous session ended cleanly
