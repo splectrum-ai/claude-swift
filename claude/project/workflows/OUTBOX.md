@@ -34,11 +34,18 @@ OUTBOX|step|security_check||Validate execution from authorized base repository
 
 **Security Validation:**
 ```bash
+# Use optimized Node.js audit logging
+source claude/scripts/audit-functions.sh
+
+# Log workflow start
+audit_log "OUTBOX" "workflow_start" "outbox_sesame" "" "Starting cross-repository task distribution workflow"
+
 # Verify we're in a base repository with projects directory
 if [ ! -d "projects" ]; then
     echo "Error: OUTBOX workflow can only be executed from base repositories"
     echo "This workflow requires a projects/ directory (sesameh org repositories only)"
     echo "Current directory: $(pwd)"
+    audit_log "OUTBOX" "error" "security_check" "" "Unauthorized execution: missing projects directory"
     exit 1
 fi
 
@@ -47,11 +54,13 @@ REGISTRY_FILE="claude/project/registered-projects.json"
 if [ ! -f "$REGISTRY_FILE" ]; then
     echo "Error: Project registry not found at $REGISTRY_FILE"
     echo "Run PROJECT_REGISTER workflow to register projects first"
+    audit_log "OUTBOX" "error" "security_check" "" "Missing project registry file"
     exit 1
 fi
 
 echo "✓ Authorized base repository verified"
 echo "✓ Project registry found"
+audit_log "OUTBOX" "step" "security_check" "" "Validated execution from authorized base repository"
 ```
 
 ### 2. Registered Projects Discovery
@@ -64,6 +73,7 @@ OUTBOX|step|registry_scan||Load registered projects from registry
 # Read registered projects from JSON registry
 if ! command -v python3 >/dev/null 2>&1; then
     echo "Error: python3 required for JSON processing"
+    audit_log "OUTBOX" "error" "registry_scan" "" "Python3 not available for JSON processing"
     exit 1
 fi
 
@@ -79,10 +89,13 @@ for project in data['registered_projects']:
 if [ -z "$REGISTERED_PROJECTS" ]; then
     echo "No registered projects found in registry"
     echo "Use 'register [org/repo] sesame' to register projects first"
+    audit_log "OUTBOX" "step" "registry_scan" "" "No registered projects found - workflow completed"
     exit 0
 fi
 
-echo "✓ Found $(echo "$REGISTERED_PROJECTS" | wc -l) registered projects"
+PROJECT_COUNT=$(echo "$REGISTERED_PROJECTS" | wc -l)
+echo "✓ Found $PROJECT_COUNT registered projects"
+audit_log "OUTBOX" "step" "registry_scan" "" "Loaded $PROJECT_COUNT registered projects from registry"
 ```
 
 ### 3. Outbox Collection Phase
@@ -100,7 +113,7 @@ echo "=== COLLECTION PHASE ==="
 
 # Process each registered project
 for PROJECT_PATH in $REGISTERED_PROJECTS; do
-    if [ -d "$PROJECT_PATH/outbox" ]; then
+    if [ -d "$PROJECT_PATH/claude/outbox" ]; then
         PROJECT_NAME=$(basename "$PROJECT_PATH")
         ORG_NAME=$(basename "$(dirname "$PROJECT_PATH")")
         
@@ -109,20 +122,31 @@ for PROJECT_PATH in $REGISTERED_PROJECTS; do
         
         if [ -n "$OUTBOX_TASKS" ]; then
             echo "Collecting from $ORG_NAME/$PROJECT_NAME:"
+            TASK_COUNT=0
             
             for TASK_FILE in $OUTBOX_TASKS; do
                 TASK_NAME=$(basename "$TASK_FILE")
                 
                 # Move task to base outbox
-                mv "$TASK_FILE" "claude/outbox/$TASK_NAME"
-                echo "  ✓ Collected: $TASK_NAME"
-                ((COLLECTED_COUNT++))
+                if mv "$TASK_FILE" "claude/outbox/$TASK_NAME"; then
+                    echo "  ✓ Collected: $TASK_NAME"
+                    ((COLLECTED_COUNT++))
+                    ((TASK_COUNT++))
+                else
+                    echo "  ❌ Failed to collect: $TASK_NAME"
+                    audit_log "OUTBOX" "error" "collection" "$TASK_NAME" "Failed to collect task from $ORG_NAME/$PROJECT_NAME"
+                fi
             done
+            
+            if [ $TASK_COUNT -gt 0 ]; then
+                audit_log "OUTBOX" "step" "collection" "$ORG_NAME/$PROJECT_NAME" "Collected $TASK_COUNT tasks from registered project"
+            fi
         fi
     fi
 done
 
 echo "✓ Collection complete: $COLLECTED_COUNT tasks collected"
+audit_log "OUTBOX" "step" "collection" "" "Collection phase completed: $COLLECTED_COUNT tasks collected from registered projects"
 ```
 
 ### 4. Task Distribution Phase
@@ -139,8 +163,12 @@ BASE_OUTBOX_TASKS=$(find claude/outbox -name "????-??-??T??-??-??-???Z_*.md" 2>/
 
 if [ -z "$BASE_OUTBOX_TASKS" ]; then
     echo "No tasks to distribute"
+    audit_log "OUTBOX" "step" "distribution" "" "No tasks found for distribution - workflow completed"
     exit 0
 fi
+
+TASK_COUNT=$(echo "$BASE_OUTBOX_TASKS" | wc -l)
+echo "Found $TASK_COUNT tasks for distribution"
 
 DISTRIBUTED_COUNT=0
 FAILED_COUNT=0
@@ -153,6 +181,7 @@ for TASK_FILE in $BASE_OUTBOX_TASKS; do
     
     if [ -z "$TARGET_REPO" ]; then
         echo "✗ Invalid task filename format: $TASK_NAME"
+        audit_log "OUTBOX" "error" "distribution" "$TASK_NAME" "Invalid filename format - cannot extract target repository"
         ((FAILED_COUNT++))
         continue
     fi
@@ -179,6 +208,7 @@ for project in data['registered_projects']:
     if [ -z "$TARGET_PATH" ] || [ ! -d "$TARGET_PATH" ]; then
         echo "✗ Target repository '$TARGET_REPO' not found or inaccessible"
         echo "  Task remains in outbox: $TASK_NAME"
+        audit_log "OUTBOX" "error" "distribution" "$TASK_NAME" "Target repository '$TARGET_REPO' not found in registry"
         ((FAILED_COUNT++))
         continue
     fi
@@ -189,14 +219,17 @@ for project in data['registered_projects']:
     # Move task to target inbox
     if mv "$TASK_FILE" "$TARGET_PATH/claude/inbox/$TASK_NAME"; then
         echo "✓ Delivered to $TARGET_REPO: $TASK_NAME"
+        audit_log "OUTBOX" "step" "distribution" "$TASK_NAME" "Successfully delivered task to $TARGET_REPO"
         ((DISTRIBUTED_COUNT++))
     else
         echo "✗ Failed to deliver to $TARGET_REPO: $TASK_NAME"
+        audit_log "OUTBOX" "error" "distribution" "$TASK_NAME" "Failed to move task to $TARGET_REPO inbox"
         ((FAILED_COUNT++))
     fi
 done
 
 echo "✓ Distribution complete: $DISTRIBUTED_COUNT delivered, $FAILED_COUNT failed"
+audit_log "OUTBOX" "step" "distribution" "" "Distribution phase completed: $DISTRIBUTED_COUNT delivered, $FAILED_COUNT failed"
 ```
 
 ### 5. Distribution Summary
@@ -213,10 +246,12 @@ echo "Distribution: $DISTRIBUTED_COUNT tasks delivered successfully"
 if [ $FAILED_COUNT -gt 0 ]; then
     echo "Failures: $FAILED_COUNT tasks remain in outbox (see errors above)"
     echo "Check target repositories and retry outbox workflow"
+    audit_log "OUTBOX" "workflow_complete" "outbox_sesame" "" "OUTBOX workflow completed with failures: $COLLECTED_COUNT collected, $DISTRIBUTED_COUNT distributed, $FAILED_COUNT failed"
 else
     echo "Status: All tasks distributed successfully"
+    audit_log "OUTBOX" "workflow_complete" "outbox_sesame" "" "OUTBOX workflow completed successfully: $COLLECTED_COUNT collected, $DISTRIBUTED_COUNT distributed"
 fi
-echo "Registry: $(echo "$REGISTERED_PROJECTS" | wc -l) registered projects processed"
+echo "Registry: $PROJECT_COUNT registered projects processed"
 echo ""
 echo "Next steps:"
 echo "- Target repositories can run 'inbox sesame' to process received tasks"

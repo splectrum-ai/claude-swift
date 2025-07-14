@@ -1,0 +1,17 @@
+{
+  "name": "claude-workflow-scripts",
+  "version": "1.0.0",
+  "description": "Node.js scripts for Claude workflow optimization",
+  "type": "module",
+  "scripts": {
+    "test": "node test/run-tests.js",
+    "audit:log": "node cli/audit.js",
+    "cache:sync": "node cli/cache.js sync",
+    "task:create": "node cli/task.js create"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

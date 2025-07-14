@@ -116,7 +116,6 @@ These work in both the orchestrator AND all registered projects:
 
 **Development Operations**
 - `commit sesame` - Intelligent commit with issue tracking
-- `audit sesame` - Validate audit log integrity
 - `issue sesame` - Create GitHub issue with metadata
 
 **Release Management**
@@ -166,7 +165,7 @@ claude-swift/                    # Orchestrator repository
 For questions and issues:
 1. Check documentation in `docs/`
 2. Review workflows in `claude/wow/workflows/`
-3. Use `audit sesame` to check system health
+3. Check recent audit logs in `claude/project/audit/current/current.log`
 4. Create an issue in this repository
 
 ---

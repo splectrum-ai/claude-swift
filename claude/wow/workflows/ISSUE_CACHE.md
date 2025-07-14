@@ -81,9 +81,18 @@ claude/project/cache/
 
 ## Workflow Steps
 
-### 1. Cache Initialization
+### 1. Initialize Audit Logging
+```bash
+# Load Node.js audit functions
+source claude/scripts/audit-functions.sh
+
+# Start issue cache workflow
+audit_log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow for cache management"
 ```
-ISSUE_CACHE|step|cache_init||Initialize cache directory and metadata
+
+### 2. Cache Initialization
+```bash
+audit_log "ISSUE_CACHE" "step" "cache_init" "" "Initializing cache directory and metadata"
 ```
 
 **Actions:**
@@ -91,9 +100,9 @@ ISSUE_CACHE|step|cache_init||Initialize cache directory and metadata
 2. Initialize metadata.json with default values
 3. Log cache initialization
 
-### 2. Gap Detection
-```
-ISSUE_CACHE|step|gap_detection||Check for missing issues/milestones in cache
+### 3. Gap Detection
+```bash
+audit_log "ISSUE_CACHE" "step" "gap_detection" "" "Checking for missing issues/milestones in cache"
 ```
 
 **Gap Detection Logic:**
@@ -114,9 +123,9 @@ else
 fi
 ```
 
-### 3. Issue Population
-```
-ISSUE_CACHE|step|issue_population||Cache missing open issues from GitHub
+### 4. Issue Population
+```bash
+audit_log "ISSUE_CACHE" "step" "issue_population" "" "Caching missing open issues from GitHub"
 ```
 
 **Population Process:**
@@ -143,9 +152,9 @@ if [ "$CACHE_NEEDED" = "true" ]; then
 fi
 ```
 
-### 4. Milestone Population
-```
-ISSUE_CACHE|step|milestone_population||Cache milestone data from GitHub
+### 5. Milestone Population
+```bash
+audit_log "ISSUE_CACHE" "step" "milestone_population" "" "Caching milestone data from GitHub"
 ```
 
 **Milestone Caching:**
@@ -499,6 +508,9 @@ if [ ! -d claude/project/cache ]; then
     mkdir -p claude/project/cache
     echo "Created missing cache directory"
 fi
+
+# Workflow completion logging
+audit_log "ISSUE_CACHE" "workflow_complete" "cache_synchronization" "" "ISSUE_CACHE workflow completed - cache synchronized with $new_issues new issues and $updated_issues updated issues"
 ```
 
 ## Success Criteria

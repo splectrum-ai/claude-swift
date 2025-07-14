@@ -130,10 +130,13 @@ OUTBOX|step|audit_logging||Record task processing in audit log
 
 **Actions:**
 ```bash
+# Use optimized Node.js audit logging
+source claude/scripts/audit-functions.sh
+
 # Log each processed task
 for task_file in $SELF_TARGETED_TASKS; do
     task_name=$(basename "$task_file")
-    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | OUTBOX|task_processed|$task_name|Moved self-targeted task from outbox to inbox" >> ./claude/project/audit/current/current.log
+    audit_log "OUTBOX" "task_processed" "$task_name" "" "Moved self-targeted task from outbox to inbox"
 done
 ```
 

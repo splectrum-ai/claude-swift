@@ -34,7 +34,6 @@ Complete list of all sesame triggers available in claude-swift orchestrator and 
 - `git sesame` - Status, add, commit, push workflow
 
 ### Documentation
-- `audit sesame` - Validate and analyze audit logs
 
 ## Specialized Triggers
 

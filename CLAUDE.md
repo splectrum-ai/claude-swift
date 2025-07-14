@@ -13,7 +13,6 @@ Use natural language with "sesame" suffix:
 - `next sesame` → NEXT_ISSUE
 - `transition sesame` → VERSION_TRANSITION (complete 6-step automation)
 - `version sesame` → NEW_VERSION_PLANNING (version setup and issue management)
-- `audit sesame` → AUDIT_LOGGING (audit log management and format validation)
 - `mandatory sesame` → MANDATORY_RULES_REFRESH (scan and validate all mandatory rules)
 - `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
 - `issue sesame` → ISSUE_CACHE workflow (issue cache synchronization) or manual issue creation

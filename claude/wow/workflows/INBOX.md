@@ -24,9 +24,18 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 
 ## Workflow Steps
 
-### 1. Inbox Scanning
+### 1. Initialize Audit Logging
+```bash
+# Load Node.js audit functions
+source claude/scripts/audit-functions.sh
+
+# Start inbox workflow
+audit_log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"
 ```
-INBOX|step|task_discovery||Scan inbox directory for pending tasks
+
+### 2. Inbox Scanning
+```bash
+audit_log "INBOX" "step" "task_discovery" "" "Scanning inbox directory for pending tasks"
 ```
 
 **Task Discovery:**
@@ -48,9 +57,9 @@ echo "Found $TASK_COUNT pending tasks in inbox"
 echo "Processing in chronological order..."
 ```
 
-### 2. Task Processing Loop
-```
-INBOX|step|task_processing||Process each task file in timestamp order
+### 3. Task Processing Loop
+```bash
+audit_log "INBOX" "step" "task_processing" "" "Processing each task file in timestamp order"
 ```
 
 **Sequential Processing:**
@@ -300,6 +309,9 @@ fi
 
 echo ""
 echo "Inbox status: $(find inbox -name "*.md" 2>/dev/null | wc -l) tasks remaining"
+
+# Workflow completion logging
+audit_log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow completed - processed $PROCESSED_COUNT tasks, $FAILED_COUNT failed"
 ```
 
 ## Task File Processing

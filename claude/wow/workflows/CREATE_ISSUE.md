@@ -5,7 +5,19 @@ Manual issue creation workflow with standardized metadata structure to ensure co
 
 ## Workflow Steps
 
-### 1. Gather Issue Information
+### 1. Initialize Audit Logging
+```bash
+# Load Node.js audit functions
+source claude/scripts/audit-functions.sh
+
+# Start issue creation workflow
+audit_log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow for manual issue creation"
+```
+
+### 2. Gather Issue Information
+```bash
+audit_log "CREATE_ISSUE" "step" "information_gathering" "" "Gathering issue information and metadata"
+```
 **Required Information:**
 - **Title**: Clear, descriptive issue title
 - **Description**: What needs to be done and why
@@ -15,8 +27,10 @@ Manual issue creation workflow with standardized metadata structure to ensure co
 - **Work Area**: Project-specific label or epic
 - **Test Criteria**: Specific validation steps
 
-### 2. Create Issue with Metadata
+### 3. Create Issue with Metadata
 ```bash
+audit_log "CREATE_ISSUE" "step" "issue_creation" "" "Creating GitHub issue with standardized metadata"
+
 gh issue create --title "[Issue Title]" --body "$(cat <<'EOF'
 ## Description
 [Clear description of what needs to be done]
@@ -46,8 +60,10 @@ EOF
 )"
 ```
 
-### 3. Apply Labels and Milestone
+### 4. Apply Labels and Milestone
 ```bash
+audit_log "CREATE_ISSUE" "step" "metadata_assignment" "" "Applying labels and milestone to created issue"
+
 # Add appropriate labels
 gh issue edit [ISSUE_NUMBER] --add-label "[priority-label]" --add-label "[work-area-label]"
 
@@ -55,14 +71,20 @@ gh issue edit [ISSUE_NUMBER] --add-label "[priority-label]" --add-label "[work-a
 gh issue edit [ISSUE_NUMBER] --milestone "[current-milestone]"
 ```
 
-### 4. Update Dependencies
+### 5. Update Dependencies
+```bash
+audit_log "CREATE_ISSUE" "step" "dependency_updates" "" "Updating dependency relationships for related issues"
+```
 If the issue has dependencies, update related issues:
 ```bash
 # For issues this blocks - add reference in their description
 # For issues this is blocked by - add reference in their description
 ```
 
-### 5. Refresh Issue Cache
+### 6. Refresh Issue Cache
+```bash
+audit_log "CREATE_ISSUE" "step" "cache_refresh" "" "Refreshing issue cache to include newly created issue"
+```
 After successful issue creation, update the local issue cache for NEXT_ISSUE performance:
 ```bash
 # Refresh issue cache to include newly created issue
@@ -100,6 +122,9 @@ except Exception as e:
     print(f'⚠ Cache update failed: {e}', file=sys.stderr)
     # Don't fail the workflow if cache update fails
 "
+
+# Workflow completion logging
+audit_log "CREATE_ISSUE" "workflow_complete" "issue_creation" "" "CREATE_ISSUE workflow completed - issue #$ISSUE_NUMBER created with full metadata"
 ```
 
 ## Metadata Standards

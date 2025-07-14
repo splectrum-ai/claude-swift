@@ -130,8 +130,8 @@ done
 ## Getting Help
 
 If you encounter issues:
-1. Run `audit sesame` to check system health
-2. Review the audit log for error details
+1. Check the audit log at `claude/project/audit/current/current.log` for error details
+2. Review workflow execution in recent audit entries
 3. Check GitHub issues for similar problems
 4. Create a new issue with reproduction steps
 

@@ -32,7 +32,6 @@ All universal workflows are available via sesame triggers:
 
 **Development Operations**
 - `commit sesame` - Intelligent commits with issue linking
-- `audit sesame` - Check audit log health
 
 **Release Management**
 - `release sesame` - Full version releases

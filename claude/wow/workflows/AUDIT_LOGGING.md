@@ -98,30 +98,78 @@ TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION
 
 ## Appending Procedure
 
-### 1. Read Current Log
+### Node.js Implementation (RECOMMENDED)
+```bash
+# Function to append to audit log using optimized Node.js implementation
+audit_log() {
+    local workflow="$1"
+    local step_type="$2"
+    local context="$3"
+    local file_path="$4"
+    local description="$5"
+    
+    # Use Node.js script for optimized logging
+    node claude/scripts/cli/audit-log.js "$workflow" "$step_type" "$context" "$file_path" "$description"
+}
+
+# Batch logging function (NEW - use for multiple entries)
+audit_log_batch() {
+    # For workflows with multiple steps, collect entries and batch at end
+    # Example usage in workflow scripts:
+    # AUDIT_ENTRIES=()
+    # AUDIT_ENTRIES+=("WORKFLOW|step1|context||Description 1")
+    # AUDIT_ENTRIES+=("WORKFLOW|step2|context||Description 2")
+    # audit_log_batch "${AUDIT_ENTRIES[@]}"
+    
+    # Call Node.js batch implementation
+    node -e "
+    import { auditLogBatch } from './claude/scripts/lib/audit.js';
+    const entries = process.argv.slice(1).map(entry => {
+        const [workflow, stepType, context, filePath, description] = entry.split('|');
+        return { workflow, stepType, context, filePath, description };
+    });
+    await auditLogBatch(entries);
+    " "$@"
+}
+
+# Usage examples:
+audit_log "COMMIT" "workflow_start" "commit_sesame" "" "Starting commit workflow"
+audit_log "TASK_CREATE" "item_complete" "outbox/task.md" "" "Created task for remote repository"
+audit_log "ISSUE_CACHE" "step" "cache_sync" "" "Synchronized 5 new issues"
+```
+
+### Legacy Bash Function (Fallback)
+```bash
+# Fallback function if Node.js is not available
+audit_log_bash() {
+    local workflow="$1"
+    local step_type="$2"
+    local context="$3"
+    local file_path="$4"
+    local description="$5"
+    local timestamp=$(date -u +%Y-%m-%dT%H:%M:%S)
+    
+    # Use plain echo without -e flag to avoid stdin interpretation
+    echo "${timestamp}|${workflow}|${step_type}|${context}|${file_path}|${description}" >> claude/project/audit/current/current.log
+}
+```
+
+### JavaScript Implementation
 ```javascript
 // Always read current state first
 const logContent = fs.readFileSync('claude/audit/current/current.log', 'utf8');
-```
 
-### 2. Locate Append Position
-```javascript
 // Find the unique marker
 const markerIndex = logContent.indexOf('##APPEND_MARKER_UNIQUE##');
-```
 
-### 3. Insert New Entry
-```javascript
 // Insert new entry before marker
 const newEntry = '2025-06-21T19:29:05Z|WORKFLOW|step|context|file|Description\n';
 const updatedContent = logContent.replace(
     '##APPEND_MARKER_UNIQUE##',
     newEntry + '##APPEND_MARKER_UNIQUE##'
 );
-```
 
-### 4. Write Updated Log
-```javascript
+// Write updated log
 fs.writeFileSync('claude/audit/current/current.log', updatedContent);
 ```
 
@@ -137,6 +185,14 @@ WRONG:     24→##APPEND_MARKER_UNIQUE##
 ```
 WRONG: ##APPEND_MARKER_UNIQUE##s
 WRONG:     25→##APPEND_MARKER_UNIQUE##
+```
+
+### ❌ Dev/Null Pollution
+```
+WRONG: 2025-06-21T19:29:05Z < /dev/null < /dev/null | WORKFLOW|step|context||Description
+CAUSE: Using echo -e or other flags that interpret stdin redirection
+FIX: Use plain echo without flags in the audit_log function
+```
 WRONG: ##APPEND_MARKER_UNIQUE## (with extra content)
 ```
 

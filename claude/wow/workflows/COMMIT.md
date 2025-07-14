@@ -27,9 +27,18 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 
 ## Workflow Steps
 
-### 1. Audit Log Validation
+### 1. Initialize Audit Logging
+```bash
+# Load Node.js audit functions
+source claude/scripts/audit-functions.sh
+
+# Start workflow with explicit logging
+audit_log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
 ```
-COMMIT|step|audit_validation||Verify recent work has corresponding audit entries
+
+### 2. Audit Log Validation
+```bash
+audit_log "COMMIT" "step" "audit_validation" "" "Verifying recent work has corresponding audit entries"
 ```
 
 **Actions:**
@@ -50,9 +59,9 @@ COMMIT|step|audit_validation||Verify recent work has corresponding audit entries
 - ⚠️ **Warning**: Some work may be undocumented, suggest adding audit entries
 - ❌ **Block**: Critical work undocumented, require audit completion before commit
 
-### 2. Change Assessment
-```
-COMMIT|step|change_assessment||Analyze current changes and git status
+### 3. Change Assessment
+```bash
+audit_log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
 ```
 
 **Actions:**
@@ -61,9 +70,9 @@ COMMIT|step|change_assessment||Analyze current changes and git status
 3. Check for untracked files that should be included
 4. Validate changes represent a logical commit unit
 
-### 3. Issue Detection
-```
-COMMIT|step|issue_detection||Scan changes and context for resolved issues
+### 4. Issue Detection
+```bash
+audit_log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
 ```
 
 **Actions:**
@@ -72,9 +81,9 @@ COMMIT|step|issue_detection||Scan changes and context for resolved issues
 3. Analyze changed files against open GitHub issues
 4. Identify issues that this work resolves
 
-### 4. Commit Message Generation
-```
-COMMIT|step|message_generation||Generate descriptive commit message
+### 5. Commit Message Generation
+```bash
+audit_log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
 ```
 
 **Format varies by context:**
@@ -111,9 +120,9 @@ Session complete: [session summary]
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-### 5. Commit Execution
-```
-COMMIT|step|commit_execution||Stage, commit, and push changes
+### 6. Commit Execution
+```bash
+audit_log "COMMIT" "step" "commit_execution" "" "Staging, committing, and pushing changes"
 ```
 
 **Actions:**
@@ -126,11 +135,14 @@ git commit -m "Generated commit message"
 
 # Push to main
 git push origin main
+
+# Log successful commit
+audit_log "COMMIT" "step" "commit_execution" "" "Staged all changes, committed as $(git rev-parse --short HEAD), pushed to main successfully"
 ```
 
-### 6. Issue Closure
-```
-COMMIT|step|issue_closure||Close resolved GitHub issues
+### 7. Issue Closure
+```bash
+audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
 ```
 
 **Actions:**
@@ -141,36 +153,27 @@ COMMIT|step|issue_closure||Close resolved GitHub issues
 2. Add comment explaining resolution
 3. **Cache-first closure**: Update cache first, then sync to GitHub
    ```bash
-   # Check if issue exists in cache
-   ISSUE_IN_CACHE=$(python3 -c "
+   # Only close issues that exist in cache (cache-first rule)
+   python3 -c "
    import json
-   try:
-       with open('claude/project/cache/issues.json', 'r') as f:
-           cache = json.load(f)
-       print('true' if '123' in cache else 'false')
-   except:
-       print('false')
-   ")
-   
-   if [ "$ISSUE_IN_CACHE" = "true" ]; then
-       # Issue in cache: Update cache first, then GitHub
-       python3 -c "
-       import json
-       with open('claude/project/cache/issues.json', 'r') as f:
-           cache = json.load(f)
-       del cache['123']
-       with open('claude/project/cache/issues.json', 'w') as f:
-           json.dump(cache, f, indent=2)
-       print('✓ Removed issue #123 from cache')
-       "
-       gh issue close #123 -c "Resolved in commit: [commit-hash]"
-   else
-       # Issue not in cache: Update GitHub first, then cache via gap detection
-       gh issue close #123 -c "Resolved in commit: [commit-hash]"
-       # Cache will be updated on next issue sesame or SESSION_START
-   fi
+   with open('claude/project/cache/issues.json', 'r') as f:
+       cache = json.load(f)
+   del cache['123']
+   with open('claude/project/cache/issues.json', 'w') as f:
+       json.dump(cache, f, indent=2)
+   print('✓ Removed issue #123 from cache')
+   "
+   gh issue close #123 -c "Resolved in commit: [commit-hash]"
    ```
 4. Log issue closure in audit log
+   ```bash
+   audit_log "COMMIT" "step" "issue_closure" "$issue_number" "Closed issue #$issue_number via commit resolution"
+   ```
+
+### 8. Workflow Completion
+```bash
+audit_log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
+```
 
 ## Interactive Prompts
 

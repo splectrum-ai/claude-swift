@@ -19,7 +19,19 @@
 
 ## SYSTEM CHECK PROCEDURE
 
+### Initialize Audit Logging
+```bash
+# Load Node.js audit functions
+source claude/scripts/audit-functions.sh
+
+# Start session end workflow
+audit_log "SESSION_END" "workflow_start" "session_termination" "" "Starting SESSION_END workflow with mandatory compliance checks"
+```
+
 **MANDATORY Rule Verification:**
+```bash
+audit_log "SESSION_END" "step" "mandatory_verification" "" "Verifying session compliance with all MANDATORY rules"
+```
 - Search CLAUDE.md for all \"**MANDATORY\" labeled rules
 - Search workflow files for MANDATORY requirements  
 - Verify session activities complied with each rule
@@ -33,14 +45,23 @@
 ## SESSION COMPLETION CHECKLIST
 
 ### **1. System Compliance Verification**
+```bash
+audit_log "SESSION_END" "step" "compliance_verification" "" "Completing MANDATORY system check and resolving any violations"
+```
 - Complete MANDATORY system check procedure above
 - Resolve any violations before session termination
 
 ### **2. Issue and Learning Management**
+```bash
+audit_log "SESSION_END" "step" "issue_management" "" "Updating GitHub issues and capturing session learnings"
+```
 - Ensure all GitHub issues are properly updated and closed if completed
 - Document session learnings in appropriate docs/ files
 
 ### **3. Git Operations and Clean Handoff**
+```bash
+audit_log "SESSION_END" "step" "git_operations" "" "Executing COMMIT workflow for session closure"
+```
 **INTELLIGENT: COMMIT workflow integration for session closure:**
 
 1. **Execute COMMIT workflow:**
@@ -51,8 +72,17 @@
    - Stage, commit, and push all changes to main
    - Close resolved issues with commit references
 2. **Archive complete session log** → `session_TIMESTAMP.log`
+   ```bash
+   audit_log "SESSION_END" "step" "log_archiving" "" "Archiving session audit log to session_$timestamp.log"
+   ```
 3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
+   ```bash
+   audit_log "SESSION_END" "step" "log_reset" "" "Created fresh audit log for next session"
+   ```
 4. **Log SESSION_END completion** in fresh audit log
+   ```bash
+   audit_log "SESSION_END" "workflow_complete" "session_termination" "" "SESSION_END workflow completed - session archived and repository prepared for next session"
+   ```
 
 **Benefits**: 
 - **Audit validation** - COMMIT workflow validates complete session audit before committing
