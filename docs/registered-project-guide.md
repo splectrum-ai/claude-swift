@@ -25,8 +25,9 @@ All universal workflows are available via sesame triggers:
 
 **Task & Issue Management**
 - `next sesame` - Get prioritized work recommendations
-- `issue sesame` - Create structured GitHub issues
-- `inbox sesame` - Process tasks sent to your inbox
+- `issue sesame` - Sync issue cache or create structured GitHub issues
+- `inbox sesame` - Process tasks sent to your inbox (auto-assigns target version milestone)
+- `outbox . sesame` - Process self-targeted tasks (universal workflow)
 - `task [target] sesame` - Create tasks for other projects
 
 **Development Operations**
@@ -57,7 +58,9 @@ Orchestrator-only workflows are NOT available:
 
 ### Receiving Tasks
 1. Tasks arrive in your `claude/inbox/`
-2. Run `inbox sesame` to convert them to issues
+2. Run `inbox sesame` to convert them to GitHub issues
+   - Issues are automatically assigned to your target version milestone
+   - Override with explicit `milestone:` field in task files if needed
 3. Use `next sesame` to prioritize work
 
 ## Directory Structure in Your Project
@@ -99,7 +102,9 @@ A: Create it in your `claude/project/workflows/` directory. It will be local to 
 
 As a registered project, you get:
 - ✅ All universal workflows for development
-- ✅ Task communication via inbox/outbox
+- ✅ Task communication via inbox/outbox (including self-targeted tasks)
+- ✅ Automatic milestone assignment from target version
+- ✅ Local issue caching for performance
 - ✅ Automatic workflow updates
 - ❌ No orchestrator-specific capabilities
 - ❌ No ability to register other projects

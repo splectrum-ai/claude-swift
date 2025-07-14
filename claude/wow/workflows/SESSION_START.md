@@ -17,7 +17,7 @@
 2. **ISSUE CACHE VALIDATION**: Execute ISSUE_CACHE workflow for complete cache synchronization
 3. **INBOX PROCESSING**: Check and process any received cross-repository tasks
 4. **OUTBOX DISTRIBUTION**: For base repositories, optionally distribute pending outbox tasks
-5. **GITHUB ISSUE REVIEW**: Show current GitHub issues and ask for user selection
+5. **ISSUE REVIEW**: Show current issues from cache and assess work priorities
 6. **SESSION OUTCOME DOCUMENTATION**: Present session summary if previous session had high-value outcomes
 
 ## SYSTEM CHECK PROCEDURE
@@ -234,7 +234,7 @@ echo "✓ Cache validation completed"
 - **OUTBOX Integration**: For base repositories, scans for pending task distribution
 - **Mandatory Processing**: Automatically executes INBOX and OUTBOX workflows when tasks are detected
 - **Session Automation**: Task processing is part of SESSION_START workflow execution, not optional
-- **Issue Creation**: INBOX processing feeds into GitHub issue system for prioritization
+- **Issue Creation**: INBOX processing creates GitHub issues that are automatically cached for prioritization
 
 ### **Connection to PROJECT_REGISTER**
 - Uses project registry to discover registered projects for outbox scanning
@@ -249,7 +249,7 @@ echo "✓ Cache validation completed"
 ## SUCCESS METRICS
 
 ### **Session Initialization Indicators**
-- Clear session goals established from GitHub issues
+- Clear session goals established from cached issue analysis
 - Previous session recovery completed successfully
 - Repository state verified as clean and compliant
 - Session boundaries clearly marked for analysis

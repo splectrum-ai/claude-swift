@@ -16,9 +16,10 @@ Use natural language with "sesame" suffix:
 - `audit sesame` → AUDIT_LOGGING (audit log management and format validation)
 - `mandatory sesame` → MANDATORY_RULES_REFRESH (scan and validate all mandatory rules)
 - `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
-- `issue sesame` → Manual issue creation for occasional needs
+- `issue sesame` → ISSUE_CACHE workflow (issue cache synchronization) or manual issue creation
 - `close sesame` → Manual issue closure for occasional needs
-- `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues)
+- `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues with milestone assignment)
+- `outbox . sesame` → OUTBOX workflow (process self-targeted tasks from outbox to inbox)
 - `task [org/repo] sesame` → TASK_CREATE workflow (interactive task creation for cross-repository communication)
 - `task . sesame` → TASK_CREATE workflow targeting current repository
 

@@ -9,8 +9,9 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 
 ## Purpose
 - Process inbox tasks in chronological order
-- Convert task files to GitHub issues using CREATE_ISSUE workflow
+- Convert task files to GitHub issues with automatic milestone assignment
 - Enable cross-repository task coordination through issue system
+- Batch process all tasks before single cache synchronization
 - Maintain clean separation between task ingestion and execution
 
 ## Prerequisites
@@ -110,6 +111,24 @@ done
 INBOX|step|issue_conversion||Convert task content to GitHub issue
 ```
 
+**Milestone Detection:**
+```bash
+get_target_milestone() {
+    # Check if version-config.md exists and extract target version
+    if [ -f "claude/project/version-config.md" ]; then
+        local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | cut -d':' -f2 | cut -d'(' -f1 | tr -d ' ')
+        if [ -n "$target_version" ]; then
+            echo "$target_version"
+            return 0
+        fi
+    fi
+    
+    # Fallback: no milestone assignment
+    echo ""
+    return 1
+}
+```
+
 **Task-to-Issue Conversion:**
 ```bash
 create_issue_from_task() {
@@ -120,6 +139,23 @@ create_issue_from_task() {
     local priority=$(grep "^priority:" "$task_file" | cut -d' ' -f2- | tr -d ' ' | tr '[:lower:]' '[:upper:]')
     local task_type=$(grep "^type:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
     local created=$(grep "^created:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
+    local explicit_milestone=$(grep "^milestone:" "$task_file" | cut -d' ' -f2- | tr -d ' ')
+    
+    # Determine milestone assignment
+    local milestone=""
+    if [ -n "$explicit_milestone" ]; then
+        # Use explicitly specified milestone
+        milestone="$explicit_milestone"
+        echo "  📌 Using explicit milestone: $milestone"
+    else
+        # Use target version milestone as default
+        milestone=$(get_target_milestone)
+        if [ -n "$milestone" ]; then
+            echo "  📌 Using target version milestone: $milestone"
+        else
+            echo "  📌 No milestone assigned (no target version found)"
+        fi
+    fi
     
     # Extract title (remove "Task: " prefix if present)
     local issue_title
@@ -166,12 +202,34 @@ $task_content
     local temp_file=$(mktemp)
     echo "$issue_body" > "$temp_file"
     
-    if gh issue create --title "$issue_title" --body-file "$temp_file" --label "cross-repository,inbox-task"; then
+    # Build gh issue create command with optional milestone
+    local create_cmd="gh issue create --title \"$issue_title\" --body-file \"$temp_file\" --label \"cross-repository,inbox-task\""
+    if [ -n "$milestone" ]; then
+        create_cmd="$create_cmd --milestone \"$milestone\""
+    fi
+    
+    if eval "$create_cmd"; then
         rm "$temp_file"
-        
-        # Execute CREATE_ISSUE cache refresh step
-        echo "Refreshing issue cache..."
-        python3 -c "
+        return 0
+    else
+        rm "$temp_file"
+        return 1
+    fi
+}
+```
+
+### 4. Issue Cache Update
+```
+INBOX|step|cache_update||Update issue cache with newly created issues
+```
+
+**Cache Synchronization:**
+```bash
+if [ $PROCESSED_COUNT -gt 0 ]; then
+    echo "🔄 Updating issue cache with newly created issues..."
+    
+    # Execute ISSUE_CACHE workflow to sync all new issues
+    python3 -c "
 import json
 import subprocess
 import sys
@@ -204,15 +262,13 @@ except Exception as e:
     print(f'⚠ Cache update failed: {e}', file=sys.stderr)
     # Don't fail the workflow if cache update fails
 "
-        return 0
-    else
-        rm "$temp_file"
-        return 1
-    fi
-}
+    echo "✓ Issue cache synchronized"
+else
+    echo "ℹ No issues created - skipping cache update"
+fi
 ```
 
-### 4. Processing Summary
+### 5. Processing Summary
 ```
 INBOX|step|completion_summary||Provide inbox processing completion summary
 ```
@@ -328,6 +384,12 @@ fi
 - **CREATE_ISSUE**: Underlying workflow for GitHub issue creation
 - **NEXT_ISSUE**: Downstream workflow for issue prioritization
 - **AUDIT_LOGGING**: Log all inbox processing operations
+
+### Milestone Assignment Strategy
+- **Default Behavior**: Issues automatically assigned to TARGET_VERSION milestone from `claude/project/version-config.md`
+- **Explicit Override**: Tasks can specify `milestone:` field to use different milestone
+- **Fallback**: No milestone assigned if no target version configured and no explicit milestone specified
+- **Integration**: Ensures all issues align with current development version by default
 
 ## Usage Examples
 

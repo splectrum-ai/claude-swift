@@ -23,8 +23,8 @@ These workflows are part of the core framework and work identically in:
 - `SESSION_START` / `SESSION_END` - Session management
 - `NEXT_ISSUE` - Issue prioritization and selection
 - `COMMIT` - Intelligent commit with issue closure
-- `CREATE_ISSUE` / `ISSUE_CACHE` - Issue management
-- `INBOX` / `TASK_CREATE` - Task reception and creation
+- `CREATE_ISSUE` / `ISSUE_CACHE` - Issue management and local caching
+- `INBOX` / `OUTBOX` / `TASK_CREATE` - Task processing and creation
 - `RELEASE_PROCESS` / `VERSION_TRANSITION` - Release management
 - `NEW_VERSION_PLANNING` - Version planning
 - `AUDIT_LOGGING` - Audit trail management
@@ -64,12 +64,14 @@ claude-swift (orchestrator)
 │   ├── wow/workflows/        # Universal workflows (work everywhere)
 │   │   ├── SESSION_START.md
 │   │   ├── NEXT_ISSUE.md
-│   │   ├── INBOX.md         # Receives tasks
+│   │   ├── INBOX.md         # Process tasks to GitHub issues
+│   │   ├── OUTBOX.md        # Process self-targeted tasks
+│   │   ├── ISSUE_CACHE.md   # Local issue caching
 │   │   └── ...
 │   └── project/workflows/    # Orchestrator-only workflows
 │       ├── INITIALISE.md    # Setup workspace
 │       ├── PROJECT_REGISTER.md # Register projects
-│       └── OUTBOX.md        # Distribute tasks
+│       └── OUTBOX.md        # Cross-repository task distribution
 └── projects/                 # Symlink to workspace (orchestrator only)
     ├── org1/repo1/
     └── org2/repo2/
@@ -79,48 +81,57 @@ registered-repo (e.g., splectrum)
 │   └── wow/workflows/        # Universal workflows ONLY
 │       ├── SESSION_START.md
 │       ├── NEXT_ISSUE.md
-│       ├── INBOX.md         # Same workflow, receives tasks
+│       ├── INBOX.md         # Process tasks to GitHub issues
+│       ├── OUTBOX.md        # Process self-targeted tasks
+│       ├── ISSUE_CACHE.md   # Local issue caching
 │       └── ...
 └── (no projects/ directory)  # Not an orchestrator
 ```
 
 ## Workflow Availability
 
-| Workflow | Orchestrator | Registered Repos | Trigger |
-|----------|--------------|------------------|---------|
-| SESSION_START | ✅ | ✅ | `start sesame` |
-| NEXT_ISSUE | ✅ | ✅ | `next sesame` |
-| INBOX | ✅ | ✅ | `inbox sesame` |
-| TASK_CREATE | ✅ | ✅ | `task [target] sesame` |
-| INITIALISE | ✅ | ❌ | `initialise sesame` |
-| PROJECT_REGISTER | ✅ | ❌ | `register [repo] sesame` |
-| OUTBOX | ✅ | ❌ | `outbox sesame` |
+| Workflow | Orchestrator | Registered Repos | Trigger | Description |
+|----------|--------------|------------------|---------|-------------|
+| SESSION_START | ✅ | ✅ | `start sesame` | Session initialization |
+| NEXT_ISSUE | ✅ | ✅ | `next sesame` | Issue prioritization |
+| INBOX | ✅ | ✅ | `inbox sesame` | Process tasks to issues (with milestone assignment) |
+| OUTBOX | ✅ | ✅ | `outbox . sesame` | Process self-targeted tasks |
+| TASK_CREATE | ✅ | ✅ | `task [target] sesame` | Create cross-repository tasks |
+| ISSUE_CACHE | ✅ | ✅ | `issue sesame` | Local issue caching |
+| INITIALISE | ✅ | ❌ | `initialise sesame` | Setup orchestrator workspace |
+| PROJECT_REGISTER | ✅ | ❌ | `register [repo] sesame` | Register projects for orchestration |
+| OUTBOX (Cross-repo) | ✅ | ❌ | `outbox sesame` | Distribute tasks to all registered projects |
 
 ## Usage Examples
 
 ### In Orchestrator (claude-swift)
 ```bash
 # Universal workflows work
-start sesame
-next sesame
-inbox sesame
+start sesame                    # Session initialization
+next sesame                     # Find next issue to work on
+outbox . sesame                 # Process self-targeted tasks
+inbox sesame                    # Convert tasks to GitHub issues
+issue sesame                    # Sync issue cache
 
 # Project-specific workflows also work
-initialise sesame
-register org/repo sesame
-outbox sesame
+initialise sesame               # Setup workspace (one-time)
+register org/repo sesame        # Register new projects
+outbox sesame                   # Distribute tasks to all projects
 ```
 
 ### In Registered Repo (e.g., splectrum)
 ```bash
 # Universal workflows work
-start sesame
-next sesame
-inbox sesame
+start sesame                    # Session initialization
+next sesame                     # Find next issue to work on
+outbox . sesame                 # Process self-targeted tasks
+inbox sesame                    # Convert tasks to GitHub issues
+issue sesame                    # Sync issue cache
 
 # Project-specific workflows NOT available
-initialise sesame  # ❌ Error: workflow not found
-outbox sesame      # ❌ Error: workflow not found
+initialise sesame               # ❌ Error: workflow not found
+register org/repo sesame        # ❌ Error: workflow not found
+outbox sesame                   # ❌ Error: workflow not found
 ```
 
 ## Implementation Notes

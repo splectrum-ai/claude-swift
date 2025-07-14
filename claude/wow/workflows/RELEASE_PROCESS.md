@@ -11,7 +11,7 @@ Complete release process for version closure including log archiving, historical
 ## Workflow Steps
 
 ### 1. Pre-Release Validation
-- Verify all Phase 1 planning issues closed
+- Verify all issues closed
 - Confirm all current version work completed
 - Validate repository clean state
 
@@ -80,8 +80,8 @@ done
 git tag v{VERSION}
 git push origin v{VERSION}
 
-# Create GitHub release with version achievements as release notes
-gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file audit/v{VERSION}/learning_v{VERSION}.log {ARTIFACT_NAME}.7z
+# Create GitHub release with release notes
+gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat release_notes.md)" {ARTIFACT_NAME}.7z
 ```
 
 ## Release Workflow Execution
@@ -113,11 +113,11 @@ gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file au
 ### Development Continuity  
 - Archived logs preserve complete development history
 - Fresh logs enable clean start for next version
-- Historical learnings remain accessible for future reference
+- Historical audit trail remains accessible for future reference
 
 ### Release Artifacts
 - Git tags for version identification
-- GitHub releases with comprehensive release notes from learnings
+- GitHub releases with comprehensive release notes
 - Self-extracting archive for distribution
 
 ## Benefits
@@ -133,7 +133,7 @@ gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file au
 - Systematic release preparation process
 
 ### Release Accountability
-- Comprehensive release notes from captured learnings
+- Comprehensive release notes documenting achievements
 - Complete traceability from planning through implementation
 - Systematic version closure process
 

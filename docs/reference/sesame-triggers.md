@@ -7,8 +7,9 @@ Complete list of all sesame triggers available in claude-swift orchestrator and 
 ### Project Management
 - `initialise sesame` - Initialize orchestrator workspace (one-time setup)
 - `register [org/repo] sesame` - Register a project for orchestration
-- `outbox sesame` - Collect tasks from all projects and distribute
-- `inbox sesame` - Process received tasks into GitHub issues
+- `outbox sesame` - Distribute tasks across all registered projects (orchestrator only)
+- `outbox . sesame` - Process self-targeted tasks from outbox to inbox (universal)
+- `inbox sesame` - Process received tasks into GitHub issues with milestone assignment
 
 ### Task Creation
 - `task [repo] sesame` - Create task for specific repository
@@ -41,22 +42,21 @@ Complete list of all sesame triggers available in claude-swift orchestrator and 
 - `mandatory sesame` - Refresh and validate all mandatory rules
 
 ### Issue Management
-- `issue sesame` - Manual issue creation
+- `issue sesame` - Manual issue creation or issue cache synchronization
 - `close sesame` - Manual issue closure
 
 ## Usage Patterns
 
 ### Starting Work
 ```bash
-# In orchestrator
+# In any repository (orchestrator or project)
 start sesame
-outbox sesame       # Distribute any pending tasks
+outbox . sesame     # Process self-targeted tasks (universal)
+inbox sesame        # Convert inbox tasks to GitHub issues
 next sesame         # See what to work on
 
-# In project terminal  
-cd projects/org/repo
-start sesame
-next sesame         # Work on project issues
+# Cross-project task distribution (orchestrator only)
+outbox sesame       # Distribute tasks to all registered projects
 ```
 
 ### Creating Cross-Project Tasks
@@ -65,10 +65,15 @@ next sesame         # Work on project issues
 task project-b sesame
 
 # From orchestrator, distribute
-outbox sesame
+outbox sesame       # Cross-repository distribution
 
 # In project B
-inbox sesame        # Converts to GitHub issue
+inbox sesame        # Converts to GitHub issue with milestone assignment
+
+# Self-targeted tasks (any repository)
+task . sesame       # Create task for current repository
+outbox . sesame     # Move to inbox for processing
+inbox sesame        # Convert to GitHub issue
 ```
 
 ### Releasing Versions
@@ -101,9 +106,11 @@ User: sesame
 ## Tips
 
 ### Efficient Orchestration
-1. Run `outbox sesame` regularly to keep tasks flowing
-2. Process inbox before starting new work
-3. Use `task . sesame` for same-project tasks
+1. Run `outbox . sesame` in any repository to process self-targeted tasks
+2. Run `outbox sesame` in orchestrator to distribute cross-repository tasks
+3. Process inbox before starting new work with `inbox sesame`
+4. Use `task . sesame` for same-project tasks (creates local outbox tasks)
+5. New issues automatically get target version milestone unless overridden
 
 ### Project Switching
 ```bash
