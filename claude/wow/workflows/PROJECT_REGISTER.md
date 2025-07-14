@@ -119,7 +119,34 @@ echo "✓ CLAUDE.md -> $(readlink CLAUDE.md)"
 echo "✓ claude/wow -> $(readlink claude/wow)"
 ```
 
-### 5. Project Registry Update
+### 5. Project Cleanup
+```
+PROJECT_REGISTER|step|project_cleanup||Remove template-only files from registered project
+```
+
+**Template File Cleanup:**
+```bash
+# Remove repo todo list if it exists (should only exist in base template)
+if [ -f "claude/project/todo.md" ]; then
+    echo "Removing template-only file: claude/project/todo.md"
+    rm "claude/project/todo.md"
+    echo "✓ Removed claude/project/todo.md (template-only file)"
+else
+    echo "✓ No claude/project/todo.md found (already clean)"
+fi
+
+# Create inbox/outbox directories with correct structure
+mkdir -p claude/inbox claude/outbox
+echo "✓ Ensured claude/inbox and claude/outbox directories exist"
+```
+
+**Cleanup Rationale:**
+- `claude/project/todo.md` should only exist in the base template
+- Registered projects should not have their own repo todo lists
+- Maintains clean separation between template machinery and project content
+- Prevents confusion about authoritative todo management
+
+### 6. Project Registry Update
 ```
 PROJECT_REGISTER|step|registry_update||Add project to registered projects list
 ```
@@ -157,7 +184,7 @@ else
 fi
 ```
 
-### 6. Registration Summary
+### 7. Registration Summary
 ```
 PROJECT_REGISTER|step|completion_summary||Provide registration completion summary
 ```
