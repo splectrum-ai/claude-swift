@@ -18,14 +18,14 @@ Complete release process for version closure including log archiving, historical
 ### 2. Audit Log Archiving Phase
 ```bash
 # Create version archive directory
-mkdir -p audit/v{VERSION}
+mkdir -p claude/project/audit/v{VERSION}
 
 # Move current audit logs to version archive
-mv audit/current/* audit/v{VERSION}/
+mv claude/project/audit/current/* claude/project/audit/v{VERSION}/
 
 # Concatenate all session files into single version audit log
-cat audit/v{VERSION}/*.log > audit/v{VERSION}/audit_v{VERSION}.log
-rm audit/v{VERSION}/*_session*.log
+cat claude/project/audit/v{VERSION}/*.log > claude/project/audit/v{VERSION}/audit_v{VERSION}.log
+rm claude/project/audit/v{VERSION}/*_session*.log
 
 # Ensure current directory is clean for next version
 # (VERSION_TRANSITION workflow will process the archived audit data)
@@ -34,10 +34,10 @@ rm audit/v{VERSION}/*_session*.log
 ### 3. Commit & Integration Phase
 ```bash
 # Commit archiving changes
-git add audit/
+git add claude/project/audit/
 git commit -m "Archive v{VERSION} audit logs and prepare for release
 
-- Move audit/current/* to audit/v{VERSION}/
+- Move claude/project/audit/current/* to claude/project/audit/v{VERSION}/
 - Concatenate session logs into audit_v{VERSION}.log
 - Preserve complete development audit trail
 

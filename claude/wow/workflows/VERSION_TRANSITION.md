@@ -8,13 +8,13 @@
 
 **Trigger**: Called via VERSION workflow router
 
-**Input**: Closed version audit logs in `claude/audit/v{version}/`
+**Input**: Closed version audit logs in `claude/project/audit/v{version}/`
 **Output**: Updated knowledge base, onboarding documentation, and clean next version preparation
 
 ## MANDATORY TRANSITION SEQUENCE:
 
 ### 1. Audit Log Analysis and Processing
-- **Process Version Audit Data**: Analyze all files in `claude/audit/v{version}/` for systematic knowledge extraction
+- **Process Version Audit Data**: Analyze all files in `claude/project/audit/v{version}/` for systematic knowledge extraction
 - **Extract Knowledge Domains**: Generate frequency analysis of knowledge domains touched during version
 - **Identify New Components**: Catalog new files, modules, and system areas discovered during development
 - **Calculate Development Metrics**: Quantify time distribution, activity patterns, and workflow effectiveness
@@ -56,7 +56,7 @@
 - **Tool**: `claude/wow/automation/get-started-generator.js`
 
 ### 7. Next Version Readiness Assessment
-- **Validate Audit Cleanup**: Verify `claude/audit/current/` is properly reset (done by Close Version Workflow)
+- **Validate Audit Cleanup**: Verify `claude/project/audit/current/` is properly reset (done by Close Version Workflow)
 - **Validate Version References**: Scan current platform documentation for version reference consistency
 - **Validate Version Scope**: Confirm scope and priorities are defined (done by NEW_VERSION_PLANNING Workflow)  
 - **Validate Knowledge Systems**: Verify tracking systems are initialized (done by Close Version Workflow)
@@ -67,7 +67,7 @@
 ### Knowledge Domain Analysis
 ```bash
 # Extract all knowledge domains from version audit logs
-grep -o 'domains:\[[^]]*\]' claude/audit/v{version}/*.log | 
+grep -o 'domains:\[[^]]*\]' claude/project/audit/v{version}/*.log | 
 cut -d'[' -f2 | cut -d']' -f1 | 
 tr ',' '\n' | sort | uniq -c | sort -nr
 ```
@@ -75,7 +75,7 @@ tr ',' '\n' | sort | uniq -c | sort -nr
 ### Component Interaction Mapping
 ```bash
 # Extract file interaction patterns
-grep -o 'files:\[[^]]*\]' claude/audit/v{version}/*.log |
+grep -o 'files:\[[^]]*\]' claude/project/audit/v{version}/*.log |
 cut -d'[' -f2 | cut -d']' -f1 |
 tr ',' '\n' | sort | uniq -c | sort -nr
 ```

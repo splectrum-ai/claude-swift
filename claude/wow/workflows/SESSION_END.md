@@ -71,9 +71,15 @@ audit_log "SESSION_END" "step" "git_operations" "" "Executing COMMIT workflow fo
    - Generate intelligent commit message with session context
    - Stage, commit, and push all changes to main
    - Close resolved issues with commit references
-2. **Archive complete session log** → `session_TIMESTAMP.log`
+2. **Archive complete session log** → `claude/project/audit/current/session_TIMESTAMPZ.log`
    ```bash
-   audit_log "SESSION_END" "step" "log_archiving" "" "Archiving session audit log to session_$timestamp.log"
+   # Create timestamp with Z suffix for UTC
+   timestamp=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+   
+   # Archive session log in current directory (belongs to target version until release)
+   cp claude/project/audit/current/current.log "claude/project/audit/current/session_${timestamp}.log"
+   
+   audit_log "SESSION_END" "step" "log_archiving" "" "Archiving session audit log to current/session_${timestamp}.log"
    ```
 3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
    ```bash

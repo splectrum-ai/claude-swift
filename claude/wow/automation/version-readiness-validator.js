@@ -72,12 +72,12 @@ class VersionReadinessValidator {
         const result = this.validationResults.auditCleanup;
         
         try {
-            // Check if claude/audit/current exists and assess its state
-            const currentAuditPath = 'claude/audit/current';
+            // Check if claude/project/audit/current exists and assess its state
+            const currentAuditPath = 'claude/project/audit/current';
             const versionAuditPath = `claude/audit/v${this.currentVersion}`;
             
             if (!fs.existsSync(currentAuditPath)) {
-                result.issues.push('claude/audit/current directory does not exist');
+                result.issues.push('claude/project/audit/current directory does not exist');
                 result.status = 'failed';
                 this.totalChecks++;
                 return;

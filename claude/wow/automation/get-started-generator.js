@@ -260,8 +260,8 @@ class GetStartedGenerator {
         this.getStartedContent.commonPitfalls = [
             {
                 pitfall: 'Incorrect audit log paths',
-                problem: 'Using old `audit/` path instead of `claude/audit/`',
-                solution: 'Always use `claude/audit/current/current.log` for current logging',
+                problem: 'Using old `audit/` path instead of `claude/project/audit/`',
+                solution: 'Always use `claude/project/audit/current/current.log` for current logging',
                 prevention: 'Check CLAUDE.md for current audit architecture'
             },
             {

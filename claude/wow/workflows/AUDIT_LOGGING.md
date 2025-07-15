@@ -1,299 +1,64 @@
-# AUDIT_LOGGING Workflow
+# AUDIT_LOGGING
 
 ## Overview
+Streamlined audit logging using proven Node.js implementation with explicit logging patterns throughout workflows.
 
-The AUDIT_LOGGING workflow defines mandatory rules and procedures for maintaining the operational audit log in `claude/project/audit/current/current.log`. This workflow ensures consistent, trackable logging of all workflow activities and session management.
+## Implementation
+**Use Node.js audit functions**: All workflows should load and use the standardized audit functions:
 
-## Core Principles
+```bash
+# Load audit functions at start of any workflow
+source claude/scripts/audit-functions.sh
 
-### 1. Unique Append Marker
-**MANDATORY**: All audit log entries MUST be appended before the unique marker `##APPEND_MARKER_UNIQUE##`
-
-```
-✅ CORRECT FORMAT:
-2025-06-21T19:29:05Z|WORKFLOW_NAME|step|context|file.txt|Description of activity
-##APPEND_MARKER_UNIQUE##
-
-❌ INCORRECT - includes line numbers:
-    23→2025-06-21T19:29:05Z|WORKFLOW_NAME|step|context|file.txt|Description
-    24→##APPEND_MARKER_UNIQUE##
+# Use explicit logging throughout workflow
+audit_log "WORKFLOW_NAME" "workflow_start" "context" "file_path" "Starting workflow description"
+audit_log "WORKFLOW_NAME" "step" "operation" "file_path" "Step description"
+audit_log "WORKFLOW_NAME" "workflow_complete" "context" "" "Workflow completed successfully"
 ```
 
-### 2. Clean Marker Management
-- Marker MUST always appear as clean text: `##APPEND_MARKER_UNIQUE##`
-- NO line numbers, NO prefixes, NO suffixes
-- Marker serves as insertion point for new entries
+## Audit Function Reference
 
-## Audit Log Entry Format
+### Basic Usage
+```bash
+audit_log workflow step_type context file_path description
+```
 
-### Standard Entry Structure
+### Parameters
+- **workflow**: Workflow name (e.g., `COMMIT`, `SESSION_START`) 
+- **step_type**: Activity type (`workflow_start`, `step`, `workflow_complete`, `item_complete`)
+- **context**: Activity category or operation name
+- **file_path**: Relevant file path (use `""` if none)
+- **description**: Clear description of activity
+
+### Batch Logging
+```bash
+# For multiple related operations
+audit_log_batch "WORKFLOW_NAME" "batch_operation" "context" "" "Processed 5 tasks successfully"
+```
+
+## Log Format
+Entries are automatically formatted as:
 ```
 TIMESTAMP|WORKFLOW|STEP_TYPE|CONTEXT|FILE_PATH|DESCRIPTION
 ```
 
-**Components:**
-- **TIMESTAMP**: ISO format with timezone (e.g., `2025-06-21T19:29:05Z`)
-- **WORKFLOW**: Workflow name (e.g., `SESSION_START`, `METRICS_ANALYSIS`)
-- **STEP_TYPE**: Activity type (`workflow_start`, `step`, `workflow_complete`, `complete`, `final`, `item_complete`)
-- **CONTEXT**: Activity category or domain
-- **FILE_PATH**: Relevant file path (optional, use `||` if none)
-- **DESCRIPTION**: Clear description of activity performed
-
-## Workflow Logging Patterns
-
-### 1. Workflow Start
+Example:
 ```
-2025-06-21T19:29:05Z|WORKFLOW_NAME|workflow_start|context|file_path|Starting workflow description
+2025-07-15T04:32:26Z|SESSION_END|workflow_start|session_termination||Starting SESSION_END workflow
 ```
 
-### 2. Workflow Steps  
-```
-2025-06-21T19:29:05Z|WORKFLOW_NAME|step|context|file_path|Step description and outcome
-```
+## Integration Pattern
+1. **Load functions**: `source claude/scripts/audit-functions.sh`
+2. **Log workflow start**: `audit_log "WORKFLOW" "workflow_start" ...`
+3. **Log major steps**: `audit_log "WORKFLOW" "step" ...`
+4. **Log completion**: `audit_log "WORKFLOW" "workflow_complete" ...`
 
-### 3. Workflow Completion
-```
-2025-06-21T19:29:05Z|WORKFLOW_NAME|workflow_complete|context|file_path|Completion summary
-```
+## Node.js Implementation
+- **Location**: `claude/scripts/lib/audit.js`
+- **CLI Interface**: `claude/scripts/cli/audit-log.js`
+- **Bash Wrapper**: `claude/scripts/audit-functions.sh`
+- **Benefits**: Batch operations, error handling, consistent formatting
 
-### 4. Item Start/Complete Logging (PRIMARY PATTERN)
-**ITEM-TRIGGERED AUDIT LOGGING**: The primary logging pattern for tracking work completion on discrete work items:
+---
 
-```
-# Item complete (multiple entries reflecting workflows used)
-2025-06-21T19:29:05Z|WORKFLOW_NAME|item_complete|context|file_path|Specific workflow activity completed
-2025-06-21T19:29:05Z|ANOTHER_WORKFLOW|item_complete|context|file_path|Another workflow activity completed
-2025-06-21T19:29:05Z|WORK_ITEM|item_complete|work_completion|relevant_file|Completed: Description of work item
-```
-
-**Pattern:**
-- **Work execution**: Execute the work completely without logging interruption
-- **Completion tracking**: After work is done, log multiple `item_complete` entries reflecting each workflow used during completion
-- **Final completion entry**: Summary entry for the overall work item
-- **Timestamp grouping**: All completion entries use same timestamp for grouped tracking
-- **Decoupled from repository todo list** - applies to any discrete work item
-- **No start logging**: Focus on outcomes, not process initiation
-
-### 5. New File Creation (MANDATORY)
-**MANDATORY FILE CREATION LOGGING**: When ANY new file is created during workflow execution, Claude MUST log the file creation activity:
-
-```
-2025-06-21T19:29:05Z|WORKFLOW_NAME|file_created|context|path/to/new/file.ext|Created new file: filename.ext - purpose description
-```
-
-**Requirements:**
-- **FILE_PATH**: MUST contain the complete path to the newly created file
-- **DESCRIPTION**: MUST include filename and brief purpose description
-- **TIMING**: Log entry MUST be created immediately after file creation
-- **CONTEXT**: Should reflect the domain or purpose of the file creation
-
-**Examples:**
-```
-2025-06-21T19:29:05Z|DOCUMENTATION_WORKFLOW|file_created|documentation|docs/api/authentication.md|Created new file: authentication.md - API authentication guide
-2025-06-21T19:29:05Z|FEATURE_IMPLEMENTATION|file_created|testing|tests/unit/user-service.test.js|Created new file: user-service.test.js - unit tests for user service
-2025-06-21T19:29:05Z|PROJECT_SETUP|file_created|configuration|config/database.json|Created new file: database.json - database configuration settings
-```
-
-**Purpose**: Provides complete audit trail of all new files created during workflows, enabling tracking of project evolution and supporting accountability for file system changes.
-
-## Appending Procedure
-
-### Node.js Implementation (RECOMMENDED)
-```bash
-# Function to append to audit log using optimized Node.js implementation
-audit_log() {
-    local workflow="$1"
-    local step_type="$2"
-    local context="$3"
-    local file_path="$4"
-    local description="$5"
-    
-    # Use Node.js script for optimized logging
-    node claude/scripts/cli/audit-log.js "$workflow" "$step_type" "$context" "$file_path" "$description"
-}
-
-# Batch logging function (NEW - use for multiple entries)
-audit_log_batch() {
-    # For workflows with multiple steps, collect entries and batch at end
-    # Example usage in workflow scripts:
-    # AUDIT_ENTRIES=()
-    # AUDIT_ENTRIES+=("WORKFLOW|step1|context||Description 1")
-    # AUDIT_ENTRIES+=("WORKFLOW|step2|context||Description 2")
-    # audit_log_batch "${AUDIT_ENTRIES[@]}"
-    
-    # Call Node.js batch implementation
-    node -e "
-    import { auditLogBatch } from './claude/scripts/lib/audit.js';
-    const entries = process.argv.slice(1).map(entry => {
-        const [workflow, stepType, context, filePath, description] = entry.split('|');
-        return { workflow, stepType, context, filePath, description };
-    });
-    await auditLogBatch(entries);
-    " "$@"
-}
-
-# Usage examples:
-audit_log "COMMIT" "workflow_start" "commit_sesame" "" "Starting commit workflow"
-audit_log "TASK_CREATE" "item_complete" "outbox/task.md" "" "Created task for remote repository"
-audit_log "ISSUE_CACHE" "step" "cache_sync" "" "Synchronized 5 new issues"
-```
-
-### Legacy Bash Function (Fallback)
-```bash
-# Fallback function if Node.js is not available
-audit_log_bash() {
-    local workflow="$1"
-    local step_type="$2"
-    local context="$3"
-    local file_path="$4"
-    local description="$5"
-    local timestamp=$(date -u +%Y-%m-%dT%H:%M:%S)
-    
-    # Use plain echo without -e flag to avoid stdin interpretation
-    echo "${timestamp}|${workflow}|${step_type}|${context}|${file_path}|${description}" >> claude/project/audit/current/current.log
-}
-```
-
-### JavaScript Implementation
-```javascript
-// Always read current state first
-const logContent = fs.readFileSync('claude/audit/current/current.log', 'utf8');
-
-// Find the unique marker
-const markerIndex = logContent.indexOf('##APPEND_MARKER_UNIQUE##');
-
-// Insert new entry before marker
-const newEntry = '2025-06-21T19:29:05Z|WORKFLOW|step|context|file|Description\n';
-const updatedContent = logContent.replace(
-    '##APPEND_MARKER_UNIQUE##',
-    newEntry + '##APPEND_MARKER_UNIQUE##'
-);
-
-// Write updated log
-fs.writeFileSync('claude/audit/current/current.log', updatedContent);
-```
-
-## Common Anti-Patterns to Avoid
-
-### ❌ Line Number Contamination
-```
-WRONG: 23→2025-06-21T19:29:05Z|WORKFLOW|step|context||Description
-WRONG:     24→##APPEND_MARKER_UNIQUE##
-```
-
-### ❌ Marker Corruption  
-```
-WRONG: ##APPEND_MARKER_UNIQUE##s
-WRONG:     25→##APPEND_MARKER_UNIQUE##
-```
-
-### ❌ Dev/Null Pollution
-```
-WRONG: 2025-06-21T19:29:05Z < /dev/null < /dev/null | WORKFLOW|step|context||Description
-CAUSE: Using echo -e or other flags that interpret stdin redirection
-FIX: Use plain echo without flags in the audit_log function
-```
-WRONG: ##APPEND_MARKER_UNIQUE## (with extra content)
-```
-
-### ❌ Missing Marker Management
-```
-WRONG: Appending without ensuring clean marker state
-WRONG: Leaving broken or duplicated markers
-```
-
-## Integration with Edit Tool
-
-### Proper Edit Tool Usage
-When using the Edit tool to append audit entries:
-
-1. **Always specify the exact marker text**:
-   ```
-   old_string: ##APPEND_MARKER_UNIQUE##
-   new_string: NEW_ENTRY\n##APPEND_MARKER_UNIQUE##
-   ```
-
-2. **Handle line number contamination**:
-   ```
-   // If marker appears with line numbers, clean it first
-   old_string: 23→##APPEND_MARKER_UNIQUE##
-   new_string: ##APPEND_MARKER_UNIQUE##
-   ```
-
-3. **Verify clean state after edit**:
-   - Check that marker appears without line numbers
-   - Ensure proper newline formatting
-
-## Session Management Integration
-
-### SESSION_START Logging
-```
-2025-06-21T19:29:05Z|SESSION_START|workflow_start|session_management|claude/project/audit/current/current.log|Starting new session - workflow initialization
-2025-06-21T19:29:05Z|SESSION_START|step|branch_management|unplanned|Verified on unplanned branch as required
-2025-06-21T19:29:05Z|SESSION_START|workflow_complete|session_management|claude/project/audit/current/current.log|SESSION_START complete - session initialized, ready for work
-```
-
-### SESSION_END Archival
-Before session end, current log may be archived:
-```bash
-# Archive current log with timestamp
-cp claude/project/audit/current/current.log claude/project/audit/current/session_$(date -u +"%Y-%m-%dT%H-%M-%S").log
-
-# Reset current log with clean marker
-echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
-```
-
-## Quality Assurance
-
-### Audit Log Validation
-Regular validation should check:
-- [ ] Unique marker exists and is clean
-- [ ] All entries follow proper format
-- [ ] No line number contamination
-- [ ] Proper timestamp formatting
-- [ ] Complete workflow lifecycle logging
-
-### Automated Checks
-```bash
-# Check for clean marker
-grep -c "^##APPEND_MARKER_UNIQUE##$" claude/project/audit/current/current.log
-
-# Verify no line number contamination  
-grep -c "→##APPEND_MARKER_UNIQUE##" claude/project/audit/current/current.log
-
-# Should return 0 (no contamination found)
-```
-
-## Error Recovery
-
-### Corrupted Marker Recovery
-If marker becomes corrupted:
-```bash
-# 1. Read current log
-# 2. Remove all corrupted marker instances
-# 3. Append clean marker at end
-# 4. Verify integrity
-```
-
-### Missing Entries Recovery
-If workflow steps are missing from audit:
-```bash
-# Add retrospective entries with clear indication:
-2025-06-21T19:29:05Z|RECOVERY|step|audit_repair||Retrospective entry: workflow X completed previously
-```
-
-## Success Criteria
-
-### Audit Log Integrity
-- [ ] Unique marker maintained in clean state
-- [ ] All workflow activities properly logged
-- [ ] Consistent entry formatting across all workflows
-- [ ] No line number contamination in marker
-
-### Operational Reliability
-- [ ] Append operations work consistently
-- [ ] Session boundaries clearly marked
-- [ ] Workflow lifecycles completely tracked
-- [ ] Integration with all workflow types functional
-
-This workflow ensures reliable, consistent audit logging that supports operational accountability and process improvement across all SPlectrum development activities.
+*Simplified audit logging focused on proven implementation patterns.*

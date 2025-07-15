@@ -125,7 +125,8 @@ INBOX|step|issue_conversion||Convert task content to GitHub issue
 get_target_milestone() {
     # Check if version-config.md exists and extract target version
     if [ -f "claude/project/version-config.md" ]; then
-        local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | cut -d':' -f2 | cut -d'(' -f1 | tr -d ' ')
+        # Extract just the version number (e.g., "1.2.0" from "1.2.0 (description)")
+        local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | sed 's/.*TARGET_VERSION.*: \([0-9.]*\).*/\1/')
         if [ -n "$target_version" ]; then
             echo "$target_version"
             return 0
@@ -157,12 +158,20 @@ create_issue_from_task() {
         milestone="$explicit_milestone"
         echo "  📌 Using explicit milestone: $milestone"
     else
-        # Use target version milestone as default
+        # Use target version milestone as default (cache-first lookup)
         milestone=$(get_target_milestone)
         if [ -n "$milestone" ]; then
-            echo "  📌 Using target version milestone: $milestone"
+            # Verify milestone exists in cache
+            if grep -q "\"title\": \"$milestone\"" claude/project/cache/milestones.json 2>/dev/null; then
+                echo "  📌 Using target version milestone: $milestone"
+            else
+                echo "  ⚠ WARNING: Target milestone '$milestone' not found in cache"
+                echo "     Issue will be created without milestone assignment"
+                echo "     Run version workflow to create milestone for new target version"
+                milestone=""  # Clear milestone to avoid assignment failure
+            fi
         else
-            echo "  📌 No milestone assigned (no target version found)"
+            echo "  📌 No milestone assigned (no target version configured)"
         fi
     fi
     
@@ -211,8 +220,8 @@ $task_content
     local temp_file=$(mktemp)
     echo "$issue_body" > "$temp_file"
     
-    # Build gh issue create command with optional milestone
-    local create_cmd="gh issue create --title \"$issue_title\" --body-file \"$temp_file\" --label \"cross-repository,inbox-task\""
+    # Build gh issue create command with optional milestone (no labels to avoid non-existent label errors)
+    local create_cmd="gh issue create --title \"$issue_title\" --body-file \"$temp_file\""
     if [ -n "$milestone" ]; then
         create_cmd="$create_cmd --milestone \"$milestone\""
     fi
@@ -398,10 +407,11 @@ fi
 - **AUDIT_LOGGING**: Log all inbox processing operations
 
 ### Milestone Assignment Strategy
-- **Default Behavior**: Issues automatically assigned to TARGET_VERSION milestone from `claude/project/version-config.md`
+- **Cache-First Lookup**: INBOX checks cached milestones for TARGET_VERSION from `claude/project/version-config.md`
 - **Explicit Override**: Tasks can specify `milestone:` field to use different milestone
-- **Fallback**: No milestone assigned if no target version configured and no explicit milestone specified
-- **Integration**: Ensures all issues align with current development version by default
+- **Error on Missing**: INBOX fails with clear error if TARGET_VERSION milestone not found in cache
+- **Milestone Creation**: RELEASE_PROCESS workflow creates milestones when setting new target versions
+- **Integration**: Ensures all issues align with current development version using validated milestones
 
 ## Usage Examples
 
