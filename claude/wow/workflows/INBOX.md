@@ -27,7 +27,7 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start inbox workflow
 audit_log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"

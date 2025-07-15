@@ -84,7 +84,7 @@ claude/project/cache/
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start issue cache workflow
 audit_log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow for cache management"

@@ -8,7 +8,7 @@ Streamlined audit logging using proven Node.js implementation with explicit logg
 
 ```bash
 # Load audit functions at start of any workflow
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Use explicit logging throughout workflow
 audit_log "WORKFLOW_NAME" "workflow_start" "context" "file_path" "Starting workflow description"
@@ -48,15 +48,15 @@ Example:
 ```
 
 ## Integration Pattern
-1. **Load functions**: `source claude/scripts/audit-functions.sh`
+1. **Load functions**: `source claude/wow/scripts/audit-functions.sh`
 2. **Log workflow start**: `audit_log "WORKFLOW" "workflow_start" ...`
 3. **Log major steps**: `audit_log "WORKFLOW" "step" ...`
 4. **Log completion**: `audit_log "WORKFLOW" "workflow_complete" ...`
 
 ## Node.js Implementation
-- **Location**: `claude/scripts/lib/audit.js`
-- **CLI Interface**: `claude/scripts/cli/audit-log.js`
-- **Bash Wrapper**: `claude/scripts/audit-functions.sh`
+- **Location**: `claude/wow/scripts/lib/audit.js`
+- **CLI Interface**: `claude/wow/scripts/cli/audit-log.js`
+- **Bash Wrapper**: `claude/wow/scripts/audit-functions.sh`
 - **Benefits**: Batch operations, error handling, consistent formatting
 
 ---

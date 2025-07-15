@@ -8,7 +8,7 @@ Manual issue creation workflow with standardized metadata structure to ensure co
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start issue creation workflow
 audit_log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow for manual issue creation"

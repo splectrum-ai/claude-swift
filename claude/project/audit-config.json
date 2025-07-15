@@ -1,0 +1,9 @@
+{
+  "auditLogPath": "/home/herma/sesameh/claude-swift/claude/project/audit/current/current.log",
+  "auditLogDirectory": "/home/herma/sesameh/claude-swift/claude/project/audit/current",
+  "projectRoot": "/home/herma/sesameh/claude-swift",
+  "scriptsPath": "/home/herma/sesameh/claude-swift/claude/wow/scripts",
+  "configVersion": "1.0.0",
+  "generatedBy": "SESSION_START",
+  "lastUpdated": "2025-07-16T05:20:00Z"
+}

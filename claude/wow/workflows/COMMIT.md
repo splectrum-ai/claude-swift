@@ -30,7 +30,7 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start workflow with explicit logging
 audit_log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"

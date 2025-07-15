@@ -35,7 +35,7 @@ OUTBOX|step|security_check||Validate execution from authorized base repository
 **Security Validation:**
 ```bash
 # Use optimized Node.js audit logging
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Log workflow start
 audit_log "OUTBOX" "workflow_start" "outbox_sesame" "" "Starting cross-repository task distribution workflow"

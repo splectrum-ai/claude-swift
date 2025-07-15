@@ -25,10 +25,37 @@
 ### Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start session with explicit logging
 audit_log "SESSION_START" "workflow_start" "session_initialization" "" "Starting new session with mandatory system checks"
+```
+
+### Setup Audit Configuration
+```bash
+audit_log "SESSION_START" "step" "audit_config_setup" "" "Ensuring audit configuration exists for reliable logging"
+
+# Generate audit-config.json if it doesn't exist
+if [ ! -f claude/project/audit-config.json ]; then
+    PROJECT_ROOT=$(pwd)
+    TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    
+    cat > claude/project/audit-config.json << EOF
+{
+  "auditLogPath": "$PROJECT_ROOT/claude/project/audit/current/current.log",
+  "auditLogDirectory": "$PROJECT_ROOT/claude/project/audit/current",
+  "projectRoot": "$PROJECT_ROOT",
+  "scriptsPath": "$PROJECT_ROOT/claude/wow/scripts",
+  "configVersion": "1.0.0",
+  "generatedBy": "SESSION_START",
+  "lastUpdated": "$TIMESTAMP"
+}
+EOF
+    
+    audit_log "SESSION_START" "step" "config_generated" "claude/project/audit-config.json" "Generated audit configuration with absolute paths"
+else
+    audit_log "SESSION_START" "step" "config_verified" "claude/project/audit-config.json" "Audit configuration already exists"
+fi
 ```
 
 **MANDATORY Rule Scanning:**

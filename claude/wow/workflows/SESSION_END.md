@@ -22,7 +22,7 @@
 ### Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Start session end workflow
 audit_log "SESSION_END" "workflow_start" "session_termination" "" "Starting SESSION_END workflow with mandatory compliance checks"

@@ -22,7 +22,7 @@ audit_log "WORKFLOW2" "item_complete" "context" "" "Did workflow 2"
 
 **New Pattern:**
 ```javascript
-import { AuditCollector } from './claude/scripts/lib/audit.js'
+import { AuditCollector } from './claude/wow/scripts/lib/audit.js'
 
 async function explicitWorkflow() {
     const audit = new AuditCollector()

@@ -48,3 +48,12 @@
 2025-07-15 05:51:06|OUTBOX|workflow_complete|outbox_sesame||OUTBOX workflow completed successfully: 0 collected, 2 distributed
 2025-07-15 05:56:14|ISSUE_CACHE|workflow_start|cache_rebuild||Starting ISSUE_CACHE workflow to rebuild cache with open issues only and complete metadata
 2025-07-15 05:57:25|ISSUE_CACHE|workflow_complete|cache_rebuild||ISSUE_CACHE workflow completed - rebuilt cache with 9 open issues and complete metadata
+2025-07-15 20:59:42|TEST_WORKFLOW|workflow_start|fix_verification||Testing audit logging after script relocation and path fix
+2025-07-15 21:00:00|TEST_WORKFLOW|step|bash_wrapper_test||Testing bash wrapper functionality
+2025-07-15 21:05:11|TEST|step|verification||Testing audit functionality
+2025-07-15 21:05:36|TEST|step|verification||Testing audit functionality directly
+2025-07-15 21:06:06|TEST2|step|verification||Testing from correct directory
+2025-07-15 21:06:36|TEST3|step|debug||Debug test entry
+2025-07-15 21:21:34|CONFIG_TEST|step|config_system_test||Testing new configuration-based audit logging
+2025-07-15 21:22:35|BASH_CONFIG_TEST|step|updated_wrapper_test||Testing updated bash wrapper with config system
+2025-07-15 21:25:07|SESSION_END|workflow_start|session_termination||Starting SESSION_END workflow - successful completion of audit logging fix

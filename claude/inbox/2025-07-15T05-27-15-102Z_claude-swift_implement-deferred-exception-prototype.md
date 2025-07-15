@@ -28,7 +28,7 @@ The prototype transforms workflows from "fail fast" to "succeed fast, fix later"
 
 ## Test Criteria
 **How to verify completion:**
-- [ ] Created deferred exception infrastructure in `claude/scripts/lib/exceptions.js`
+- [ ] Created deferred exception infrastructure in `claude/wow/scripts/lib/exceptions.js`
 - [ ] Implemented automatic bug task creation for infrastructure problems
 - [ ] Enhanced INBOX workflow with full deferred exception handling
 - [ ] Created audit logging enhancements for warning classification
@@ -46,7 +46,7 @@ The prototype transforms workflows from "fail fast" to "succeed fast, fix later"
 
 **1. Deferred Exception Infrastructure**
 ```javascript
-// claude/scripts/lib/exceptions.js
+// claude/wow/scripts/lib/exceptions.js
 class DeferredException {
   constructor(type, description, affectedItems, remediation) {
     this.type = type;

@@ -13,7 +13,7 @@ These scripts implement key optimizations for the Claude workflow system:
 ## Installation
 
 ```bash
-cd claude/scripts
+cd claude/wow/scripts
 npm install
 ```
 

@@ -131,7 +131,7 @@ OUTBOX|step|audit_logging||Record task processing in audit log
 **Actions:**
 ```bash
 # Use optimized Node.js audit logging
-source claude/scripts/audit-functions.sh
+source claude/wow/scripts/audit-functions.sh
 
 # Log each processed task
 for task_file in $SELF_TARGETED_TASKS; do
