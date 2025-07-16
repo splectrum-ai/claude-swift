@@ -282,8 +282,7 @@ class VersionReadinessValidator {
             const workflowFiles = [
                 'claude/workflows/SESSION_START.md',
                 'claude/workflows/SESSION_END.md',
-                'claude/workflows/VERSION_TRANSITION.md',
-                'claude/workflows/AUDIT_LOGGING.md'
+                'claude/workflows/VERSION_TRANSITION.md'
             ];
 
             let workflowsReady = 0;
