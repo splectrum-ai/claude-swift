@@ -4,3 +4,6 @@ projects/
 
 # Local machine-specific configurations
 claude/local/
+
+# Generated cache files
+claude/project/cache/
