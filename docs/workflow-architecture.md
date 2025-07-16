@@ -58,34 +58,57 @@ These workflows are **ONLY** available in the orchestrator repository (claude-sw
 
 ## Architecture Diagram
 
-```
-claude-swift (orchestrator)
-├── claude/
-│   ├── wow/workflows/        # Universal workflows (work everywhere)
-│   │   ├── SESSION_START.md
-│   │   ├── NEXT_ISSUE.md
-│   │   ├── INBOX.md         # Process tasks to GitHub issues
-│   │   ├── OUTBOX.md        # Process self-targeted tasks
-│   │   ├── ISSUE_CACHE.md   # Local issue caching
-│   │   └── ...
-│   └── project/workflows/    # Orchestrator-only workflows
-│       ├── INITIALISE.md    # Setup workspace
-│       ├── PROJECT_REGISTER.md # Register projects
-│       └── OUTBOX.md        # Cross-repository task distribution
-└── projects/                 # Symlink to workspace (orchestrator only)
-    ├── org1/repo1/
-    └── org2/repo2/
-
-registered-repo (e.g., splectrum)
-├── claude/
-│   └── wow/workflows/        # Universal workflows ONLY
-│       ├── SESSION_START.md
-│       ├── NEXT_ISSUE.md
-│       ├── INBOX.md         # Process tasks to GitHub issues
-│       ├── OUTBOX.md        # Process self-targeted tasks
-│       ├── ISSUE_CACHE.md   # Local issue caching
-│       └── ...
-└── (no projects/ directory)  # Not an orchestrator
+```mermaid
+graph TD
+    subgraph "Orchestrator (claude-swift)"
+        O1[claude/]
+        O2[wow/workflows/]
+        O3[project/workflows/]
+        O4[projects/]
+        
+        O1 --> O2
+        O1 --> O3
+        
+        O2 --> O2A[SESSION_START.md]
+        O2 --> O2B[NEXT_ISSUE.md]
+        O2 --> O2C[INBOX.md]
+        O2 --> O2D[TO_INBOX.md]
+        O2 --> O2E[ISSUE_CACHE.md]
+        O2 --> O2F[Universal workflows...]
+        
+        O3 --> O3A[INITIALISE.md]
+        O3 --> O3B[PROJECT_REGISTER.md]
+        O3 --> O3C[OUTBOX.md]
+        
+        O4 --> O4A[org1/repo1/]
+        O4 --> O4B[org2/repo2/]
+    end
+    
+    subgraph "Registered Repo (e.g., splectrum)"
+        R1[claude/]
+        R2[wow/workflows/]
+        R3[❌ No projects/]
+        
+        R1 --> R2
+        
+        R2 --> R2A[SESSION_START.md]
+        R2 --> R2B[NEXT_ISSUE.md]
+        R2 --> R2C[INBOX.md]
+        R2 --> R2D[TO_INBOX.md]
+        R2 --> R2E[ISSUE_CACHE.md]
+        R2 --> R2F[Universal workflows...]
+    end
+    
+    O2 -.->|Synced to all repos| R2
+    O3A -.->|Setup workspace| O4
+    O3B -.->|Register projects| O4
+    O3C -.->|Cross-repo distribution| R2C
+    
+    style O2 fill:#e8f5e8
+    style O3 fill:#fff3e0
+    style R2 fill:#e8f5e8
+    style R3 fill:#ffebee
+    style O4 fill:#f3e5f5
 ```
 
 ## Workflow Availability

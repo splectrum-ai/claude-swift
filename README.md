@@ -134,23 +134,44 @@ These ONLY work in the claude-swift repository:
 
 ## Project Structure
 
-```
-claude-swift/                    # Orchestrator repository
-├── projects/                    # Symlinks to registered projects  
-├── claude/
-│   ├── wow/                    # Universal workflows (shared with all repos)
-│   │   └── workflows/          # Available everywhere
-│   ├── project/                # Orchestrator-specific configuration
-│   │   ├── workflows/          # Orchestrator-only workflows
-│   │   │   ├── INITIALISE.md
-│   │   │   ├── PROJECT_REGISTER.md
-│   │   │   └── OUTBOX.md
-│   │   ├── registered-projects.json
-│   │   └── audit/
-│   ├── inbox/                  # Task reception
-│   └── outbox/                 # Task distribution
-└── docs/                       # Orchestrator documentation
-    └── workflow-architecture.md # Explains the dual-layer system
+```mermaid
+graph TD
+    A[claude-swift/] --> B[projects/]
+    A --> C[claude/]
+    A --> D[docs/]
+    
+    B --> B1[Symlinks to registered projects]
+    
+    C --> C1[cache/]
+    C --> C2[wow/]
+    C --> C3[project/]
+    C --> C4[inbox/]
+    C --> C5[outbox/]
+    
+    C1 --> C1A[Issue and metadata caching]
+    
+    C2 --> C2A[workflows/]
+    C2A --> C2A1[Universal workflows - Available everywhere]
+    
+    C3 --> C3A[workflows/]
+    C3 --> C3B[registered-projects.json]
+    C3 --> C3C[audit/]
+    C3A --> C3A1[Orchestrator-only workflows]
+    C3A1 --> C3A2[INITIALISE.md]
+    C3A1 --> C3A3[PROJECT_REGISTER.md]
+    C3A1 --> C3A4[OUTBOX.md]
+    
+    C4 --> C4A[Task reception]
+    C5 --> C5A[Task distribution]
+    
+    D --> D1[workflow-architecture.md]
+    D1 --> D1A[Explains the dual-layer system]
+    
+    style A fill:#e1f5fe
+    style C2 fill:#f3e5f5
+    style C3 fill:#fff3e0
+    style C4 fill:#e8f5e8
+    style C5 fill:#fff9c4
 ```
 
 ## Requirements
