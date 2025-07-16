@@ -139,7 +139,7 @@ TASK_TYPE=${TASK_TYPE:-enhancement}
 
 echo ""
 echo "Work Area/Epic:"
-echo "Which area of the project does this affect? (e.g., v1.1.0, documentation, infrastructure):"
+echo "Which area of the project does this affect? (e.g., v1.2.0, documentation, infrastructure):"
 read -p "Work area: " WORK_AREA
 
 echo ""
@@ -361,11 +361,11 @@ echo "Task is ready for distribution! 🚀"
 ---
 source: current-org/current-repo
 target: target-org/target-repo
-created: 2025-07-14T16:30:45.123Z
+created: 2025-07-16T16:30:45.123Z
 priority: HIGH
 effort: M
 type: enhancement
-work_area: v1.1.0
+work_area: v1.2.0
 ---
 
 # Implement New Feature X
@@ -374,12 +374,12 @@ work_area: v1.1.0
 Detailed description of what needs to be implemented, including context and background information.
 
 ## Priority: HIGH
-**Justification:** Critical for v1.1.0 release and blocks other features
+**Justification:** Critical for v1.2.0 release and blocks other features
 
 ## Dependencies
-**Blocks:** #45, #47
-**Blocked by:** #42
-**Related:** #44, #46
+**Blocks:** #63, #60
+**Blocked by:** #55
+**Related:** #61, #62
 
 ## Effort: M
 **Estimate:** Medium complexity with well-defined requirements and existing patterns
@@ -392,15 +392,15 @@ Detailed description of what needs to be implemented, including context and back
 - [ ] Documentation updated
 - [ ] Manual testing completed
 
-## Work Area: v1.1.0
-**Context:** Part of enhanced multi-project workspace capabilities for v1.1.0 milestone
+## Work Area: v1.2.0
+**Context:** Part of enhanced multi-project workspace capabilities for v1.2.0 milestone
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 ```
 
 **Filename Convention:**
 - **Format**: `YYYY-MM-DDTHH-MM-SS-sssZ_target-repo_task-name.md`
-- **Example**: `2025-07-14T16-30-45-123Z_target-project_implement-feature-x.md`
+- **Example**: `2025-07-16T16-30-45-123Z_target-project_implement-feature-x.md`
 
 ## Interactive Prompts
 
@@ -507,7 +507,7 @@ Task name: Update documentation
 
 Task Title:
 Enter the full task title (will appear as # heading in task file):
-Title: Update user documentation for v1.1.0
+Title: Update user documentation for v1.2.0
 
 Task Description:
 Enter a detailed description of what needs to be done:
@@ -518,7 +518,7 @@ Priority [MEDIUM]: HIGH
 
 Priority Justification:
 Explain why this priority level is appropriate:
-Justification: Critical for v1.1.0 adoption - users need current documentation
+Justification: Critical for v1.2.0 adoption - users need current documentation
 
 Task Effort (S/M/L/XL):
 Effort [M]: L
@@ -531,8 +531,8 @@ Task Type (enhancement/bug/documentation/workflow-update/other):
 Type [enhancement]: documentation
 
 Work Area/Epic:
-Which area of the project does this affect? (e.g., v1.1.0, documentation, infrastructure):
-Work area: v1.1.0
+Which area of the project does this affect? (e.g., v1.2.0, documentation, infrastructure):
+Work area: v1.2.0
 
 Dependencies:
 Enter issues this task blocks (comma-separated, or press Enter if none):
@@ -552,23 +552,23 @@ Enter specific validation steps to verify completion (one per line, press Enter 
 
 Additional Context (optional):
 Enter any additional context or background information:
-Context: Following v1.1.0 release with INBOX/OUTBOX workflows
+Context: Following v1.2.0 release with INBOX/OUTBOX workflows
 
 === TASK SUMMARY ===
 Target: project
 Name: update-documentation
-Title: Update user documentation for v1.1.0
-Priority: HIGH (Critical for v1.1.0 adoption - users need current documentation)
+Title: Update user documentation for v1.2.0
+Priority: HIGH (Critical for v1.2.0 adoption - users need current documentation)
 Effort: L (Multiple documentation files need updates, comprehensive review required)
 Type: documentation
-Work Area: v1.1.0
+Work Area: v1.2.0
 Blocked by: 39
 Related: 24, 32
 
 Proceed with task creation? (y/n)
 Confirm: y
 
-✓ Task file created: outbox/2025-07-14T16-30-45-123Z_project_update-documentation.md
+✓ Task file created: outbox/2025-07-16T16-30-45-123Z_project_update-documentation.md
 ```
 
 **Parameter Mode (target specified):**
@@ -584,11 +584,11 @@ Task name: Fix critical bug
 
 Task Title:
 Enter the full task title (will appear as # heading in task file):
-Title: Fix critical authentication bug in v1.1.0
+Title: Fix critical authentication bug in v1.2.0
 
 Task Description:
 Enter a detailed description of what needs to be done:
-Description: Authentication fails for new users after v1.1.0 deployment
+Description: Authentication fails for new users after v1.2.0 deployment
 
 Task Priority (HIGH/MEDIUM/LOW):
 Priority [MEDIUM]: HIGH
@@ -608,8 +608,8 @@ Task Type (enhancement/bug/documentation/workflow-update/other):
 Type [enhancement]: bug
 
 Work Area/Epic:
-Which area of the project does this affect? (e.g., v1.1.0, documentation, infrastructure):
-Work area: v1.1.0
+Which area of the project does this affect? (e.g., v1.2.0, documentation, infrastructure):
+Work area: v1.2.0
 
 Dependencies:
 Enter issues this task blocks (comma-separated, or press Enter if none):
@@ -629,23 +629,23 @@ Enter specific validation steps to verify completion (one per line, press Enter 
 
 Additional Context (optional):
 Enter any additional context or background information:
-Context: Introduced in v1.1.0 release, affecting production
+Context: Introduced in v1.2.0 release, affecting production
 
 === TASK SUMMARY ===
 Target: project
 Name: fix-critical-bug
-Title: Fix critical authentication bug in v1.1.0
+Title: Fix critical authentication bug in v1.2.0
 Priority: HIGH (Blocking new user onboarding - affects production)
 Effort: S (Isolated issue with known fix pattern)
 Type: bug
-Work Area: v1.1.0
+Work Area: v1.2.0
 Blocks: 45, 46
 Related: 44
 
 Proceed with task creation? (y/n)
 Confirm: y
 
-✓ Task file created: outbox/2025-07-14T16-30-45-123Z_project_fix-critical-bug.md
+✓ Task file created: outbox/2025-07-16T16-30-45-123Z_project_fix-critical-bug.md
 ```
 
 ## Workflow Benefits

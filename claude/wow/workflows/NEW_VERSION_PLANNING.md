@@ -73,7 +73,7 @@
 
 **Milestone Creation Implementation:**
 - **Create Version Milestone**: Establish single milestone for target version
-  - Pattern: `v{TARGET_VERSION}` (e.g., `v1.1.0`)
+  - Pattern: `v{TARGET_VERSION}` (e.g., `v1.3.0`)
   - Use version from project hook query in Step 1
   - Description: Brief version scope summary with epic areas included
 - **Issue Assignment**: Assign all selected version issues to version milestone
@@ -90,9 +90,9 @@
   - Maintain epic labels for cross-version epic tracking
   - Use for filtering epic work across multiple versions
 - **Issue Organization**: Structure issues for efficient development workflow
-  - Version filtering: `gh issue list --milestone "v1.1.0"`
+  - Version filtering: `gh issue list --milestone "v1.3.0"`
   - Epic filtering: `gh issue list --label "TMPL"`
-  - Combined filtering: `gh issue list --milestone "v1.1.0" --label "TMPL"`
+  - Combined filtering: `gh issue list --milestone "v1.3.0" --label "TMPL"`
 
 ### 5. Work Scope Validation and Refinement
 - **Version Scope Assessment**: Validate planned work against version capacity
@@ -111,7 +111,7 @@
 ## Simplified Organization Strategy
 
 ### Milestone-as-Version Approach
-- **Single Version Milestone**: One milestone per version (e.g., `v1.1.0`)
+- **Single Version Milestone**: One milestone per version (e.g., `v1.3.0`)
   - Contains all issues planned for that version across all epics
   - Provides clear version scope and progress tracking
   - Aligns with release planning and version completion
@@ -128,9 +128,9 @@
 - **Minimal Overhead**: Focus on essential categorization only
 
 ### Filtering Patterns
-- **Version Work**: `gh issue list --milestone "v1.1.0"`
+- **Version Work**: `gh issue list --milestone "v1.3.0"`
 - **Epic Work**: `gh issue list --label "TMPL"`
-- **Version + Epic**: `gh issue list --milestone "v1.1.0" --label "TMPL"`
+- **Version + Epic**: `gh issue list --milestone "v1.3.0" --label "TMPL"
 - **Dependencies**: Track in issue descriptions and comments
 
 ## Work Breakdown Methodology
@@ -171,16 +171,13 @@
 
 ## Success Criteria
 
-### Version Planning Setup
-- [ ] Project information retrieved via project hook (`claude/project/version-config.md`)
-- [ ] Target version number extracted and validated
-- [ ] Epic abbreviations verified and labels confirmed
-
-### Version Organization
-- [ ] Version epics selected based on strategic priorities and capacity
-- [ ] Single version milestone created with target version number
-- [ ] Epic execution order defined with clear rationale
-- [ ] All selected issues assigned to version milestone
+- Project information retrieved via project hook (`claude/project/version-config.md`)
+- Target version number extracted and validated
+- Epic abbreviations verified and labels confirmed
+- Version epics selected based on strategic priorities and capacity
+- Single version milestone created with target version number
+- Epic execution order defined with clear rationale
+- All selected issues assigned to version milestone
 
 ### Work Planning Completeness
 - [ ] All planned work aligned with selected version epics

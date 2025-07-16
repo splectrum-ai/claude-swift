@@ -239,15 +239,12 @@ Use when:
 - Adding ad-hoc work to project backlog
 - Converting informal tasks to tracked issues
 
-## Success Metrics
+## Success Criteria
 
-### Well-Structured Issues
 - Contains all required metadata fields
 - Clear, testable acceptance criteria
 - Realistic effort estimates
 - Proper dependency identification
-
-### NEXT_ISSUE Integration
 - Issues appear in recommendations with correct scores
 - Priority and effort weights applied correctly
 - Dependency blocking works as expected

@@ -101,9 +101,9 @@ audit_log "SESSION_START" "step" "inbox_check" "" "Checking for received cross-r
 **Example Output:**
 ```
 ✓ Found 3 pending tasks in inbox:
-  - 2025-07-14T10-30-00Z_claude-swift_update-workflows.md (from splectrum)
-  - 2025-07-14T10-31-00Z_claude-swift_bug-fix.md (from spl1)
-  - 2025-07-14T10-32-00Z_claude-swift_documentation.md (from InfoMetis)
+  - 2025-07-16T10-30-00Z_claude-swift_update-workflows.md (from target-org)
+  - 2025-07-16T10-31-00Z_claude-swift_bug-fix.md (from example-org)
+  - 2025-07-16T10-32-00Z_claude-swift_documentation.md (from partner-org)
 
 Executing INBOX workflow to convert tasks to GitHub issues...
 ```
@@ -132,8 +132,8 @@ audit_log "SESSION_START" "step" "outbox_check" "" "Checking for pending task di
 ✓ Base repository detected with 2 registered projects
 ✓ Found 6 pending tasks for distribution:
   - claude/outbox: 2 self-targeted tasks
-  - projects/jules-tenbos/splectrum/outbox: 2 tasks
-  - projects/sesameh/spl1/outbox: 2 tasks
+  - projects/example-org/target-project/outbox: 2 tasks
+  - projects/partner-org/another-project/outbox: 2 tasks
 
 Executing OUTBOX workflow to distribute tasks to target repositories...
 ```
@@ -306,15 +306,12 @@ audit_log "SESSION_START" "workflow_complete" "session_initialization" "" "SESSI
 - Check that current milestone and epic assignments are accurate
 - Prepare GitHub integration for session activities
 
-## SUCCESS METRICS
+## Success Criteria
 
-### **Session Initialization Indicators**
 - Clear session goals established from cached issue analysis
 - Previous session recovery completed successfully
 - Repository state verified as clean and compliant
 - Session boundaries clearly marked for analysis
-
-### **Quality Indicators**
 - All audit log entries properly formatted
 - No incomplete workflows or orphaned task tracking from previous session
 - Relevant documentation reflects current state

@@ -26,7 +26,7 @@ Universal workflow that processes tasks in the current repository's outbox direc
 ## Task File Format
 Tasks should be named: `TIMESTAMP_TARGET-REPO_DESCRIPTION.md`
 
-Example: `2025-07-14T23-45-00Z_claude-swift_update-documentation.md`
+Example: `2025-07-16T23-45-00Z_claude-swift_update-documentation.md`
 
 ## Workflow Steps
 

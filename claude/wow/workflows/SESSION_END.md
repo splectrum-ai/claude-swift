@@ -162,15 +162,12 @@ Previous session had incomplete SESSION_END workflow. Completing missing steps:
 - Check that issues have appropriate labels, milestones, and epic assignments
 - Verify commit messages provide clear context for changes
 
-## SUCCESS METRICS
+## Success Criteria
 
-### **Session Effectiveness Indicators**
 - Clear accomplishments documented in timelog
 - Learning insights captured for future reference
 - Outstanding work properly tracked in GitHub issues
 - Session boundaries clearly marked for analysis
-
-### **Quality Indicators**
 - All timelog entries properly formatted
 - No incomplete workflows or orphaned task tracking
 - Relevant documentation updated with session insights

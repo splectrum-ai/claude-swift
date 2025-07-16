@@ -86,12 +86,12 @@ echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
 When working on GitHub issues:
 ```bash
 # Reference issue number in commit
-git commit -m "Fix authentication bug (#123)
+git commit -m "Fix authentication bug (#62)
 
 - Updated token validation
 - Added error handling
 
-Closes #123"
+Closes #62"
 ```
 
 ## Version Release Workflow
@@ -139,6 +139,15 @@ git diff --staged  # for staged changes
 git fetch origin
 git reset --hard origin/main
 ```
+
+## Success Criteria
+
+- All work committed directly to main branch
+- Clear commit messages describe changes and rationale
+- Repository state remains clean and up-to-date
+- Linear history maintained without merge conflicts
+- Session boundaries properly tracked through git operations
+- Issue references included in relevant commits
 
 ## Benefits of Main-Only Workflow
 

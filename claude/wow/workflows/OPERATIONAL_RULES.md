@@ -137,3 +137,14 @@
 - **Debug mode**: Use `./spl_execute spl app-name -d command` when troubleshooting
 - **Path issues**: Use `spl.context(input, "cwd")` for install root resolution
 - **Test help**: All commands support `-h` or `--help` for guidance
+
+## Success Criteria
+
+- All work follows single-step completion with choice points
+- Collaborative decision-making maintained through dialogue
+- Exact file paths specified in all references
+- Audit logging completed with proper format and timing
+- Documentation created in docs/ directory with proper back links
+- Main branch workflow maintained with clear commits
+- Issues assigned to appropriate milestones
+- Quality gates implemented through propose-review-execute pattern

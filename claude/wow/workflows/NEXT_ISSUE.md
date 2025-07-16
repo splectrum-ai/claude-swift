@@ -97,14 +97,14 @@ Present top-ranked issues (up to 6) with compact format:
 
 **Example Format:**
 ```
-#5 [3.0] HIGH Enable project-specific workflow extensions without contaminating WoW template
+#60 [3.0] HIGH Create Comprehensive Workflow Development Guide
 Critical template feature - enables extensibility, no blockers, high impact for adoption
 
-#32 [2.0] MEDIUM Create comprehensive first-time deployment setup documentation  
+#63 [2.0] MEDIUM Update user documentation to reflect current workflow patterns  
 User experience improvement - clear scope, ready to start, documentation effort
 
-#39 [1.33] MEDIUM Create INBOX/OUTBOX workflows for cross-repository task communication
-Large scope workflow - v1.1.0 feature, multiple components, significant implementation
+#61 [1.33] MEDIUM Implement Happy Path + Deferred Exception Prototype
+Large scope workflow - v1.2.0 feature, multiple components, significant implementation
 ```
 
 ### 6. Selection Decision
@@ -174,18 +174,18 @@ Finish epic phase → **NEXT_ISSUE** → Move to different epic for balance
 # Get current issues
 gh issue list --limit 10 --json number,title,labels,body
 
-# Parse metadata: Issue #32 shows Priority: HIGH, Effort: M, Dependencies: None
+# Parse metadata: Issue #63 shows Priority: HIGH, Effort: M, Dependencies: None
 # Calculate score: (3 × 1 × 1) / 2 = 1.5
-# Select #32 for strategic documentation foundation
+# Select #63 for strategic documentation foundation
 # Document: "Selected for strategic foundation - enables template adoption"
 ```
 
 ### Example 2: Project-Specific Focus
 ```bash
 # Review project-specific labeled issues
-# Issue #5 shows Priority: MEDIUM, Effort: L, Blocks: 3 issues
+# Issue #60 shows Priority: MEDIUM, Effort: L, Blocks: 3 issues
 # Calculate score: (2 × 4 × 1) / 3 = 2.67
-# Select #5 for project enhancement
+# Select #60 for project enhancement
 # Document: "High impact project work - enables multiple dependent issues"
 ```
 
@@ -197,16 +197,13 @@ gh issue list --limit 10 --json number,title,labels,body
 # Avoid Large/XL items that need longer focus periods
 ```
 
-## Success Metrics
+## Success Criteria
 
-### Effective Selection
 - Consistent progress across project areas
 - Milestone features completed systematically
 - Strategic foundation work completed early
 - Dependencies resolved before dependent work
-
-### Workflow Efficiency
-- < 2 minutes for routine selections
+- Routine selections completed in under 2 minutes
 - Clear selection rationale documented
 - No analysis paralysis
 - Smooth context transitions

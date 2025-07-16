@@ -34,11 +34,11 @@ claude/project/cache/
     "number": 49,
     "title": "Identify workflows that reference the orchestrator and move to project area",
     "state": "open",
-    "labels": ["enhancement", "v1.1.0"],
+    "labels": ["enhancement", "v1.2.0"],
     "milestone": null,
-    "created_at": "2025-07-14T13:39:27Z",
-    "updated_at": "2025-07-14T13:39:27Z",
-    "cached_at": "2025-07-14T21:27:43Z"
+    "created_at": "2025-07-16T13:39:27Z",
+    "updated_at": "2025-07-16T13:39:27Z",
+    "cached_at": "2025-07-16T21:27:43Z"
   }
 }
 ```
@@ -50,9 +50,9 @@ claude/project/cache/
     "number": 4,
     "title": "Claude Swift as root, with sub project work bench",
     "state": "open",
-    "description": "Transform claude-swift into a root workspace framework...",
-    "created_at": "2025-07-13T14:20:00Z",
-    "cached_at": "2025-07-14T21:27:43Z"
+    "description": "Remove references to old ways of doing across all workflows...",
+    "created_at": "2025-07-15T14:20:00Z",
+    "cached_at": "2025-07-16T21:27:43Z"
   }
 }
 ```
@@ -60,7 +60,7 @@ claude/project/cache/
 **metadata.json**:
 ```json
 {
-  "last_sync": "2025-07-14T21:27:43Z",
+  "last_sync": "2025-07-16T21:27:43Z",
   "cache_version": "1.0.0",
   "last_issue_number": 50,
   "last_milestone_number": 4
@@ -384,7 +384,7 @@ SESSION_START|step|issue_cache_validation||Validate and update issue cache
 **Cache-First New Issue Flow:**
 ```bash
 # Method 1: Direct creation with auto-caching
-create_new_issue "Issue Title" "Issue body content" "enhancement,v1.1.0"
+create_new_issue "Issue Title" "Issue body content" "enhancement,v1.2.0"
 
 # Method 2: GitHub creation + gap detection
 gh issue create --title "New Issue" --body "Description" --label "enhancement"

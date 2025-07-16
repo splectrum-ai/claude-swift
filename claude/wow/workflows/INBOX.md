@@ -127,7 +127,7 @@ audit_log "INBOX" "step" "issue_conversion" "" "Convert task content to GitHub i
 get_target_milestone() {
     # Check if version-config.md exists and extract target version
     if [ -f "claude/project/version-config.md" ]; then
-        # Extract version with v prefix (e.g., "v1.2.0" from "v1.2.0 (description)")
+        # Extract version with v prefix (e.g., "v1.3.0" from "v1.3.0 (description)")
         local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | sed 's/.*TARGET_VERSION.*: \(v[0-9.]*\).*/\1/')
         if [ -n "$target_version" ]; then
             echo "$target_version"
@@ -332,7 +332,7 @@ audit_log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow comple
 ---
 source: org1/project1
 target: org2/project2
-created: 2025-07-14T15:30:45.123Z
+created: 2025-07-16T15:30:45.123Z
 priority: normal
 type: feature-request
 ---
@@ -459,9 +459,9 @@ fi
 **Before INBOX**:
 ```
 project/claude/inbox/
-├── 2025-07-14T15-30-45-123Z_project1_implement-feature.md
-├── 2025-07-14T15-31-02-456Z_project2_add-integration.md
-└── 2025-07-14T15-31-15-789Z_project3_update-api.md
+├── 2025-07-16T15-30-45-123Z_project1_implement-feature.md
+├── 2025-07-16T15-31-02-456Z_project2_add-integration.md
+└── 2025-07-16T15-31-15-789Z_project3_update-api.md
 ```
 
 **After INBOX**:

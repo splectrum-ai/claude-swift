@@ -124,16 +124,13 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "verification" "" "Verify all correct
 - Checks marker management correctness
 - Ensures workflow logging completeness
 
-## Success Metrics
+## Success Criteria
 
-### Compliance Indicators
-- **100% Rule Discovery**: All mandatory rules identified and catalogued
-- **Complete Validation**: Every rule checked against current state
-- **Zero Violations**: All compliance issues resolved
-- **Automated Verification**: Systematic validation of corrections
-
-### Quality Indicators
-- **Comprehensive Coverage**: No mandatory rules missed
+- All mandatory rules identified and catalogued
+- Every rule checked against current state
+- All compliance issues resolved
+- Systematic validation of corrections
+- No mandatory rules missed
 - **Accurate Detection**: All violations properly identified
 - **Effective Corrections**: All fixes properly applied
 - **Sustainable Compliance**: Rules remain enforced over time
