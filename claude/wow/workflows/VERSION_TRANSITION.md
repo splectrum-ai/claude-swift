@@ -8,7 +8,9 @@
 
 **MANDATORY VERSION TRANSITION**: After any version release completion, Claude MUST execute this systematic transition workflow to process development knowledge and prepare for next version.
 
-**Trigger**: Coordinated via VERSION workflow
+## Trigger
+**User-Friendly**: `transition sesame`
+**Technical**: `VERSION_TRANSITION`
 
 **Input**: Closed version audit logs in `claude/project/audit/v{version}/`
 **Output**: Updated knowledge base, onboarding documentation, and clean next version preparation

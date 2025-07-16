@@ -6,7 +6,9 @@
 
 **MANDATORY SESSION TERMINATION**: When any Claude session ends, Claude MUST execute this system check and termination sequence.
 
-**TRIGGER**: End of any Claude session or when user indicates session completion
+## Trigger
+**User-Friendly**: `finish sesame`
+**Technical**: `SESSION_END`
 
 **MANDATORY SYSTEM CHECK:**
 1. **SCAN ALL MANDATORY RULES**: Review CLAUDE.md and workflow files for all rules marked "MANDATORY"

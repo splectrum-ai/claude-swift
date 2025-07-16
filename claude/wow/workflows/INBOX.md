@@ -6,7 +6,7 @@
 Task ingestion workflow that processes inbox tasks by converting them to GitHub issues. Separates task reception from task execution, feeding tasks into the existing issue prioritization system.
 
 ## Trigger
-**User-Friendly**: `inbox sesame`
+**User-Friendly**: ``inbox sesame``
 **Technical**: `INBOX`
 
 ## Purpose
@@ -307,7 +307,7 @@ if [ $PROCESSED_COUNT -gt 0 ]; then
     echo "✓ Task files removed from inbox"
     echo ""
     echo "Next steps:"
-    echo "- Use 'next sesame' to see recommended issues for execution"
+    echo "- Use '`next sesame`' to see recommended issues for execution"
     echo "- Check GitHub issues for task details and prioritization"
 fi
 
@@ -420,20 +420,20 @@ fi
 ### Process all inbox tasks
 ```bash
 # Run from any project directory
-inbox sesame
+`inbox sesame`
 # Result: All inbox tasks converted to GitHub issues
 ```
 
 ### Empty inbox scenario
 ```bash
-inbox sesame
+`inbox sesame`
 # Result: "No pending tasks in inbox" - normal state
 ```
 
 ### Error recovery
 ```bash
 # After fixing GitHub authentication issues
-inbox sesame
+`inbox sesame`
 # Result: Retry processing of failed tasks
 ```
 
@@ -473,11 +473,7 @@ GitHub Issues:                       # New issues created
 - "Task: Update API Interface"
 ```
 
-## Trigger Pattern
-
-```markdown
-**INBOX** → See [workflows/INBOX.md](./workflows/INBOX.md)
-```
+## Usage Guidelines
 
 Use when:
 - Processing received cross-repository tasks

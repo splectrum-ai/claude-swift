@@ -5,6 +5,10 @@
 ## Overview
 Manual issue creation workflow with standardized metadata structure to ensure compatibility with NEXT_ISSUE recommendations and project organization.
 
+## Trigger
+**User-Friendly**: `issue sesame` (manual issue creation)
+**Technical**: `CREATE_ISSUE`
+
 ## Workflow Steps
 
 ### 1. Initialize Audit Logging
@@ -227,11 +231,7 @@ Where:
 **Context:** [System area affected]
 ```
 
-## Trigger Pattern
-
-```markdown
-**CREATE_ISSUE** → See [workflows/CREATE_ISSUE.md](./workflows/CREATE_ISSUE.md)
-```
+## Usage Guidelines
 
 Use when:
 - Creating issues outside formal planning sessions

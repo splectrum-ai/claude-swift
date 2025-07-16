@@ -1,12 +1,12 @@
 [← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
-# OUTBOX Workflow
+# TO_INBOX Workflow
 
 ## Overview
 Universal workflow that processes tasks in the current repository's outbox directory, specifically handling self-targeted tasks by moving them from outbox to inbox for local processing.
 
 ## Trigger
-**User-Friendly**: `to-inbox sesame`
+**User-Friendly**: ``to-inbox sesame``
 **Technical**: `TO_INBOX`
 
 ## Purpose
@@ -32,7 +32,7 @@ Example: `2025-07-14T23-45-00Z_claude-swift_update-documentation.md`
 
 ### 1. Repository Detection
 ```bash
-audit_log "OUTBOX" "step" "repository_detection" "" "Detect current repository name and validate outbox directory"
+audit_log "TO_INBOX" "step" "repository_detection" "" "Detect current repository name and validate outbox directory"
 ```
 
 **Actions:**
@@ -51,7 +51,7 @@ echo "📂 Processing outbox for repository: $CURRENT_REPO"
 
 ### 2. Task Discovery
 ```bash
-audit_log "OUTBOX" "step" "task_discovery" "" "Scan outbox directory for self-targeted tasks"
+audit_log "TO_INBOX" "step" "task_discovery" "" "Scan outbox directory for self-targeted tasks"
 ```
 
 **Actions:**
@@ -69,7 +69,7 @@ echo "🔍 Found $(echo "$OUTBOX_TASKS" | wc -l) task files in outbox"
 
 ### 3. Self-Target Filtering
 ```bash
-audit_log "OUTBOX" "step" "self_target_filtering" "" "Filter tasks that target current repository"
+audit_log "TO_INBOX" "step" "self_target_filtering" "" "Filter tasks that target current repository"
 ```
 
 **Actions:**
@@ -93,7 +93,7 @@ echo "📋 Found $PROCESSED_COUNT self-targeted tasks for $CURRENT_REPO"
 
 ### 4. Task Processing
 ```bash
-audit_log "OUTBOX" "step" "task_processing" "" "Move self-targeted tasks from outbox to inbox"
+audit_log "TO_INBOX" "step" "task_processing" "" "Move self-targeted tasks from outbox to inbox"
 ```
 
 **Actions:**
@@ -127,7 +127,7 @@ echo "🎉 Processed $PROCESSED_COUNT self-targeted tasks"
 
 ### 5. Audit Logging
 ```bash
-audit_log "OUTBOX" "step" "audit_logging" "" "Record task processing in audit log"
+audit_log "TO_INBOX" "step" "audit_logging" "" "Record task processing in audit log"
 ```
 
 **Actions:**
@@ -138,18 +138,18 @@ source claude/wow/scripts/audit-functions.sh
 # Log each processed task
 for task_file in $SELF_TARGETED_TASKS; do
     task_name=$(basename "$task_file")
-    audit_log "OUTBOX" "task_processed" "$task_name" "" "Moved self-targeted task from outbox to inbox"
+    audit_log "TO_INBOX" "task_processed" "$task_name" "" "Moved self-targeted task from outbox to inbox"
 done
 ```
 
 ## Integration Points
 
 ### SESSION_START Integration
-- SESSION_START can automatically trigger OUTBOX workflow when outbox tasks are detected
+- SESSION_START can automatically trigger TO_INBOX workflow when outbox tasks are detected
 - Part of session initialization for processing pending work
 
 ### INBOX Integration
-- OUTBOX workflow feeds tasks into INBOX workflow
+- TO_INBOX workflow feeds tasks into INBOX workflow
 - Creates seamless task processing pipeline
 - Tasks moved to inbox can be processed by `inbox sesame` trigger
 
@@ -163,7 +163,7 @@ done
 ### Manual Processing
 ```bash
 # Process all self-targeted tasks in outbox
-to-inbox sesame
+`to-inbox sesame`
 ```
 
 ### Automated Processing
@@ -194,7 +194,7 @@ Each task file should contain:
 [HIGH/MEDIUM/LOW]
 
 ## Milestone (Optional)
-[Specific milestone - if not specified, uses target version from version-config.md]
+[Specific milestone - if not specified, uses target version from `claude/project/version-config.md`]
 
 ## Created
 [Timestamp and source]

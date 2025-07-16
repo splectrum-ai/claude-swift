@@ -6,7 +6,7 @@
 Interactive task creation workflow that guides users through creating cross-repository tasks with proper metadata and formatting. Tasks are saved to the local outbox folder for distribution via the OUTBOX workflow.
 
 ## Trigger
-**User-Friendly**: `task sesame`, `task [org/repo] sesame`, or `task . sesame`
+**User-Friendly**: ``task sesame``, `task [org/repo] sesame`, or `task . sesame`
 **Technical**: `TASK_CREATE`
 
 ## Purpose
@@ -284,7 +284,7 @@ This directory contains cross-repository tasks awaiting distribution.
 - **Content**: Standardized task format with metadata header
 
 ## Workflow Integration
-- Tasks created here via `task sesame` (TASK_CREATE workflow)
+- Tasks created here via ``task sesame`` (TASK_CREATE workflow)
 - Tasks distributed via `outbox sesame` (OUTBOX workflow)
 - Tasks processed at target via `inbox sesame` (INBOX workflow)
 
@@ -347,9 +347,9 @@ echo "Lines: $(wc -l < "$TASK_FILE_PATH")"
 echo ""
 echo "Next steps:"
 echo "1. Review task file: cat claude/outbox/$TASK_FILENAME"
-echo "2. Distribute task: outbox sesame (from base repository)"
+echo "2. Distribute task: `outbox sesame` (from base repository)"
 echo "3. Target repository will receive task in their inbox"
-echo "4. Target can process: inbox sesame (converts to GitHub issue)"
+echo "4. Target can process: `inbox sesame` (converts to GitHub issue)"
 echo ""
 echo "Task is ready for distribution! 🚀"
 ```
@@ -478,15 +478,15 @@ fi
 ### Create a new task
 ```bash
 # Interactive task creation (prompts for target)
-task sesame
+`task sesame`
 # Result: Guided prompts for all task details, file created in outbox/
 
 # Direct target specification
-task org/project sesame
+`task org/project sesame`
 # Result: Target pre-filled, prompts for remaining details, file created in outbox/
 
 # Direct target with repo name only
-task project-name sesame
+`task project-name sesame`
 # Result: Target set to "project-name", prompts for remaining details
 ```
 
@@ -494,7 +494,7 @@ task project-name sesame
 
 **Interactive Mode (no target parameter):**
 ```bash
-$ task sesame
+$ `task sesame`
 === CREATE CROSS-REPOSITORY TASK ===
 
 Target Repository:
@@ -573,7 +573,7 @@ Confirm: y
 
 **Parameter Mode (target specified):**
 ```bash
-$ task org/project sesame
+$ `task org/project sesame`
 === CREATE CROSS-REPOSITORY TASK ===
 
 Target Repository: org/project (from parameter)
@@ -667,11 +667,7 @@ Confirm: y
 - **Source Detection**: Automatic repository identification
 - **Template Population**: Consistent task structure
 
-## Trigger Pattern
-
-```markdown
-**TASK_CREATE** → See [workflows/TASK_CREATE.md](./workflows/TASK_CREATE.md)
-```
+## Usage Guidelines
 
 Use when:
 - Creating cross-repository tasks for other teams/projects
@@ -680,6 +676,6 @@ Use when:
 - Establishing formal task communication channels
 
 **Usage Patterns:**
-- `task sesame` - Interactive mode, prompts for target repository
+- ``task sesame`` - Interactive mode, prompts for target repository
 - `task [org/repo] sesame` - Direct mode, target pre-specified
 - `task [repo-name] sesame` - Direct mode with repo name only

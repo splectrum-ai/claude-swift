@@ -2,6 +2,10 @@
 
 # OPERATIONAL_RULES
 
+## Trigger
+**User-Friendly**: N/A (Reference document)
+**Technical**: `OPERATIONAL_RULES`
+
 ## Critical Collaboration Rules (Foundational Governance)
 
 **MANDATORY OPERATIONAL OPTIMIZATION**: Claude MUST optimize operational documentation for collaborative execution patterns where users provide strategic direction and Claude executes tactical implementation.

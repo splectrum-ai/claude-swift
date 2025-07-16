@@ -388,7 +388,7 @@ create_new_issue "Issue Title" "Issue body content" "enhancement,v1.1.0"
 
 # Method 2: GitHub creation + gap detection
 gh issue create --title "New Issue" --body "Description" --label "enhancement"
-issue sesame  # Triggers gap detection to cache new issue
+`issue sesame`  # Triggers gap detection to cache new issue
 ```
 
 ### Issue Update Integration
@@ -407,7 +407,7 @@ sync_to_github 50
 ```bash
 # When closing issues, cache cleanup happens automatically
 gh issue close 50 -c "Completed"
-issue sesame  # Cleanup removes closed issues from cache
+`issue sesame`  # Cleanup removes closed issues from cache
 ```
 
 ### Workflow Integration Examples

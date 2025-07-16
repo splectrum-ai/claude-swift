@@ -238,7 +238,7 @@ Merge conflicts detected. Resolve conflicts before committing:
 git status  # See conflicted files
 # Resolve conflicts manually
 git add .   # Stage resolved files
-commit sesame  # Retry commit
+`commit sesame`  # Retry commit
 ```
 
 ### Push Failures
@@ -278,21 +278,21 @@ git push origin main
 
 ### Simple Commit
 ```
-commit sesame
+`commit sesame`
 # Result: Analyzes changes, generates message, commits and pushes
 ```
 
 ### With Issue Resolution
 ```
 # After working on issue #123
-commit sesame
+`commit sesame`
 # Result: Commits changes and closes issue #123 automatically
 ```
 
 ### Multiple Issues
 ```
 # After fixing bugs #123 and #124
-commit sesame
+`commit sesame`
 # Result: Commits changes and closes both issues with references
 ```
 

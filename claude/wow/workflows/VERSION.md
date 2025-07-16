@@ -5,9 +5,9 @@
 ## Purpose
 Main version management workflow that consolidates all version-related operations with intelligent state detection and user-guided routing.
 
-## Trigger Keywords
-- `version sesame`
-- `VERSION`
+## Trigger
+**User-Friendly**: `version sesame`
+**Technical**: `VERSION`
 
 ## Overview
 This workflow provides version management coordination:

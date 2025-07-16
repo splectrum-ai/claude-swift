@@ -146,8 +146,11 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "verification" "" "Verify all correct
 - **Periodic Maintenance**: Regular compliance validation
 - **Rule Updates**: After adding or modifying mandatory rules
 
+## Trigger
+**User-Friendly**: `mandatory sesame`
+**Technical**: `MANDATORY_RULES_REFRESH`
+
 ### Integration with Sesame System
-- **Trigger**: `mandatory sesame` → `MANDATORY_RULES_REFRESH`
 - **Purpose**: Quick access to complete mandatory rule validation
 - **Context**: Troubleshooting, maintenance, compliance verification
 

@@ -6,6 +6,10 @@
 
 **One Branch, Direct Commits, Maximum Simplicity**
 
+## Trigger
+**User-Friendly**: N/A (Reference document)
+**Technical**: `GIT_WORKFLOW`
+
 ### Core Principles
 1. **All work on main branch** - No feature branches, no merging
 2. **Direct commits** - Stage, commit, push to main

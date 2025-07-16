@@ -5,6 +5,10 @@
 ## Overview
 Automated workflow for selecting the next GitHub issue to work on, combining recommendation engine with contextual decision factors.
 
+## Trigger
+**User-Friendly**: `next sesame`
+**Technical**: `NEXT_ISSUE`
+
 ## Cache Integration
 **Performance Optimization**: Uses local ISSUE_CACHE for instant issue queries instead of GitHub API calls. Requires cache to be populated via `issue sesame` or SESSION_START workflow.
 
@@ -14,7 +18,7 @@ Automated workflow for selecting the next GitHub issue to work on, combining rec
 ```bash
 # Ensure cache exists and is reasonably current
 if [ ! -f "claude/project/cache/issues.json" ]; then
-    echo "Issue cache not found. Running 'issue sesame' to populate cache..."
+    echo "Issue cache not found. Running '`issue sesame`' to populate cache..."
     # Execute ISSUE_CACHE workflow to populate cache
     echo "Cache populated. Continuing with issue analysis..."
 fi
@@ -207,11 +211,7 @@ gh issue list --limit 10 --json number,title,labels,body
 - No analysis paralysis
 - Smooth context transitions
 
-## Trigger Pattern
-
-```markdown
-**NEXT_ISSUE** → See [workflows/NEXT_ISSUE.md](./workflows/NEXT_ISSUE.md)
-```
+## Usage Guidelines
 
 Use when:
 - Starting new session

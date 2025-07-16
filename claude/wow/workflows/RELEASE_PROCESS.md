@@ -4,7 +4,9 @@
 
 **Note:** This is a specialized workflow coordinated by the main VERSION workflow.
 
-**Trigger**: Coordinated via VERSION workflow
+## Trigger
+**User-Friendly**: `release sesame` or `patch sesame`
+**Technical**: `RELEASE_PROCESS`
 
 ## Overview
 
@@ -94,7 +96,7 @@ gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat 
 source claude/wow/scripts/audit-functions.sh
 
 # Log workflow start
-audit_log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with release sesame trigger"
+audit_log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with `release sesame` trigger"
 
 # Log each major step
 audit_log "RELEASE_PROCESS" "step" "archive_logs" "" "Archive logs with version stamps"
@@ -109,7 +111,7 @@ audit_log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release
 
 ## Version Strategy
 **Loaded from Project Hooks:**
-- Version strategy and numbering patterns defined in `claude/project/hooks/version-config.md`
+- Version strategy and numbering patterns defined in `claude/project/version-config.md`
 - Project-specific release criteria and artifact configuration
 - Development phases and milestone structure
 
@@ -150,7 +152,7 @@ audit_log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release
 ## Release Execution Lessons (v0.6.1 Experience)
 
 ### First Release Insights
-Based on the first "release sesame" execution for v0.6.1, the following refinements and patterns have been identified:
+Based on the first "`release sesame`" execution for v0.6.1, the following refinements and patterns have been identified:
 
 #### **Planning vs Implementation Releases**
 - **Planning Releases** (like v0.6.1): Focus on architectural documentation, no binary artifacts

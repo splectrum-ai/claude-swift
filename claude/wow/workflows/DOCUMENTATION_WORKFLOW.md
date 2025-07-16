@@ -6,7 +6,8 @@
 
 **MANDATORY DOCUMENTATION WORKFLOW**: All documentation creation, modification, and maintenance MUST follow this standardized workflow to ensure WoW compliance and consistency.
 
-**TRIGGER**: `docs sesame` or when any documentation operations are needed
+## Trigger
+**Technical**: `DOCUMENTATION_WORKFLOW`
 
 **SCOPE**: All `.md` files in repository (excluding root CLAUDE.md and README.md)
 

@@ -6,7 +6,9 @@
 
 **MANDATORY SESSION INITIALIZATION**: When any new Claude session begins, Claude MUST execute this system check and initialization sequence.
 
-**TRIGGER**: Any new Claude session initiation
+## Trigger
+**User-Friendly**: `start sesame`
+**Technical**: `SESSION_START`
 
 **MANDATORY SYSTEM CHECK:**
 1. **SCAN ALL MANDATORY RULES**: Review CLAUDE.md and workflow files for all rules marked "MANDATORY"
@@ -273,7 +275,7 @@ audit_log "SESSION_START" "step" "issue_cache_validation" "" "Executing ISSUE_CA
 **Implementation:**
 ```bash
 echo "Validating and updating issue cache..."
-# Execute complete ISSUE_CACHE workflow (issue sesame)
+# Execute complete ISSUE_CACHE workflow (`issue sesame`)
 # - Gap detection: Add missing issues
 # - Cache cleanup: Remove closed issues  
 # - Milestone sync: Update milestone data
