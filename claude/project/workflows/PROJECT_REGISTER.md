@@ -208,6 +208,45 @@ fi
 echo "✓ Ensured claude/inbox and claude/outbox directories exist with documentation"
 ```
 
+### Local Configuration Setup
+```bash
+# Create local config directory for machine-specific settings
+mkdir -p claude/local
+
+# Create .gitignore if it doesn't exist to exclude local configs
+if [ ! -f .gitignore ]; then
+    cat > .gitignore << 'EOF'
+# Local machine-specific configurations
+claude/local/
+EOF
+    echo "✓ Created .gitignore with claude/local/ exclusion"
+elif ! grep -q "claude/local/" .gitignore; then
+    echo "" >> .gitignore
+    echo "# Local machine-specific configurations" >> .gitignore
+    echo "claude/local/" >> .gitignore
+    echo "✓ Added claude/local/ to existing .gitignore"
+else
+    echo "✓ .gitignore already excludes claude/local/"
+fi
+
+# Create local config README
+cat > claude/local/README.md << 'EOF'
+# Local Configuration Directory
+
+This directory contains machine-specific configuration files that should not be committed to git.
+
+## Files in this directory:
+- `audit-config.json` - Local audit logging configuration with absolute paths
+- `session-config.json` - Session-specific settings
+- `cache/` - Local cache files
+
+## Purpose:
+Separates environment-specific configs from shared project configurations.
+EOF
+
+echo "✓ Created claude/local/ directory with documentation"
+```
+
 **Cleanup Rationale:**
 - `claude/project/todo.md` should only exist in the base template
 - Registered projects should not have their own repo todo lists
@@ -282,7 +321,7 @@ fi
 
 # 2. Required Directory Structure
 echo "Checking directory structure..."
-REQUIRED_DIRS=("claude/project" "claude/inbox" "claude/outbox")
+REQUIRED_DIRS=("claude/project" "claude/inbox" "claude/outbox" "claude/local")
 for dir in "${REQUIRED_DIRS[@]}"; do
     if [ -d "$dir" ]; then
         echo "✓ $dir directory exists"
@@ -294,7 +333,7 @@ done
 
 # 3. Required Files
 echo "Checking required files..."
-REQUIRED_FILES=("claude/inbox/README.md" "claude/outbox/README.md")
+REQUIRED_FILES=("claude/inbox/README.md" "claude/outbox/README.md" "claude/local/README.md")
 for file in "${REQUIRED_FILES[@]}"; do
     if [ -f "$file" ]; then
         echo "✓ $file exists"

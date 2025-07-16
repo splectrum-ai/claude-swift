@@ -15,7 +15,10 @@ function loadAuditConfig() {
     while (currentDir !== path.dirname(currentDir)) {
         const claudeDir = path.join(currentDir, 'claude');
         if (existsSync(claudeDir)) {
-            const configPath = path.join(claudeDir, 'project', 'audit-config.json');
+            // Try local config first (gitignored, machine-specific)
+            const localConfigPath = path.join(claudeDir, 'local', 'audit-config.json');
+            const projectConfigPath = path.join(claudeDir, 'project', 'audit-config.json');
+            const configPath = existsSync(localConfigPath) ? localConfigPath : projectConfigPath;
             try {
                 if (existsSync(configPath)) {
                     const configData = JSON.parse(readFileSync(configPath, 'utf8'));

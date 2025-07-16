@@ -25,8 +25,16 @@ audit_log() {
     if [[ -z "$script_path" ]]; then
         current_dir="$(pwd)"
         while [[ "$current_dir" != "/" ]]; do
-            if [[ -f "$current_dir/claude/project/audit-config.json" ]]; then
-                local config_scripts_path=$(grep '"scriptsPath"' "$current_dir/claude/project/audit-config.json" | sed 's/.*"scriptsPath": *"\([^"]*\)".*/\1/')
+            # Try local config first, then project config
+            local config_file=""
+            if [[ -f "$current_dir/claude/local/audit-config.json" ]]; then
+                config_file="$current_dir/claude/local/audit-config.json"
+            elif [[ -f "$current_dir/claude/project/audit-config.json" ]]; then
+                config_file="$current_dir/claude/project/audit-config.json"
+            fi
+            
+            if [[ -n "$config_file" ]]; then
+                local config_scripts_path=$(grep '"scriptsPath"' "$config_file" | sed 's/.*"scriptsPath": *"\([^"]*\)".*/\1/')
                 if [[ -f "$config_scripts_path/cli/audit-log.js" ]]; then
                     script_path="$config_scripts_path/cli/audit-log.js"
                     break

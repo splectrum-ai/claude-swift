@@ -1,3 +1,6 @@
 # Claude Code settings files
 .claude/
 projects/
+
+# Local machine-specific configurations
+claude/local/
