@@ -283,7 +283,7 @@ export class OptimizedGitHubCache {
      */
     async loadIssuesCache() {
         try {
-            const content = await fs.readFile('claude/project/cache/issues.json', 'utf8');
+            const content = await fs.readFile('claude/cache/issues.json', 'utf8');
             return JSON.parse(content);
         } catch (error) {
             return {};
@@ -291,13 +291,13 @@ export class OptimizedGitHubCache {
     }
 
     async saveIssuesCache(cache) {
-        await fs.mkdir('claude/project/cache', { recursive: true });
-        await fs.writeFile('claude/project/cache/issues.json', JSON.stringify(cache, null, 2));
+        await fs.mkdir('claude/cache', { recursive: true });
+        await fs.writeFile('claude/cache/issues.json', JSON.stringify(cache, null, 2));
     }
 
     async loadMilestonesCache() {
         try {
-            const content = await fs.readFile('claude/project/cache/milestones.json', 'utf8');
+            const content = await fs.readFile('claude/cache/milestones.json', 'utf8');
             return JSON.parse(content);
         } catch (error) {
             return {};
@@ -305,13 +305,13 @@ export class OptimizedGitHubCache {
     }
 
     async saveMilestonesCache(cache) {
-        await fs.mkdir('claude/project/cache', { recursive: true });
-        await fs.writeFile('claude/project/cache/milestones.json', JSON.stringify(cache, null, 2));
+        await fs.mkdir('claude/cache', { recursive: true });
+        await fs.writeFile('claude/cache/milestones.json', JSON.stringify(cache, null, 2));
     }
 
     async getCacheMetadata() {
         try {
-            const content = await fs.readFile('claude/project/cache/metadata.json', 'utf8');
+            const content = await fs.readFile('claude/cache/metadata.json', 'utf8');
             return JSON.parse(content);
         } catch (error) {
             return {
@@ -330,8 +330,8 @@ export class OptimizedGitHubCache {
         const current = await this.getCacheMetadata();
         const updated = { ...current, ...updates };
         
-        await fs.mkdir('claude/project/cache', { recursive: true });
-        await fs.writeFile('claude/project/cache/metadata.json', JSON.stringify(updated, null, 2));
+        await fs.mkdir('claude/cache', { recursive: true });
+        await fs.writeFile('claude/cache/metadata.json', JSON.stringify(updated, null, 2));
     }
 
     /**

@@ -6,4 +6,4 @@ projects/
 claude/local/
 
 # Generated cache files
-claude/project/cache/
+claude/cache/

@@ -247,7 +247,7 @@ export class LazyCacheManager {
     }
 
     getCacheFilePath(key) {
-        return path.join('claude/project/cache/lazy', `${key}.json`);
+        return path.join('claude/cache/lazy', `${key}.json`);
     }
 
     /**

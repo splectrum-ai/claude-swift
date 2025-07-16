@@ -401,7 +401,7 @@ export class OptimizedSessionStartWorkflowOrchestrator {
         const requiredDirs = [
             'claude/inbox',
             'claude/outbox',
-            'claude/project/cache',
+            'claude/cache',
             'claude/project/audit/current'
         ];
         
