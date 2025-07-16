@@ -59,6 +59,33 @@ Example:
 - **Bash Wrapper**: `claude/wow/scripts/audit-functions.sh`
 - **Benefits**: Batch operations, error handling, consistent formatting
 
+## Configuration System
+The audit logging system uses a configuration-based approach for cross-repository compatibility:
+
+### Configuration Files (Priority Order)
+1. **Local Config** (preferred): `claude/local/audit-config.json` - Machine-specific, gitignored
+2. **Project Config** (fallback): `claude/project/audit-config.json` - Shared configuration
+
+### Automatic Configuration
+- **SESSION_START**: Automatically creates local config with absolute paths
+- **PROJECT_REGISTER**: Sets up local config directory for subprojects
+- **Path Resolution**: Scripts automatically find correct audit log location
+
+### Configuration Format
+```json
+{
+  "auditLogPath": "/absolute/path/to/claude/project/audit/current/current.log",
+  "auditLogDirectory": "/absolute/path/to/claude/project/audit/current",
+  "projectRoot": "/absolute/path/to/repository",
+  "scriptsPath": "/absolute/path/to/claude/wow/scripts",
+  "configVersion": "1.0.0",
+  "generatedBy": "SESSION_START",
+  "lastUpdated": "2025-07-16T07:18:00Z"
+}
+```
+
+This ensures audit logging works reliably across different repository structures without committing machine-specific paths.
+
 ---
 
 *Simplified audit logging focused on proven implementation patterns.*
