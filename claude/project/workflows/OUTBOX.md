@@ -4,8 +4,10 @@
 Cross-repository task distribution workflow that collects tasks from registered project outboxes and routes them to target project inboxes. Acts as the central message broker in the event-driven choreography system.
 
 ## Trigger
-**User-Friendly**: `outbox sesame`
+**User-Friendly**: `outbox sesame` (NOTE: no dot parameter for orchestrator workflow)
 **Technical**: `OUTBOX`
+
+**⚠️ IMPORTANT**: This is the ORCHESTRATOR-ONLY cross-repository workflow. For self-targeted tasks within a repository, use `to-inbox sesame` (universal) instead.
 
 ## Purpose
 - Collect outbox tasks from all registered projects
@@ -42,9 +44,13 @@ audit_log "OUTBOX" "workflow_start" "outbox_sesame" "" "Starting cross-repositor
 
 # Verify we're in a base repository with projects directory
 if [ ! -d "projects" ]; then
-    echo "Error: OUTBOX workflow can only be executed from base repositories"
+    echo "❌ Error: OUTBOX cross-repository workflow can only be executed from base repositories"
     echo "This workflow requires a projects/ directory (sesameh org repositories only)"
     echo "Current directory: $(pwd)"
+    echo ""
+    echo "💡 Did you mean to run 'to-inbox sesame' instead?"
+    echo "   - 'to-inbox sesame' = Process self-targeted tasks (works in any repository)"
+    echo "   - 'outbox sesame' = Cross-repository distribution (orchestrator only)"
     audit_log "OUTBOX" "error" "security_check" "" "Unauthorized execution: missing projects directory"
     exit 1
 fi

@@ -9,10 +9,10 @@
 - **REPOSITORY**: SPlectrum/claude-swift
 
 ## Version Strategy
-- **CURRENT_VERSION**: 1.1.0
+- **CURRENT_VERSION**: v1.1.0
 - **VERSION_PATTERN**: semantic (major.minor.patch)
 - **RELEASE_TYPE**: template-system
-- **TARGET_VERSION**: 1.2.0 (workflow optimization and enhanced analytics)
+- **TARGET_VERSION**: v1.2.0 (workflow optimization and enhanced analytics)
 
 ## Version Numbering Rules
 - **Major Version**: Template architecture changes, breaking compatibility

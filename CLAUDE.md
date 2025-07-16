@@ -18,7 +18,8 @@ Use natural language with "sesame" suffix:
 - `issue sesame` → ISSUE_CACHE workflow (issue cache synchronization) or manual issue creation
 - `close sesame` → Manual issue closure for occasional needs
 - `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues with milestone assignment)
-- `outbox . sesame` → OUTBOX workflow (process self-targeted tasks from outbox to inbox)
+- `to-inbox sesame` → TO_INBOX workflow (process self-targeted tasks from outbox to inbox) - UNIVERSAL
+- `outbox sesame` → OUTBOX workflow (collect and distribute cross-repository tasks) - ORCHESTRATOR ONLY
 - `task [org/repo] sesame` → TASK_CREATE workflow (interactive task creation for cross-repository communication)
 - `task . sesame` → TASK_CREATE workflow targeting current repository
 

@@ -20,7 +20,7 @@ This file maintains the complete registry of uppercase workflow trigger keywords
 | **ISSUE_CACHE** | `ISSUE_CACHE.md` | Local cache management for GitHub issues and milestones | Performance optimization, reduced API calls, offline access | `issue sesame` |
 | **CREATE_ISSUE** | `CREATE_ISSUE.md` | Manual issue creation with standardized metadata structure | Ad-hoc issue creation, structured backlog management | `issue sesame` |
 | **INBOX** | `INBOX.md` | Task ingestion workflow converting inbox tasks to GitHub issues | Cross-repository task processing, task-to-issue conversion, inbox management | `inbox sesame` |
-| **OUTBOX** | `OUTBOX.md` | Self-targeted task processing from outbox to inbox | Local task queuing, outbox-to-inbox movement, task processing | `outbox . sesame` |
+| **TO_INBOX** | `OUTBOX.md` | Self-targeted task processing from outbox to inbox | Local task queuing, outbox-to-inbox movement, task processing | `to-inbox sesame` |
 | **TASK_CREATE** | `TASK_CREATE.md` | Interactive task creation workflow for cross-repository communication | Guided task creation, metadata collection, standardized formatting | `task [org/repo] sesame`, `task . sesame` |
 
 ## Built-in Claude Code Keywords
@@ -71,6 +71,7 @@ next sesame      → NEXT_ISSUE
 mandatory sesame → MANDATORY_RULES_REFRESH
 issue sesame     → CREATE_ISSUE
 inbox sesame     → INBOX
+to-inbox sesame  → TO_INBOX
 task sesame      → TASK_CREATE
 ```
 

@@ -4,8 +4,8 @@
 Universal workflow that processes tasks in the current repository's outbox directory, specifically handling self-targeted tasks by moving them from outbox to inbox for local processing.
 
 ## Trigger
-**User-Friendly**: `outbox . sesame`
-**Technical**: `OUTBOX` (with dot parameter)
+**User-Friendly**: `to-inbox sesame`
+**Technical**: `TO_INBOX`
 
 ## Purpose
 - Process self-targeted tasks from outbox directory
@@ -161,7 +161,7 @@ done
 ### Manual Processing
 ```bash
 # Process all self-targeted tasks in outbox
-outbox . sesame
+to-inbox sesame
 ```
 
 ### Automated Processing
@@ -169,7 +169,7 @@ outbox . sesame
 # Check for self-targeted tasks during session start
 if [ -n "$(find claude/outbox -name "*_${CURRENT_REPO}_*.md" 2>/dev/null)" ]; then
     echo "Self-targeted tasks detected, processing..."
-    # Execute OUTBOX . workflow
+    # Execute TO_INBOX workflow
 fi
 ```
 

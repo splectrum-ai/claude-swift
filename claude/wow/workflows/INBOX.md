@@ -125,8 +125,8 @@ INBOX|step|issue_conversion||Convert task content to GitHub issue
 get_target_milestone() {
     # Check if version-config.md exists and extract target version
     if [ -f "claude/project/version-config.md" ]; then
-        # Extract just the version number (e.g., "1.2.0" from "1.2.0 (description)")
-        local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | sed 's/.*TARGET_VERSION.*: \([0-9.]*\).*/\1/')
+        # Extract version with v prefix (e.g., "v1.2.0" from "v1.2.0 (description)")
+        local target_version=$(grep "TARGET_VERSION" claude/project/version-config.md | sed 's/.*TARGET_VERSION.*: \(v[0-9.]*\).*/\1/')
         if [ -n "$target_version" ]; then
             echo "$target_version"
             return 0

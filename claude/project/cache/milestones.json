@@ -1,0 +1,42 @@
+[
+  {
+    "number": 2,
+    "title": "DEPL-1: Deployment Infrastructure",
+    "description": "Core deployment scripts and automation for template system",
+    "state": "open",
+    "createdAt": "2025-06-26T18:01:02Z",
+    "updatedAt": "2025-06-26T19:01:34Z",
+    "dueOn": null,
+    "closedAt": null
+  },
+  {
+    "number": 3,
+    "title": "SIDE-1: Sidecar Validation",
+    "description": "Testing and validation of sidecar deployment pattern",
+    "state": "open",
+    "createdAt": "2025-06-26T18:01:10Z",
+    "updatedAt": "2025-06-26T19:01:38Z",
+    "dueOn": null,
+    "closedAt": null
+  },
+  {
+    "number": 4,
+    "title": "Claude Swift as root, with sub project work bench",
+    "description": "Transform claude-swift into a root workspace framework that manages multiple sub-projects. Core features: PROJECT_SWITCH workflow for seamless project switching, GitHub repository cloning automation, and independent project contexts within a unified development environment. Claude-swift WoW (Ways of Working) workflows are seamlessly activated in all sub-projects using symlinks, providing consistent operational framework across the entire workspace.",
+    "state": "open",
+    "createdAt": "2025-06-26T19:01:22Z",
+    "updatedAt": "2025-07-14T13:43:09Z",
+    "dueOn": null,
+    "closedAt": null
+  },
+  {
+    "number": 5,
+    "title": "v1.2.0",
+    "description": "Workflow optimization and enhanced analytics",
+    "state": "open",
+    "createdAt": "2025-07-16T11:06:31Z",
+    "updatedAt": "2025-07-16T17:44:58Z",
+    "dueOn": null,
+    "closedAt": null
+  }
+]

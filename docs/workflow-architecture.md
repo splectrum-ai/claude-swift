@@ -95,7 +95,7 @@ registered-repo (e.g., splectrum)
 | SESSION_START | ✅ | ✅ | `start sesame` | Session initialization |
 | NEXT_ISSUE | ✅ | ✅ | `next sesame` | Issue prioritization |
 | INBOX | ✅ | ✅ | `inbox sesame` | Process tasks to issues (with milestone assignment) |
-| OUTBOX | ✅ | ✅ | `outbox . sesame` | Process self-targeted tasks |
+| TO_INBOX | ✅ | ✅ | `to-inbox sesame` | Process self-targeted tasks |
 | TASK_CREATE | ✅ | ✅ | `task [target] sesame` | Create cross-repository tasks |
 | ISSUE_CACHE | ✅ | ✅ | `issue sesame` | Local issue caching |
 | INITIALISE | ✅ | ❌ | `initialise sesame` | Setup orchestrator workspace |
@@ -109,7 +109,7 @@ registered-repo (e.g., splectrum)
 # Universal workflows work
 start sesame                    # Session initialization
 next sesame                     # Find next issue to work on
-outbox . sesame                 # Process self-targeted tasks
+to-inbox sesame                 # Process self-targeted tasks
 inbox sesame                    # Convert tasks to GitHub issues
 issue sesame                    # Sync issue cache
 
@@ -124,7 +124,7 @@ outbox sesame                   # Distribute tasks to all projects
 # Universal workflows work
 start sesame                    # Session initialization
 next sesame                     # Find next issue to work on
-outbox . sesame                 # Process self-targeted tasks
+to-inbox sesame                 # Process self-targeted tasks
 inbox sesame                    # Convert tasks to GitHub issues
 issue sesame                    # Sync issue cache
 

@@ -27,7 +27,7 @@ All universal workflows are available via sesame triggers:
 - `next sesame` - Get prioritized work recommendations
 - `issue sesame` - Sync issue cache or create structured GitHub issues
 - `inbox sesame` - Process tasks sent to your inbox (auto-assigns target version milestone)
-- `outbox . sesame` - Process self-targeted tasks (universal workflow)
+- `to-inbox sesame` - Process self-targeted tasks (universal workflow)
 - `task [target] sesame` - Create tasks for other projects
 
 **Development Operations**

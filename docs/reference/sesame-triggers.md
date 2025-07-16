@@ -8,7 +8,7 @@ Complete list of all sesame triggers available in claude-swift orchestrator and 
 - `initialise sesame` - Initialize orchestrator workspace (one-time setup)
 - `register [org/repo] sesame` - Register a project for orchestration
 - `outbox sesame` - Distribute tasks across all registered projects (orchestrator only)
-- `outbox . sesame` - Process self-targeted tasks from outbox to inbox (universal)
+- `to-inbox sesame` - Process self-targeted tasks from outbox to inbox (universal)
 - `inbox sesame` - Process received tasks into GitHub issues with milestone assignment
 
 ### Task Creation
@@ -50,7 +50,7 @@ Complete list of all sesame triggers available in claude-swift orchestrator and 
 ```bash
 # In any repository (orchestrator or project)
 start sesame
-outbox . sesame     # Process self-targeted tasks (universal)
+to-inbox sesame     # Process self-targeted tasks (universal)
 inbox sesame        # Convert inbox tasks to GitHub issues
 next sesame         # See what to work on
 
@@ -71,7 +71,7 @@ inbox sesame        # Converts to GitHub issue with milestone assignment
 
 # Self-targeted tasks (any repository)
 task . sesame       # Create task for current repository
-outbox . sesame     # Move to inbox for processing
+to-inbox sesame     # Move to inbox for processing
 inbox sesame        # Convert to GitHub issue
 ```
 
@@ -105,7 +105,7 @@ User: sesame
 ## Tips
 
 ### Efficient Orchestration
-1. Run `outbox . sesame` in any repository to process self-targeted tasks
+1. Run `to-inbox sesame` in any repository to process self-targeted tasks
 2. Run `outbox sesame` in orchestrator to distribute cross-repository tasks
 3. Process inbox before starting new work with `inbox sesame`
 4. Use `task . sesame` for same-project tasks (creates local outbox tasks)
