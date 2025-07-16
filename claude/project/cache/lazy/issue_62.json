@@ -1,0 +1,20 @@
+{
+  "number": 62,
+  "title": "Remove references to old ways of doing across all workflows",
+  "state": "OPEN",
+  "labels": [],
+  "milestone": {
+    "title": "v1.2.0",
+    "number": 5
+  },
+  "createdAt": "2025-07-16T17:16:34Z",
+  "updatedAt": "2025-07-16T17:16:35Z",
+  "body": "## Cross-Repository Task\r\n\r\n**Source**: sesameh/claude-swift  \r\n**Type**: cleanup  \r\n**Created**: 2025-07-16T17:06:53.001Z  \r\n**Priority**: HIGH\r\n\r\n---\r\n\r\n# Remove references to old ways of doing across all workflows\r\n\r\n## Description\r\nClean up all workflow files to remove references to outdated patterns, deprecated approaches, and old ways of doing things\r\n\r\n## Priority: HIGH\r\n**Justification:** Critical for maintaining clean, current documentation and preventing confusion about workflow patterns\r\n\r\n## Dependencies\r\n\r\n## Effort: M\r\n**Estimate:** Medium complexity - requires systematic review of all workflow files and careful removal of deprecated content\r\n\r\n## Test Criteria\r\n**How to verify completion:**\r\n- [ ] All workflow files reviewed for old way references\r\n- [ ] Deprecated patterns and approaches removed\r\n- [ ] Documentation consistency verified\r\n- [ ] No broken references remain\r\n- [ ] All workflows reflect current best practices\r\n\r\n## Work Area: v1.2.0\r\n**Context:** Part of v1.2.0 milestone to clean up documentation and workflows\r\n\r\n🤖 Generated with [Claude Code](https://claude.ai/code)\r\n\r\n---\r\n\r\n## Dependencies\r\n**Blocks:** None (unless specified in task content)\r\n**Blocked by:** None (unless specified in task content)  \r\n**Related:** Cross-repository communication\r\n\r\n## Effort: M\r\n**Estimate:** Cross-repository task processing\r\n\r\n## Test Criteria\r\n**How to verify completion:**\r\n- [ ] Task requirements completed as specified\r\n- [ ] Cross-repository coordination successful\r\n\r\n## Work Area: cross-repository\r\n**Context:** Task distributed via OUTBOX/INBOX workflow\r\n\r\n*This issue was automatically created from an inbox task by the INBOX workflow.*",
+  "user": {
+    "login": "jules-tenbos"
+  },
+  "assignees": [],
+  "url": "https://github.com/sesameh/claude-swift/issues/62",
+  "cached_at": "2025-07-16T19:15:02.210Z",
+  "cache_source": "api"
+}
