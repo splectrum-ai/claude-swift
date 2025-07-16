@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # OUTBOX Workflow
 
 ## Overview
@@ -29,8 +31,8 @@ Example: `2025-07-14T23-45-00Z_claude-swift_update-documentation.md`
 ## Workflow Steps
 
 ### 1. Repository Detection
-```
-OUTBOX|step|repository_detection||Detect current repository name and validate outbox directory
+```bash
+audit_log "OUTBOX" "step" "repository_detection" "" "Detect current repository name and validate outbox directory"
 ```
 
 **Actions:**
@@ -48,8 +50,8 @@ echo "📂 Processing outbox for repository: $CURRENT_REPO"
 ```
 
 ### 2. Task Discovery
-```
-OUTBOX|step|task_discovery||Scan outbox directory for self-targeted tasks
+```bash
+audit_log "OUTBOX" "step" "task_discovery" "" "Scan outbox directory for self-targeted tasks"
 ```
 
 **Actions:**
@@ -66,8 +68,8 @@ echo "🔍 Found $(echo "$OUTBOX_TASKS" | wc -l) task files in outbox"
 ```
 
 ### 3. Self-Target Filtering
-```
-OUTBOX|step|self_target_filtering||Filter tasks that target current repository
+```bash
+audit_log "OUTBOX" "step" "self_target_filtering" "" "Filter tasks that target current repository"
 ```
 
 **Actions:**
@@ -90,8 +92,8 @@ echo "📋 Found $PROCESSED_COUNT self-targeted tasks for $CURRENT_REPO"
 ```
 
 ### 4. Task Processing
-```
-OUTBOX|step|task_processing||Move self-targeted tasks from outbox to inbox
+```bash
+audit_log "OUTBOX" "step" "task_processing" "" "Move self-targeted tasks from outbox to inbox"
 ```
 
 **Actions:**
@@ -124,8 +126,8 @@ echo "🎉 Processed $PROCESSED_COUNT self-targeted tasks"
 ```
 
 ### 5. Audit Logging
-```
-OUTBOX|step|audit_logging||Record task processing in audit log
+```bash
+audit_log "OUTBOX" "step" "audit_logging" "" "Record task processing in audit log"
 ```
 
 **Actions:**

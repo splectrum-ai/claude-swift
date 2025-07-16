@@ -1,12 +1,14 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # VERSION_TRANSITION Sub-Workflow
 
-**Note:** This is a sub-workflow called by the main VERSION workflow router.
+**Note:** This is a specialized workflow coordinated by the main VERSION workflow.
 
 ## ⚠️ MANDATORY VERSION TRANSITION ⚠️
 
 **MANDATORY VERSION TRANSITION**: After any version release completion, Claude MUST execute this systematic transition workflow to process development knowledge and prepare for next version.
 
-**Trigger**: Called via VERSION workflow router
+**Trigger**: Coordinated via VERSION workflow
 
 **Input**: Closed version audit logs in `claude/project/audit/v{version}/`
 **Output**: Updated knowledge base, onboarding documentation, and clean next version preparation
@@ -58,7 +60,7 @@
 ### 7. Next Version Readiness Assessment
 - **Validate Audit Cleanup**: Verify `claude/project/audit/current/` is properly reset (done by Close Version Workflow)
 - **Validate Version References**: Scan current platform documentation for version reference consistency
-- **Validate Version Scope**: Confirm scope and priorities are defined (done by NEW_VERSION_PLANNING Workflow)  
+- **Validate Version Scope**: Confirm scope and priorities are defined (done by NEW_VERSION_PLANNING workflow)  
 - **Validate Knowledge Systems**: Verify tracking systems are initialized (done by Close Version Workflow)
 - **Generate Readiness Report**: Create comprehensive go/no-go assessment for next version development
 

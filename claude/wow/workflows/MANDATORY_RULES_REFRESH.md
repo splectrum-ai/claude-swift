@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # MANDATORY_RULES_REFRESH Workflow
 
 ## Overview
@@ -24,8 +26,8 @@ The MANDATORY_RULES_REFRESH workflow provides systematic scanning, validation, a
 ## Workflow Execution Steps
 
 ### Step 1: Rule Scanning
-```
-MANDATORY_RULES_REFRESH|step|rule_scanning||Scan all files for mandatory rules
+```bash
+audit_log "MANDATORY_RULES_REFRESH" "step" "rule_scanning" "" "Scan all files for mandatory rules"
 ```
 
 **Actions:**
@@ -35,8 +37,8 @@ MANDATORY_RULES_REFRESH|step|rule_scanning||Scan all files for mandatory rules
 4. Create comprehensive inventory with file paths and descriptions
 
 ### Step 2: Compliance Check
-```
-MANDATORY_RULES_REFRESH|step|compliance_check||Validate current state against all mandatory rules
+```bash
+audit_log "MANDATORY_RULES_REFRESH" "step" "compliance_check" "" "Validate current state against all mandatory rules"
 ```
 
 **Actions:**
@@ -46,8 +48,8 @@ MANDATORY_RULES_REFRESH|step|compliance_check||Validate current state against al
 4. Document findings with specific violation details
 
 ### Step 3: Automatic Corrections
-```
-MANDATORY_RULES_REFRESH|step|auto_corrections||Apply automatic fixes for correctable violations
+```bash
+audit_log "MANDATORY_RULES_REFRESH" "step" "auto_corrections" "" "Apply automatic fixes for correctable violations"
 ```
 
 **Actions:**
@@ -57,8 +59,8 @@ MANDATORY_RULES_REFRESH|step|auto_corrections||Apply automatic fixes for correct
 4. Update workflow logging compliance
 
 ### Step 4: Manual Action Planning
-```
-MANDATORY_RULES_REFRESH|step|manual_actions||Create action items for manual corrections
+```bash
+audit_log "MANDATORY_RULES_REFRESH" "step" "manual_actions" "" "Create action items for manual corrections"
 ```
 
 **Actions:**
@@ -68,8 +70,8 @@ MANDATORY_RULES_REFRESH|step|manual_actions||Create action items for manual corr
 4. Set deadlines for completion
 
 ### Step 5: Verification
-```
-MANDATORY_RULES_REFRESH|step|verification||Verify all corrections are properly applied
+```bash
+audit_log "MANDATORY_RULES_REFRESH" "step" "verification" "" "Verify all corrections are properly applied"
 ```
 
 **Actions:**

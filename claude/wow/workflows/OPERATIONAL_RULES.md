@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # OPERATIONAL_RULES
 
 ## Critical Collaboration Rules (Foundational Governance)

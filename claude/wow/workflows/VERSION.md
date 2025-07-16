@@ -10,11 +10,11 @@ Main version management workflow that consolidates all version-related operation
 - `VERSION`
 
 ## Overview
-This workflow acts as an intelligent router that:
+This workflow provides version management coordination:
 1. Analyzes current version state and project configuration
 2. Detects version management context and readiness
 3. Presents appropriate version management options to the user
-4. Routes to specialized sub-workflows based on user choice
+4. Coordinates with specialized version workflows based on user choice
 5. Enforces version management rules and best practices
 
 ## Critical Version Management Rules
@@ -83,10 +83,10 @@ This workflow acts as an intelligent router that:
 
 **Classification Logic:**
 ```
-No current version setup → VERSION_PLANNING candidate
+No current version setup → NEW_VERSION_PLANNING candidate
 Active milestones with open issues → Development in progress
 All milestones complete, no release → RELEASE_PROCESS candidate
-Recent release, planning needed → VERSION_PLANNING candidate
+Recent release, planning needed → NEW_VERSION_PLANNING candidate
 Mid-transition state → VERSION_TRANSITION candidate
 ```
 
@@ -137,16 +137,16 @@ Version Management Options:
 Choose option [1-4]:
 ```
 
-### 4. Sub-Workflow Routing
-Route to appropriate specialized workflow based on user selection:
+### 4. Version Workflow Coordination
+Coordinate with appropriate specialized workflow based on user selection:
 
-**Initialize/Plan Version:** → `VERSION_PLANNING` sub-workflow
-**Execute Transition:** → `VERSION_TRANSITION` sub-workflow
-**Create Release:** → `RELEASE_PROCESS` sub-workflow
+**Initialize/Plan Version:** → `NEW_VERSION_PLANNING` workflow
+**Execute Transition:** → `VERSION_TRANSITION` workflow
+**Create Release:** → `RELEASE_PROCESS` workflow
 **Review Status:** → Generate comprehensive version status report
 
 ### 5. Post-Workflow Integration
-After sub-workflow completion:
+After workflow completion:
 - Update project configuration with new version state
 - Verify version management rules compliance
 - Generate summary of changes made
@@ -185,16 +185,16 @@ After sub-workflow completion:
 - Guide through cleanup processes
 - Ensure version management rule compliance
 
-### Sub-Workflow Failures
-- Monitor sub-workflow execution status
+### Workflow Failures
+- Monitor workflow execution status
 - Capture and report error conditions
 - Provide rollback guidance where applicable
 - Log failures for troubleshooting
 
 ## Integration Points
 
-### With Sub-Workflows
-- **VERSION_PLANNING** - Version and milestone planning
+### With Version Workflows
+- **NEW_VERSION_PLANNING** - Version and milestone planning
 - **VERSION_TRANSITION** - Phase transitions and project updates
 - **RELEASE_PROCESS** - Complete release execution
 
@@ -211,7 +211,7 @@ After sub-workflow completion:
 ## Success Criteria
 - Accurate version state detection and analysis
 - Appropriate option presentation based on current state
-- Successful sub-workflow routing and execution
+- Successful workflow coordination and execution
 - Version management rules compliance maintained
 - Project hooks properly updated and maintained
 - Clear user guidance for next steps
@@ -219,7 +219,7 @@ After sub-workflow completion:
 ## Expected Outputs
 - Comprehensive version state analysis
 - User-selected version management path
-- Successful sub-workflow execution
+- Successful workflow execution
 - Updated project configuration hooks
 - Version management compliance validation
 - Strategic guidance for continued development

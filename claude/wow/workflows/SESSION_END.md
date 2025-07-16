@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # SESSION_END Workflow
 
 ## ⚠️ MANDATORY SESSION TERMINATION ⚠️

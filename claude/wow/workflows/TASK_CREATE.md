@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # TASK_CREATE
 
 ## Overview
@@ -24,8 +26,8 @@ Interactive task creation workflow that guides users through creating cross-repo
 ## Workflow Steps
 
 ### 1. Interactive Task Information Collection
-```
-TASK_CREATE|step|information_gathering||Collect task details through interactive prompts
+```bash
+audit_log "TASK_CREATE" "step" "information_gathering" "" "Collect task details through interactive prompts"
 ```
 
 **Task Information Prompts:**
@@ -194,8 +196,8 @@ fi
 ```
 
 ### 2. Task File Generation
-```
-TASK_CREATE|step|file_generation||Generate task filename and content structure
+```bash
+audit_log "TASK_CREATE" "step" "file_generation" "" "Generate task filename and content structure"
 ```
 
 **Filename Generation:**
@@ -261,8 +263,8 @@ echo "✓ Task content generated"
 ```
 
 ### 3. Outbox Directory Setup
-```
-TASK_CREATE|step|outbox_setup||Ensure outbox directory exists and is properly configured
+```bash
+audit_log "TASK_CREATE" "step" "outbox_setup" "" "Ensure outbox directory exists and is properly configured"
 ```
 
 **Outbox Preparation:**
@@ -298,8 +300,8 @@ echo "✓ Outbox directory ready: $(pwd)/outbox"
 ```
 
 ### 4. Task File Creation
-```
-TASK_CREATE|step|file_creation||Write task file to outbox directory
+```bash
+audit_log "TASK_CREATE" "step" "file_creation" "" "Write task file to outbox directory"
 ```
 
 **File Writing:**
@@ -325,8 +327,8 @@ fi
 ```
 
 ### 5. Task Creation Summary
-```
-TASK_CREATE|step|completion_summary||Provide task creation completion summary
+```bash
+audit_log "TASK_CREATE" "step" "completion_summary" "" "Provide task creation completion summary"
 ```
 
 **Completion Report:**

@@ -1,12 +1,14 @@
-# VERSION_PLANNING Sub-Workflow
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
-**Note:** This is a sub-workflow called by the main VERSION workflow router. Renamed from NEW_VERSION_PLANNING for consistency.
+# NEW_VERSION_PLANNING Workflow
+
+**Note:** This is a specialized workflow coordinated by the main VERSION workflow.
 
 ## ⚠️ MANDATORY NEW VERSION PLANNING ⚠️
 
 **MANDATORY NEW VERSION PLANNING**: After VERSION_TRANSITION workflow completion, Claude MUST execute this systematic planning workflow to establish scope, priorities, and work organization for the next version.
 
-**Trigger**: Called via VERSION workflow router
+**Trigger**: Coordinated via VERSION workflow
 
 **Input**: Clean knowledge base and repository from VERSION_TRANSITION
 **Output**: Organized next version with epic scope, milestones, and labeled issues for development

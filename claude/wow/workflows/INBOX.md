@@ -1,3 +1,5 @@
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
+
 # INBOX
 
 ## Overview
@@ -116,8 +118,8 @@ done
 ```
 
 ### 3. Issue Creation Integration
-```
-INBOX|step|issue_conversion||Convert task content to GitHub issue
+```bash
+audit_log "INBOX" "step" "issue_conversion" "" "Convert task content to GitHub issue"
 ```
 
 **Milestone Detection:**
@@ -162,7 +164,7 @@ create_issue_from_task() {
         milestone=$(get_target_milestone)
         if [ -n "$milestone" ]; then
             # Verify milestone exists in cache
-            if grep -q "\"title\": \"$milestone\"" claude/project/cache/milestones.json 2>/dev/null; then
+            if grep -q "\"title\": \"$milestone\"" claude/cache/milestones.json 2>/dev/null; then
                 echo "  📌 Using target version milestone: $milestone"
             else
                 echo "  ⚠ WARNING: Target milestone '$milestone' not found in cache"
@@ -237,8 +239,8 @@ $task_content
 ```
 
 ### 4. Issue Cache Update
-```
-INBOX|step|cache_update||Update issue cache with newly created issues
+```bash
+audit_log "INBOX" "step" "cache_update" "" "Update issue cache with newly created issues"
 ```
 
 **Cache Synchronization:**
@@ -268,10 +270,10 @@ try:
         }
     
     # Ensure cache directory exists
-    subprocess.run(['mkdir', '-p', 'claude/project/cache'], check=True)
+    subprocess.run(['mkdir', '-p', 'claude/cache'], check=True)
     
     # Write updated cache
-    with open('claude/project/cache/issues.json', 'w') as f:
+    with open('claude/cache/issues.json', 'w') as f:
         json.dump(cache, f, indent=2)
     
     print(f'✓ Issue cache updated with {len(cache)} issues')
@@ -287,8 +289,8 @@ fi
 ```
 
 ### 5. Processing Summary
-```
-INBOX|step|completion_summary||Provide inbox processing completion summary
+```bash
+audit_log "INBOX" "step" "completion_summary" "" "Provide inbox processing completion summary"
 ```
 
 **Completion Report:**

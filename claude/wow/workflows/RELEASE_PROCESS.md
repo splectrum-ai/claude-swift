@@ -1,8 +1,10 @@
-# RELEASE_PROCESS Sub-Workflow
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
-**Note:** This is a sub-workflow called by the main VERSION workflow router.
+# RELEASE_PROCESS Workflow
 
-**Trigger**: Called via VERSION workflow router
+**Note:** This is a specialized workflow coordinated by the main VERSION workflow.
+
+**Trigger**: Coordinated via VERSION workflow
 
 ## Overview
 
@@ -87,14 +89,22 @@ gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat 
 ## Release Workflow Execution
 
 ### Mandatory Workflow Logging
-```
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | workflow_start: release sesame trigger
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: archive logs with version stamps
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: reset logs for next version
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: commit archiving changes to main
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: create release artifacts and test installation
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | step_description: create version tag and GitHub release
-##→YYYY-MM-DDTHH:MM:SSZ | RELEASE_PROCESS | workflow_complete: v{VERSION} release created successfully
+```bash
+# Initialize audit logging
+source claude/wow/scripts/audit-functions.sh
+
+# Log workflow start
+audit_log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with release sesame trigger"
+
+# Log each major step
+audit_log "RELEASE_PROCESS" "step" "archive_logs" "" "Archive logs with version stamps"
+audit_log "RELEASE_PROCESS" "step" "reset_logs" "" "Reset logs for next version"
+audit_log "RELEASE_PROCESS" "step" "commit_changes" "" "Commit archiving changes to main"
+audit_log "RELEASE_PROCESS" "step" "create_artifacts" "" "Create release artifacts and test installation"
+audit_log "RELEASE_PROCESS" "step" "create_release" "" "Create version tag and GitHub release"
+
+# Log workflow completion
+audit_log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release created successfully"
 ```
 
 ## Version Strategy
