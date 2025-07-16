@@ -9,8 +9,8 @@
 **MANDATORY NEW VERSION PLANNING**: After VERSION_TRANSITION workflow completion, Claude MUST execute this systematic planning workflow to establish scope, priorities, and work organization for the next version.
 
 ## Trigger
+**User-Friendly**: Coordinated by VERSION workflow (`version sesame`)
 **Technical**: `NEW_VERSION_PLANNING`
-**Coordinated by**: VERSION workflow (`version sesame`)
 
 **Input**: Clean knowledge base and repository from VERSION_TRANSITION
 **Output**: Organized next version with epic scope, milestones, and labeled issues for development

@@ -6,7 +6,7 @@
 Task ingestion workflow that processes inbox tasks by converting them to GitHub issues. Separates task reception from task execution, feeding tasks into the existing issue prioritization system.
 
 ## Trigger
-**User-Friendly**: ``inbox sesame``
+**User-Friendly**: `inbox sesame`
 **Technical**: `INBOX`
 
 ## Purpose

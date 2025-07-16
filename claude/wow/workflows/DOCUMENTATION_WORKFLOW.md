@@ -1,4 +1,4 @@
-[← Back to Claude-Swift Home](../../README.md)
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
 # DOCUMENTATION_WORKFLOW
 
@@ -7,6 +7,7 @@
 **MANDATORY DOCUMENTATION WORKFLOW**: All documentation creation, modification, and maintenance MUST follow this standardized workflow to ensure WoW compliance and consistency.
 
 ## Trigger
+**User-Friendly**: N/A (Reference document)
 **Technical**: `DOCUMENTATION_WORKFLOW`
 
 **SCOPE**: All `.md` files in repository (excluding root CLAUDE.md and README.md)
@@ -37,7 +38,7 @@
 ### 4. Content Structure Rules
 **MANDATORY STRUCTURE**:
 ```markdown
-[← Back to Claude-Swift Home](../../README.md)
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
 # Document Title
 

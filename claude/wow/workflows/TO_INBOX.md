@@ -6,7 +6,7 @@
 Universal workflow that processes tasks in the current repository's outbox directory, specifically handling self-targeted tasks by moving them from outbox to inbox for local processing.
 
 ## Trigger
-**User-Friendly**: ``to-inbox sesame``
+**User-Friendly**: `to-inbox sesame`
 **Technical**: `TO_INBOX`
 
 ## Purpose

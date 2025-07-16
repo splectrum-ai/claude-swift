@@ -79,7 +79,7 @@ audit_log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for
 
 **Actions:**
 1. Check recent audit log entries for issue references
-2. Search commit message context for issue numbers (#62)
+2. Search commit message context for issue numbers (#XX)
 3. Analyze changed files against open GitHub issues
 4. Identify issues that this work resolves
 
@@ -99,7 +99,7 @@ Brief summary of changes
 - Reference to methodology or approach used
 
 [Context: Why this change was needed]
-[Closes #62] (if issue resolved)
+[Closes #XX] (if issue resolved)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -115,7 +115,7 @@ Session complete: [session summary]
 - Issues resolved during session
 
 [Session context and learnings]
-[Closes #62, #63] (if issues resolved)
+[Closes #XX, #YY] (if issues resolved)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -150,7 +150,7 @@ audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
 **Actions:**
 1. For each detected resolved issue:
    ```bash
-   gh issue close #62 -c "Resolved in commit: [commit-hash]"
+   gh issue close #XX -c "Resolved in commit: [commit-hash]"
    ```
 2. Add comment explaining resolution
 3. **Cache-first closure**: Update cache first, then sync to GitHub
@@ -158,14 +158,14 @@ audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
    # Only close issues that exist in cache (cache-first rule)
    python3 -c "
    import json
-   with open('claude/project/cache/issues.json', 'r') as f:
+   with open('claude/cache/issues.json', 'r') as f:
        cache = json.load(f)
    del cache['123']
-   with open('claude/project/cache/issues.json', 'w') as f:
+   with open('claude/cache/issues.json', 'w') as f:
        json.dump(cache, f, indent=2)
-   print('✓ Removed issue #62 from cache')
+   print('✓ Removed issue #XX from cache')
    "
-   gh issue close #62 -c "Resolved in commit: [commit-hash]"
+   gh issue close #XX -c "Resolved in commit: [commit-hash]"
    ```
 4. Log issue closure in audit log
    ```bash
@@ -183,10 +183,10 @@ audit_log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow compl
 When potential issue resolution is detected:
 ```
 Detected potential issue resolution:
-- Issue #62: "Remove references to old ways of doing across all workflows"
+- Issue #XX: "Remove references to old ways of doing across all workflows"
 - Changes: Modified auth.js, added error handling
 
-Does this commit resolve issue #62? (yes/no):
+Does this commit resolve issue #XX? (yes/no):
 ```
 
 ### Commit Message Review
@@ -200,7 +200,7 @@ Fix authentication flow bug
 - Improved user feedback for auth failures
 
 Context: Resolves intermittent login failures reported by users
-Closes #62
+Closes #XX
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
@@ -213,7 +213,7 @@ Proceed with this commit? (yes/edit/cancel):
 ## Smart Detection Patterns
 
 ### Issue Reference Detection
-- **Audit log scanning**: Look for recent `#62` references
+- **Audit log scanning**: Look for recent `#XX` references
 - **File change analysis**: Match changed files to issue descriptions
 - **Commit context**: Analyze work done against open issues
 - **User confirmation**: Always confirm before closing issues
@@ -284,14 +284,14 @@ git push origin main
 
 ### With Issue Resolution
 ```
-# After working on issue #62
+# After working on issue #XX
 `commit sesame`
-# Result: Commits changes and closes issue #62 automatically
+# Result: Commits changes and closes issue #XX automatically
 ```
 
 ### Multiple Issues
 ```
-# After fixing bugs #62 and #63
+# After fixing bugs #XX and #YY
 `commit sesame`
 # Result: Commits changes and closes both issues with references
 ```

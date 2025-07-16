@@ -1,4 +1,4 @@
-[← Back to Claude-Swift Home](../../README.md)
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
 # GIT_WORKFLOW
 
@@ -86,12 +86,12 @@ echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
 When working on GitHub issues:
 ```bash
 # Reference issue number in commit
-git commit -m "Fix authentication bug (#62)
+git commit -m "Fix authentication bug (#XX)
 
 - Updated token validation
 - Added error handling
 
-Closes #62"
+Closes #XX"
 ```
 
 ## Version Release Workflow

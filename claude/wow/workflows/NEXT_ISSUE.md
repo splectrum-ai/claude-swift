@@ -17,7 +17,7 @@ Automated workflow for selecting the next GitHub issue to work on, combining rec
 ### 1. Cache Validation
 ```bash
 # Ensure cache exists and is reasonably current
-if [ ! -f "claude/project/cache/issues.json" ]; then
+if [ ! -f "claude/cache/issues.json" ]; then
     echo "Issue cache not found. Running '`issue sesame`' to populate cache..."
     # Execute ISSUE_CACHE workflow to populate cache
     echo "Cache populated. Continuing with issue analysis..."
@@ -29,7 +29,7 @@ fi
 # Use local cache instead of GitHub API for performance
 python3 -c "
 import json
-with open('claude/project/cache/issues.json', 'r') as f:
+with open('claude/cache/issues.json', 'r') as f:
     cache = json.load(f)
 issues = [issue for issue in cache.values() if issue['state'] == 'OPEN']
 print(json.dumps(issues, indent=2))
@@ -97,13 +97,13 @@ Present top-ranked issues (up to 6) with compact format:
 
 **Example Format:**
 ```
-#60 [3.0] HIGH Create Comprehensive Workflow Development Guide
+#XX [3.0] HIGH Create Comprehensive Workflow Development Guide
 Critical template feature - enables extensibility, no blockers, high impact for adoption
 
-#63 [2.0] MEDIUM Update user documentation to reflect current workflow patterns  
+#YY [2.0] MEDIUM Update user documentation to reflect current workflow patterns  
 User experience improvement - clear scope, ready to start, documentation effort
 
-#61 [1.33] MEDIUM Implement Happy Path + Deferred Exception Prototype
+#ZZ [1.33] MEDIUM Implement Happy Path + Deferred Exception Prototype
 Large scope workflow - v1.2.0 feature, multiple components, significant implementation
 ```
 
@@ -174,18 +174,18 @@ Finish epic phase → **NEXT_ISSUE** → Move to different epic for balance
 # Get current issues
 gh issue list --limit 10 --json number,title,labels,body
 
-# Parse metadata: Issue #63 shows Priority: HIGH, Effort: M, Dependencies: None
+# Parse metadata: Issue #YY shows Priority: HIGH, Effort: M, Dependencies: None
 # Calculate score: (3 × 1 × 1) / 2 = 1.5
-# Select #63 for strategic documentation foundation
+# Select #YY for strategic documentation foundation
 # Document: "Selected for strategic foundation - enables template adoption"
 ```
 
 ### Example 2: Project-Specific Focus
 ```bash
 # Review project-specific labeled issues
-# Issue #60 shows Priority: MEDIUM, Effort: L, Blocks: 3 issues
+# Issue #XX shows Priority: MEDIUM, Effort: L, Blocks: 3 issues
 # Calculate score: (2 × 4 × 1) / 3 = 2.67
-# Select #60 for project enhancement
+# Select #XX for project enhancement
 # Document: "High impact project work - enables multiple dependent issues"
 ```
 

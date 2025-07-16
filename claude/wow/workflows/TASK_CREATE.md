@@ -6,7 +6,7 @@
 Interactive task creation workflow that guides users through creating cross-repository tasks with proper metadata and formatting. Tasks are saved to the local outbox folder for distribution via the OUTBOX workflow.
 
 ## Trigger
-**User-Friendly**: ``task sesame``, `task [org/repo] sesame`, or `task . sesame`
+**User-Friendly**: `task sesame`, `task [org/repo] sesame`, or `task . sesame`
 **Technical**: `TASK_CREATE`
 
 ## Purpose
@@ -377,9 +377,9 @@ Detailed description of what needs to be implemented, including context and back
 **Justification:** Critical for v1.2.0 release and blocks other features
 
 ## Dependencies
-**Blocks:** #63, #60
-**Blocked by:** #55
-**Related:** #61, #62
+**Blocks:** #YY, #ZZ
+**Blocked by:** #AA
+**Related:** #BB, #CC
 
 ## Effort: M
 **Estimate:** Medium complexity with well-defined requirements and existing patterns

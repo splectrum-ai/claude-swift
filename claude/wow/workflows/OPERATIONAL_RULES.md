@@ -114,9 +114,8 @@
 ## SHOULD Rules (Strong Recommendations)
 - **Create issues for significant work** - When discussion leads to implementation decisions, create GitHub issue before starting work to enable proper tracking and documentation
 - **Close issues on completion** - Mark issues complete when work is finished, with judgment required on completion criteria
-- **Use named arguments** - `spl/app/run -f script.js -a args` NOT `spl/app/run script.js args`
-- **Correct command syntax** - `./spl_execute <install-folder> <app-name> <command>` (e.g., `./spl_execute spl boot usr/apps_to_release`)
-- **Test batch files first** with `spl/app/exec -f` before generating usr/ commands
+- **Use explicit command patterns** - Prefer explicit argument specification over positional arguments when available
+- **Validate commands before execution** - Test command patterns before running in production contexts
 - **Follow existing code patterns** - Mimic style, libraries, and conventions in codebase
 - **Documentation housekeeping** - When features completed, REMOVE planning/scaffolding docs entirely
 - **Decision logging** - Log strategic/architectural decisions in `docs/decision-log.md` when they meet decision criteria (strategic changes, technical architecture, workflow changes, technology adoption, epic modifications)

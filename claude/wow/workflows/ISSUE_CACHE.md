@@ -20,7 +20,7 @@ Local cache management for GitHub issues and milestones to improve performance a
 
 ### Directory Layout
 ```
-claude/project/cache/
+claude/cache/
 ├── issues.json          # Cached issue data
 ├── milestones.json      # Cached milestone data
 └── metadata.json        # Cache metadata and sync timestamps
@@ -98,7 +98,7 @@ audit_log "ISSUE_CACHE" "step" "cache_init" "" "Initializing cache directory and
 ```
 
 **Actions:**
-1. Create cache directory if missing: `mkdir -p claude/project/cache`
+1. Create cache directory if missing: `mkdir -p claude/cache`
 2. Initialize metadata.json with default values
 3. Log cache initialization
 
@@ -110,7 +110,7 @@ audit_log "ISSUE_CACHE" "step" "gap_detection" "" "Checking for missing issues/m
 **Gap Detection Logic:**
 ```bash
 # Get highest cached issue number
-LAST_CACHED_ISSUE=$(jq -r 'keys | map(tonumber) | max // 0' claude/project/cache/issues.json 2>/dev/null || echo "0")
+LAST_CACHED_ISSUE=$(jq -r 'keys | map(tonumber) | max // 0' claude/cache/issues.json 2>/dev/null || echo "0")
 
 # Get highest GitHub issue number
 LATEST_GITHUB_ISSUE=$(gh issue list --state all --limit 1 --json number --jq '.[0].number // 0')
@@ -139,7 +139,7 @@ if [ "$CACHE_NEEDED" = "true" ]; then
     gh issue list --state open --limit 100 --json number,title,state,labels,milestone,createdAt,updatedAt > temp_issues.json
     
     # Get current cache or create empty
-    CURRENT_CACHE=$(cat claude/project/cache/issues.json 2>/dev/null || echo "{}")
+    CURRENT_CACHE=$(cat claude/cache/issues.json 2>/dev/null || echo "{}")
     
     # Merge new issues with existing cache
     jq --argjson current "$CURRENT_CACHE" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
@@ -147,7 +147,7 @@ if [ "$CACHE_NEEDED" = "true" ]; then
             $current; 
             .[$issue.number | tostring] = ($issue + {cached_at: $timestamp})
         )
-    ' temp_issues.json > claude/project/cache/issues.json
+    ' temp_issues.json > claude/cache/issues.json
     
     rm temp_issues.json
     echo "✓ Issues cached successfully"
@@ -165,7 +165,7 @@ audit_log "ISSUE_CACHE" "step" "milestone_population" "" "Caching milestone data
 gh api repos/:owner/:repo/milestones --jq '.[]' > temp_milestones.json
 
 # Get current cache or create empty
-CURRENT_MILESTONE_CACHE=$(cat claude/project/cache/milestones.json 2>/dev/null || echo "{}")
+CURRENT_MILESTONE_CACHE=$(cat claude/cache/milestones.json 2>/dev/null || echo "{}")
 
 # Merge milestones with existing cache
 jq --argjson current "$CURRENT_MILESTONE_CACHE" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
@@ -173,39 +173,39 @@ jq --argjson current "$CURRENT_MILESTONE_CACHE" --arg timestamp "$(date -u +%Y-%
         $current; 
         .[$milestone.number | tostring] = ($milestone + {cached_at: $timestamp})
     )
-' temp_milestones.json > claude/project/cache/milestones.json
+' temp_milestones.json > claude/cache/milestones.json
 
 rm temp_milestones.json
 echo "✓ Milestones cached successfully"
 ```
 
 ### 5. Cache Cleanup
-```
-ISSUE_CACHE|step|cache_cleanup||Remove closed issues/milestones from cache
+```bash
+audit_log "ISSUE_CACHE" "step" "cache_cleanup" "" "Remove closed issues/milestones from cache"
 ```
 
 **Cleanup Process:**
 ```bash
 # Remove closed issues from cache
-jq 'with_entries(select(.value.state == "open"))' claude/project/cache/issues.json > temp_issues_clean.json
-mv temp_issues_clean.json claude/project/cache/issues.json
+jq 'with_entries(select(.value.state == "open"))' claude/cache/issues.json > temp_issues_clean.json
+mv temp_issues_clean.json claude/cache/issues.json
 
 # Remove closed milestones from cache
-jq 'with_entries(select(.value.state == "open"))' claude/project/cache/milestones.json > temp_milestones_clean.json
-mv temp_milestones_clean.json claude/project/cache/milestones.json
+jq 'with_entries(select(.value.state == "open"))' claude/cache/milestones.json > temp_milestones_clean.json
+mv temp_milestones_clean.json claude/cache/milestones.json
 
 echo "✓ Cache cleanup completed"
 ```
 
 ### 6. Issue Update Detection
-```
-ISSUE_CACHE|step|update_detection||Detect and sync changed issues
+```bash
+audit_log "ISSUE_CACHE" "step" "update_detection" "" "Detect and sync changed issues"
 ```
 
 **Change Detection Logic:**
 ```bash
 # Check for updated issues since last sync
-LAST_SYNC=$(jq -r '.last_sync' claude/project/cache/metadata.json)
+LAST_SYNC=$(jq -r '.last_sync' claude/cache/metadata.json)
 
 # Get issues updated since last sync
 UPDATED_ISSUES=$(gh issue list --state all --search "updated:>$LAST_SYNC" --json number,updatedAt)
@@ -223,15 +223,15 @@ if [ "$(echo "$UPDATED_ISSUES" | jq 'length')" -gt 0 ]; then
         # Update cache with new data
         jq --argjson issue_data "$ISSUE_DATA" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
            '.[$issue_data.number | tostring] = ($issue_data + {cached_at: $timestamp})' \
-           claude/project/cache/issues.json > temp_cache.json
-        mv temp_cache.json claude/project/cache/issues.json
+           claude/cache/issues.json > temp_cache.json
+        mv temp_cache.json claude/cache/issues.json
     done
 fi
 ```
 
 ### 7. Cache Update Functions
-```
-ISSUE_CACHE|step|cache_functions||Implement cache update and sync functions
+```bash
+audit_log "ISSUE_CACHE" "step" "cache_functions" "" "Implement cache update and sync functions"
 ```
 
 **Update Issue in Cache:**
@@ -247,7 +247,7 @@ update_cached_issue() {
 import json, sys
 
 # Load current cache
-with open('claude/project/cache/issues.json', 'r') as f:
+with open('claude/cache/issues.json', 'r') as f:
     cache = json.load(f)
 
 # Update the field
@@ -257,7 +257,7 @@ if '$issue_num' in cache:
     cache['$issue_num']['needs_sync'] = True
     
     # Write updated cache
-    with open('claude/project/cache/issues.json', 'w') as f:
+    with open('claude/cache/issues.json', 'w') as f:
         json.dump(cache, f, indent=2)
     
     print(f'✓ Updated issue #$issue_num field $field in cache')
@@ -273,7 +273,7 @@ sync_to_github() {
     local issue_num=$1
     
     # Get cached issue data
-    CACHED_ISSUE=$(jq --arg num "$issue_num" '.[$num]' claude/project/cache/issues.json)
+    CACHED_ISSUE=$(jq --arg num "$issue_num" '.[$num]' claude/cache/issues.json)
     
     if [ "$CACHED_ISSUE" != "null" ]; then
         # Check if sync needed
@@ -290,8 +290,8 @@ sync_to_github() {
             if gh issue edit "$issue_num" --title "$TITLE" --add-label "$LABELS"; then
                 # Mark as synced in cache
                 jq --arg num "$issue_num" 'del(.[$num].needs_sync)' \
-                   claude/project/cache/issues.json > temp_cache.json
-                mv temp_cache.json claude/project/cache/issues.json
+                   claude/cache/issues.json > temp_cache.json
+                mv temp_cache.json claude/cache/issues.json
                 
                 echo "✓ Issue #$issue_num synced to GitHub"
             else
@@ -303,8 +303,8 @@ sync_to_github() {
 ```
 
 ### 8. New Issue Creation
-```
-ISSUE_CACHE|step|new_issue_creation||Create new issue and update cache
+```bash
+audit_log "ISSUE_CACHE" "step" "new_issue_creation" "" "Create new issue and update cache"
 ```
 
 **Create Issue Flow:**
@@ -334,8 +334,8 @@ create_new_issue() {
         # Add to cache
         jq --argjson new_issue "$NEW_ISSUE_DATA" --arg timestamp "$TIMESTAMP" \
            '.[$new_issue.number | tostring] = ($new_issue + {cached_at: $timestamp})' \
-           claude/project/cache/issues.json > temp_cache.json
-        mv temp_cache.json claude/project/cache/issues.json
+           claude/cache/issues.json > temp_cache.json
+        mv temp_cache.json claude/cache/issues.json
         
         echo "✓ Issue #$NEW_ISSUE_NUM cached locally"
         return 0
@@ -347,8 +347,8 @@ create_new_issue() {
 ```
 
 ### 9. Metadata Update
-```
-ISSUE_CACHE|step|metadata_update||Update cache metadata and sync timestamp
+```bash
+audit_log "ISSUE_CACHE" "step" "metadata_update" "" "Update cache metadata and sync timestamp"
 ```
 
 **Metadata Update:**
@@ -356,13 +356,13 @@ ISSUE_CACHE|step|metadata_update||Update cache metadata and sync timestamp
 # Update metadata with sync timestamp
 jq --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
    --argjson last_issue "$LATEST_GITHUB_ISSUE" \
-   --argjson last_milestone "$(jq 'keys | map(tonumber) | max // 0' claude/project/cache/milestones.json)" \
+   --argjson last_milestone "$(jq 'keys | map(tonumber) | max // 0' claude/cache/milestones.json)" \
    '{
      last_sync: $timestamp,
      cache_version: "1.0.0",
      last_issue_number: $last_issue,
      last_milestone_number: $last_milestone
-   }' > claude/project/cache/metadata.json
+   }' > claude/cache/metadata.json
 
 echo "✓ Metadata updated"
 ```
@@ -370,8 +370,8 @@ echo "✓ Metadata updated"
 ## Integration Points
 
 ### SESSION_START Integration
-```
-SESSION_START|step|issue_cache_validation||Validate and update issue cache
+```bash
+audit_log "SESSION_START" "step" "issue_cache_validation" "" "Validate and update issue cache"
 ```
 
 **Session Start Integration:**
@@ -416,13 +416,13 @@ gh issue close 50 -c "Completed"
 # Fast local issue queries instead of GitHub API
 get_cached_issue() {
     local issue_num=$1
-    jq -r --arg num "$issue_num" '.[$num] // empty' claude/project/cache/issues.json
+    jq -r --arg num "$issue_num" '.[$num] // empty' claude/cache/issues.json
 }
 
 # Get issues by label without API calls
 get_issues_by_label() {
     local label=$1
-    jq -r --arg label "$label" '.[] | select(.labels[].name == $label)' claude/project/cache/issues.json
+    jq -r --arg label "$label" '.[] | select(.labels[].name == $label)' claude/cache/issues.json
 }
 ```
 
@@ -433,19 +433,19 @@ get_issues_by_label() {
 # Get cached issue by number
 get_cached_issue() {
     local issue_num=$1
-    jq -r --arg num "$issue_num" '.[$num] // empty' claude/project/cache/issues.json
+    jq -r --arg num "$issue_num" '.[$num] // empty' claude/cache/issues.json
 }
 
 # Get all cached issues with label
 get_issues_by_label() {
     local label=$1
-    jq -r --arg label "$label" '.[] | select(.labels[] == $label)' claude/project/cache/issues.json
+    jq -r --arg label "$label" '.[] | select(.labels[] == $label)' claude/cache/issues.json
 }
 
 # Get issues by milestone
 get_issues_by_milestone() {
     local milestone=$1
-    jq -r --arg milestone "$milestone" '.[] | select(.milestone.title == $milestone)' claude/project/cache/issues.json
+    jq -r --arg milestone "$milestone" '.[] | select(.milestone.title == $milestone)' claude/cache/issues.json
 }
 ```
 
@@ -453,12 +453,12 @@ get_issues_by_milestone() {
 ```bash
 # Validate cache integrity
 validate_cache() {
-    if [ ! -f claude/project/cache/issues.json ]; then
+    if [ ! -f claude/cache/issues.json ]; then
         echo "Cache missing - running full cache rebuild"
         return 1
     fi
     
-    if [ ! -f claude/project/cache/metadata.json ]; then
+    if [ ! -f claude/cache/metadata.json ]; then
         echo "Metadata missing - cache rebuild required"
         return 1
     fi
@@ -487,9 +487,9 @@ validate_cache() {
 ### Cache Corruption
 ```bash
 # Detect and recover from cache corruption
-if ! jq empty claude/project/cache/issues.json 2>/dev/null; then
+if ! jq empty claude/cache/issues.json 2>/dev/null; then
     echo "Cache corruption detected - rebuilding from GitHub"
-    rm claude/project/cache/issues.json
+    rm claude/cache/issues.json
     # Trigger full cache rebuild
 fi
 ```
@@ -506,8 +506,8 @@ fi
 ### Missing Cache Directory
 ```bash
 # Auto-create cache directory if missing
-if [ ! -d claude/project/cache ]; then
-    mkdir -p claude/project/cache
+if [ ! -d claude/cache ]; then
+    mkdir -p claude/cache
     echo "Created missing cache directory"
 fi
 

@@ -116,10 +116,10 @@ try:
         }
     
     # Ensure cache directory exists
-    subprocess.run(['mkdir', '-p', 'claude/project/cache'], check=True)
+    subprocess.run(['mkdir', '-p', 'claude/cache'], check=True)
     
     # Write updated cache
-    with open('claude/project/cache/issues.json', 'w') as f:
+    with open('claude/cache/issues.json', 'w') as f:
         json.dump(cache, f, indent=2)
     
     print(f'✓ Issue cache updated with {len(cache)} issues')

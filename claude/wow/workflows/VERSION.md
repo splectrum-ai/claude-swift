@@ -1,4 +1,4 @@
-[← Back to Claude-Swift Home](../../../README.md)
+[← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
 # VERSION Workflow
 
