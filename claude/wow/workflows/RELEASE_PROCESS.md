@@ -85,7 +85,7 @@ git tag v{VERSION}
 git push origin v{VERSION}
 
 # Create GitHub release with release notes
-gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat release_notes.md)" {ARTIFACT_NAME}.7z
+claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat release_notes.md)" {ARTIFACT_NAME}.7z
 ```
 
 ## Release Workflow Execution

@@ -117,13 +117,13 @@ Document final choice:
 ## Decision Framework
 
 ### Quick Selection (< 2 minutes)
-1. Run `gh issue list` command
+1. Run `claude/wow/scripts/gh-issue list` command
 2. Generate top 3 recommendations with scores
 3. Select highest scoring available issue
 4. Start work immediately
 
 ### Thoughtful Selection (5-10 minutes)
-1. Run `gh issue list` command
+1. Run `claude/wow/scripts/gh-issue list` command
 2. Parse metadata from top 10 issues
 3. Calculate scores using metadata formula
 4. Present top 6 recommendations with rationale
@@ -172,7 +172,7 @@ Finish epic phase → **NEXT_ISSUE** → Move to different epic for balance
 ### Example 1: Planning Session Start
 ```bash
 # Get current issues
-gh issue list --limit 10 --json number,title,labels,body
+claude/wow/scripts/gh-issue list --limit 10 --json number,title,labels,body
 
 # Parse metadata: Issue #YY shows Priority: HIGH, Effort: M, Dependencies: None
 # Calculate score: (3 × 1 × 1) / 2 = 1.5

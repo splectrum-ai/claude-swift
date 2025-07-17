@@ -90,9 +90,9 @@
   - Maintain epic labels for cross-version epic tracking
   - Use for filtering epic work across multiple versions
 - **Issue Organization**: Structure issues for efficient development workflow
-  - Version filtering: `gh issue list --milestone "v1.3.0"`
-  - Epic filtering: `gh issue list --label "TMPL"`
-  - Combined filtering: `gh issue list --milestone "v1.3.0" --label "TMPL"`
+  - Version filtering: `claude/wow/scripts/gh-issue list --milestone "v1.3.0"`
+  - Epic filtering: `claude/wow/scripts/gh-issue list --label "TMPL"`
+  - Combined filtering: `claude/wow/scripts/gh-issue list --milestone "v1.3.0" --label "TMPL"`
 
 ### 5. Work Scope Validation and Refinement
 - **Version Scope Assessment**: Validate planned work against version capacity
@@ -128,9 +128,9 @@
 - **Minimal Overhead**: Focus on essential categorization only
 
 ### Filtering Patterns
-- **Version Work**: `gh issue list --milestone "v1.3.0"`
-- **Epic Work**: `gh issue list --label "TMPL"`
-- **Version + Epic**: `gh issue list --milestone "v1.3.0" --label "TMPL"
+- **Version Work**: `claude/wow/scripts/gh-issue list --milestone "v1.3.0"`
+- **Epic Work**: `claude/wow/scripts/gh-issue list --label "TMPL"`
+- **Version + Epic**: `claude/wow/scripts/gh-issue list --milestone "v1.3.0" --label "TMPL"
 - **Dependencies**: Track in issue descriptions and comments
 
 ## Work Breakdown Methodology

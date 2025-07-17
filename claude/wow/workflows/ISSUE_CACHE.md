@@ -113,7 +113,7 @@ audit_log "ISSUE_CACHE" "step" "gap_detection" "" "Checking for missing issues/m
 LAST_CACHED_ISSUE=$(jq -r 'keys | map(tonumber) | max // 0' claude/cache/issues.json 2>/dev/null || echo "0")
 
 # Get highest GitHub issue number
-LATEST_GITHUB_ISSUE=$(gh issue list --state all --limit 1 --json number --jq '.[0].number // 0')
+LATEST_GITHUB_ISSUE=$(claude/wow/scripts/gh-issue list --state all --limit 1 --json number | jq '.[0].number // 0')
 
 # Calculate gap
 if [ "$LATEST_GITHUB_ISSUE" -gt "$LAST_CACHED_ISSUE" ]; then
@@ -136,7 +136,7 @@ if [ "$CACHE_NEEDED" = "true" ]; then
     echo "Caching missing issues..."
     
     # Get all open issues from GitHub
-    gh issue list --state open --limit 100 --json number,title,state,labels,milestone,createdAt,updatedAt > temp_issues.json
+    claude/wow/scripts/gh-issue list --state open --limit 100 --json number,title,state,labels,milestone,createdAt,updatedAt > temp_issues.json
     
     # Get current cache or create empty
     CURRENT_CACHE=$(cat claude/cache/issues.json 2>/dev/null || echo "{}")
@@ -208,7 +208,7 @@ audit_log "ISSUE_CACHE" "step" "update_detection" "" "Detect and sync changed is
 LAST_SYNC=$(jq -r '.last_sync' claude/cache/metadata.json)
 
 # Get issues updated since last sync
-UPDATED_ISSUES=$(gh issue list --state all --search "updated:>$LAST_SYNC" --json number,updatedAt)
+UPDATED_ISSUES=$(claude/wow/scripts/gh-issue list --state all --search "updated:>$LAST_SYNC" --json number,updatedAt)
 
 if [ "$(echo "$UPDATED_ISSUES" | jq 'length')" -gt 0 ]; then
     echo "Detected $(echo "$UPDATED_ISSUES" | jq 'length') updated issues"
@@ -218,7 +218,7 @@ if [ "$(echo "$UPDATED_ISSUES" | jq 'length')" -gt 0 ]; then
         echo "Updating issue #$issue_num in cache"
         
         # Get latest issue data from GitHub
-        ISSUE_DATA=$(gh issue view "$issue_num" --json number,title,state,labels,milestone,createdAt,updatedAt)
+        ISSUE_DATA=$(claude/wow/scripts/gh-issue view "$issue_num" --json number,title,state,labels,milestone,createdAt,updatedAt)
         
         # Update cache with new data
         jq --argjson issue_data "$ISSUE_DATA" --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
@@ -287,7 +287,7 @@ sync_to_github() {
             LABELS=$(echo "$CACHED_ISSUE" | jq -r '.labels[].name' | tr '\n' ',' | sed 's/,$//')
             
             # Update GitHub issue
-            if gh issue edit "$issue_num" --title "$TITLE" --add-label "$LABELS"; then
+            if claude/wow/scripts/gh-issue edit "$issue_num" --title "$TITLE" --add-label "$LABELS"; then
                 # Mark as synced in cache
                 jq --arg num "$issue_num" 'del(.[$num].needs_sync)' \
                    claude/cache/issues.json > temp_cache.json
@@ -317,7 +317,7 @@ create_new_issue() {
     echo "Creating new issue: $title"
     
     # Create issue in GitHub first
-    NEW_ISSUE_URL=$(gh issue create --title "$title" --body "$body" --label "$labels")
+    NEW_ISSUE_URL=$(claude/wow/scripts/gh-issue create --title "$title" --body "$body" --label "$labels")
     NEW_ISSUE_NUM=$(echo "$NEW_ISSUE_URL" | grep -o '[0-9]*$')
     
     if [ -n "$NEW_ISSUE_NUM" ]; then
@@ -325,10 +325,10 @@ create_new_issue() {
         
         # Trigger gap detection to capture new issue
         echo "Running gap detection to cache new issue..."
-        LATEST_GITHUB_ISSUE=$(gh issue list --state all --limit 1 --json number --jq '.[0].number // 0')
+        LATEST_GITHUB_ISSUE=$(claude/wow/scripts/gh-issue list --state all --limit 1 --json number | jq '.[0].number // 0')
         
         # Get new issue data and add to cache
-        NEW_ISSUE_DATA=$(gh issue view "$NEW_ISSUE_NUM" --json number,title,state,labels,milestone,createdAt,updatedAt)
+        NEW_ISSUE_DATA=$(claude/wow/scripts/gh-issue view "$NEW_ISSUE_NUM" --json number,title,state,labels,milestone,createdAt,updatedAt)
         TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
         
         # Add to cache
@@ -387,7 +387,7 @@ audit_log "SESSION_START" "step" "issue_cache_validation" "" "Validate and updat
 create_new_issue "Issue Title" "Issue body content" "enhancement,v1.2.0"
 
 # Method 2: GitHub creation + gap detection
-gh issue create --title "New Issue" --body "Description" --label "enhancement"
+claude/wow/scripts/gh-issue create --title "New Issue" --body "Description" --label "enhancement"
 `issue sesame`  # Triggers gap detection to cache new issue
 ```
 
@@ -406,7 +406,7 @@ sync_to_github 50
 **Automatic Cache Cleanup:**
 ```bash
 # When closing issues, cache cleanup happens automatically
-gh issue close 50 -c "Completed"
+claude/wow/scripts/gh-issue close 50 -c "Completed"
 `issue sesame`  # Cleanup removes closed issues from cache
 ```
 
@@ -497,7 +497,7 @@ fi
 ### GitHub API Failures
 ```bash
 # Handle GitHub API rate limiting
-if ! gh issue list --state open --limit 1 &>/dev/null; then
+if ! claude/wow/scripts/gh-issue list --state open --limit 1 &>/dev/null; then
     echo "GitHub API unavailable - using cached data"
     echo "Warning: Cache may not reflect latest changes"
 fi

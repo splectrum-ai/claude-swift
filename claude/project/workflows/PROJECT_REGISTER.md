@@ -128,11 +128,13 @@ PROJECT_REGISTER|step|symlink_creation||Create CLAUDE.md and claude/wow symlinks
 # Navigate to target project directory
 cd "$TARGET_PATH"
 
-# Create CLAUDE.md symlink (force overwrite)
+# Create CLAUDE.md symlink with absolute path (force overwrite)
+# Uses absolute path since symlinks are gitignored in subprojects
 echo "Creating CLAUDE.md symlink..."
 ln -sf "$BASE_PROJECT_PATH/CLAUDE.md" CLAUDE.md
 
-# Create claude/wow symlink (force overwrite)
+# Create claude/wow symlink with absolute path (force overwrite)
+# Uses absolute path since symlinks are gitignored in subprojects
 echo "Creating claude/wow symlink..."
 mkdir -p claude
 ln -sf "$BASE_PROJECT_PATH/claude/wow" claude/wow
@@ -497,9 +499,11 @@ The registry file `claude/project/registered-projects.json` tracks:
 ```
 
 ### Symlink Targets
-All symlinks in registered projects point to the base project:
-- `CLAUDE.md` → `$BASE_PROJECT_PATH/CLAUDE.md`
-- `claude/wow` → `$BASE_PROJECT_PATH/claude/wow`
+All symlinks in registered projects use absolute paths pointing to the base project:
+- `CLAUDE.md` → `$BASE_PROJECT_PATH/CLAUDE.md` (absolute path)
+- `claude/wow` → `$BASE_PROJECT_PATH/claude/wow` (absolute path)
+
+**Note**: Absolute paths are used since symlinks are gitignored in subprojects, making them local-only setup files.
 
 ## Error Handling
 

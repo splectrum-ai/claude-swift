@@ -150,7 +150,7 @@ audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
 **Actions:**
 1. For each detected resolved issue:
    ```bash
-   gh issue close #XX -c "Resolved in commit: [commit-hash]"
+   claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
    ```
 2. Add comment explaining resolution
 3. **Cache-first closure**: Update cache first, then sync to GitHub
@@ -165,7 +165,7 @@ audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
        json.dump(cache, f, indent=2)
    print('✓ Removed issue #XX from cache')
    "
-   gh issue close #XX -c "Resolved in commit: [commit-hash]"
+   claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
    ```
 4. Log issue closure in audit log
    ```bash

@@ -109,7 +109,7 @@ git push origin main
 # 3. Create tag and release
 git tag v{VERSION}
 git push origin v{VERSION}
-gh release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release-notes.md
+claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release-notes.md
 ```
 
 ## Common Scenarios

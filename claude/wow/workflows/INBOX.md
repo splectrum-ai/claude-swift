@@ -218,12 +218,12 @@ $task_content
 
 *This issue was automatically created from an inbox task by the INBOX workflow.*"
     
-    # Use CREATE_ISSUE workflow for issue creation (includes cache sync)
+    # Use optimized JavaScript gh-issue script for issue creation (includes cache sync)
     local temp_file=$(mktemp)
     echo "$issue_body" > "$temp_file"
     
-    # Build gh issue create command with optional milestone (no labels to avoid non-existent label errors)
-    local create_cmd="gh issue create --title \"$issue_title\" --body-file \"$temp_file\""
+    # Build gh-issue create command with optional milestone (uses optimized JS GitHub API)
+    local create_cmd="claude/wow/scripts/gh-issue create --title \"$issue_title\" --body-file \"$temp_file\""
     if [ -n "$milestone" ]; then
         create_cmd="$create_cmd --milestone \"$milestone\""
     fi
@@ -248,40 +248,43 @@ audit_log "INBOX" "step" "cache_update" "" "Update issue cache with newly create
 if [ $PROCESSED_COUNT -gt 0 ]; then
     echo "🔄 Updating issue cache with newly created issues..."
     
-    # Execute ISSUE_CACHE workflow to sync all new issues
-    python3 -c "
-import json
-import subprocess
-import sys
-from datetime import datetime
+    # Use optimized JavaScript gh-issue script for cache synchronization
+    if claude/wow/scripts/gh-issue list --limit 100 --json number,title,labels,state,milestone,createdAt,updatedAt > /tmp/issues_list.json; then
+        # Use JavaScript cache management system
+        node -e "
+const fs = require('fs');
+const path = require('path');
 
-try:
-    # Fetch current issues from GitHub
-    result = subprocess.run(['gh', 'issue', 'list', '--limit', '100', '--json', 'number,title,labels,state,milestone,createdAt,updatedAt'], 
-                          capture_output=True, text=True, check=True)
-    issues_list = json.loads(result.stdout)
+try {
+    // Read issues from gh-issue output
+    const issuesList = JSON.parse(fs.readFileSync('/tmp/issues_list.json', 'utf8'));
     
-    # Convert to cache format (keyed by issue number)
-    cache = {}
-    for issue in issues_list:
-        cache[str(issue['number'])] = {
-            **issue,
-            'cached_at': datetime.utcnow().isoformat() + 'Z'
-        }
+    // Convert to cache format (keyed by issue number)
+    const cache = {};
+    for (const issue of issuesList) {
+        cache[String(issue.number)] = {
+            ...issue,
+            cached_at: new Date().toISOString()
+        };
+    }
     
-    # Ensure cache directory exists
-    subprocess.run(['mkdir', '-p', 'claude/cache'], check=True)
+    // Ensure cache directory exists
+    require('child_process').execSync('mkdir -p claude/cache');
     
-    # Write updated cache
-    with open('claude/cache/issues.json', 'w') as f:
-        json.dump(cache, f, indent=2)
+    // Write updated cache
+    fs.writeFileSync('claude/cache/issues.json', JSON.stringify(cache, null, 2));
     
-    print(f'✓ Issue cache updated with {len(cache)} issues')
+    console.log(\`✓ Issue cache updated with \${Object.keys(cache).length} issues\`);
     
-except Exception as e:
-    print(f'⚠ Cache update failed: {e}', file=sys.stderr)
-    # Don't fail the workflow if cache update fails
+} catch (error) {
+    console.error(\`⚠ Cache update failed: \${error.message}\`);
+    // Don't fail the workflow if cache update fails
+}
 "
+        rm -f /tmp/issues_list.json
+    else
+        echo "⚠ Failed to fetch issues for cache update"
+    fi
     echo "✓ Issue cache synchronized"
 else
     echo "ℹ No issues created - skipping cache update"

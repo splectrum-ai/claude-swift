@@ -37,7 +37,7 @@ audit_log "CREATE_ISSUE" "step" "information_gathering" "" "Gathering issue info
 ```bash
 audit_log "CREATE_ISSUE" "step" "issue_creation" "" "Creating GitHub issue with standardized metadata"
 
-gh issue create --title "[Issue Title]" --body "$(cat <<'EOF'
+claude/wow/scripts/gh-issue create --title "[Issue Title]" --body "$(cat <<'EOF'
 ## Description
 [Clear description of what needs to be done]
 
@@ -71,10 +71,10 @@ EOF
 audit_log "CREATE_ISSUE" "step" "metadata_assignment" "" "Applying labels and milestone to created issue"
 
 # Add appropriate labels
-gh issue edit [ISSUE_NUMBER] --add-label "[priority-label]" --add-label "[work-area-label]"
+claude/wow/scripts/gh-issue edit [ISSUE_NUMBER] --add-label "[priority-label]" --add-label "[work-area-label]"
 
 # Assign to current milestone
-gh issue edit [ISSUE_NUMBER] --milestone "[current-milestone]"
+claude/wow/scripts/gh-issue edit [ISSUE_NUMBER] --milestone "[current-milestone]"
 ```
 
 ### 5. Update Dependencies
