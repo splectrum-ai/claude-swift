@@ -15,6 +15,7 @@
  */
 
 import { execSync } from 'child_process';
+import { createRepoConfig } from './lib/repo-config.js';
 
 /**
  * Audit logging helper
@@ -31,18 +32,28 @@ function auditLog(step, details = '', action = 'step', description = '') {
     }
 }
 
+// Initialize repository configuration
+let repoConfig = null;
+
+function getRepoConfig() {
+    if (!repoConfig) {
+        repoConfig = createRepoConfig();
+    }
+    return repoConfig;
+}
+
 /**
  * Execute git command with error handling
  */
 function gitCommand(command, description, allowFailure = false) {
     try {
-        const result = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
-        return result.trim();
+        const result = getRepoConfig().gitCommand(command, description);
+        return result;
     } catch (error) {
         if (allowFailure) {
             return null;
         }
-        throw new Error(`Git command failed (${description}): ${error.message}`);
+        throw error;
     }
 }
 

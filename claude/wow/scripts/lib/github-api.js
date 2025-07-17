@@ -61,14 +61,14 @@ export class GitHubAPI {
     }
 
     /**
-     * Get repository from local audit config (preferred method)
+     * Get repository from local repo config (preferred method)
      */
     getRepoFromConfig() {
         try {
             // Look for config files in specified working directory
             const configPaths = [
-                path.join(this.workingDirectory, 'claude/local/audit-config.json'),
-                path.join(this.workingDirectory, 'claude/project/audit-config.json')
+                path.join(this.workingDirectory, 'claude/local/repo-config.json'),
+                path.join(this.workingDirectory, 'claude/project/repo-config.json')
             ];
             
             for (const configPath of configPaths) {

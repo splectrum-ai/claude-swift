@@ -16,14 +16,25 @@
 
 import { execSync } from 'child_process';
 import path from 'path';
+import { createRepoConfig } from './lib/repo-config.js';
+
+// Initialize repository configuration
+let repoConfig = null;
+
+function getRepoConfig() {
+    if (!repoConfig) {
+        repoConfig = createRepoConfig();
+    }
+    return repoConfig;
+}
 
 /**
  * Execute git command with error handling
  */
 function gitCommand(command, description, allowFailure = false) {
     try {
-        const result = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
-        return result.trim();
+        const result = getRepoConfig().gitCommand(command, description);
+        return result;
     } catch (error) {
         if (allowFailure) {
             return null;
