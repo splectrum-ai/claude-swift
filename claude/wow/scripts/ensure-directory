@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+/**
+ * Ensure Directory Script - Automated directory creation
+ * 
+ * Creates directories if they don't exist, with proper error handling
+ * Usage: ensure-directory <directory_path>
+ */
+
+import { promises as fs, existsSync } from 'fs';
+import { createRepoConfig } from './lib/repo-config.js';
+import path from 'path';
+
+/**
+ * Audit logging helper
+ */
+function auditLog(workflow, step, details = '', action = 'step', description = '') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const entry = `${timestamp}|${workflow}|${action}|${step}|${details}|${description}`;
+    
+    try {
+        const auditPath = 'claude/project/audit/current/current.log';
+        const logCmd = `echo "${entry}" >> "${auditPath}"`;
+        require('child_process').execSync(logCmd, { stdio: 'ignore' });
+    } catch (error) {
+        console.log(`[AUDIT] ${entry}`);
+    }
+}
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const dirPath = args[0];
+        
+        if (!dirPath) {
+            console.error('Usage: ensure-directory <directory_path>');
+            process.exit(1);
+        }
+        
+        if (!existsSync(dirPath)) {
+            await fs.mkdir(dirPath, { recursive: true });
+            auditLog('MANUAL', 'ensure_directory', dirPath, 'step', `Created directory: ${dirPath}`);
+            console.log(`✓ Created directory: ${dirPath}`);
+        } else {
+            auditLog('MANUAL', 'ensure_directory', dirPath, 'step', `Directory already exists: ${dirPath}`);
+            console.log(`✓ Directory already exists: ${dirPath}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Directory creation failed: ${error.message}`);
+        auditLog('MANUAL', 'ensure_directory', '', 'workflow_error', `Directory creation failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}

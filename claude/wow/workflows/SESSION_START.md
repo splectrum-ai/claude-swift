@@ -29,22 +29,22 @@
 ### Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Start session with explicit logging
-audit_log "SESSION_START" "workflow_start" "session_initialization" "" "Starting new session with mandatory system checks"
+claude/wow/scripts/audit-log "SESSION_START" "workflow_start" "session_initialization" "" "Starting new session with mandatory system checks"
 ```
 
 ### Repository Configuration
 ```bash
-audit_log "SESSION_START" "step" "repo_config_check" "" "Repository configuration auto-generates on first script use"
+claude/wow/scripts/audit-log "SESSION_START" "step" "repo_config_check" "" "Repository configuration auto-generates on first script use"
 ```
 
 **Configuration is now auto-generated on demand** - Scripts automatically create `claude/local/repo-config.json` when first used in any git repository. No manual setup required.
 
 **MANDATORY Rule Scanning:**
 ```bash
-audit_log "SESSION_START" "step" "mandatory_scan" "" "Scanning CLAUDE.md and workflow files for MANDATORY requirements"
+claude/wow/scripts/audit-log "SESSION_START" "step" "mandatory_scan" "" "Scanning CLAUDE.md and workflow files for MANDATORY requirements"
 ```
 - Search CLAUDE.md for all \"**MANDATORY\" labeled rules
 - Search workflow files for MANDATORY requirements
@@ -62,7 +62,7 @@ audit_log "SESSION_START" "step" "mandatory_scan" "" "Scanning CLAUDE.md and wor
 ### **Inbox Processing**
 At session start, check for incoming cross-repository tasks:
 ```bash
-audit_log "SESSION_START" "step" "inbox_check" "" "Checking for received cross-repository tasks"
+claude/wow/scripts/audit-log "SESSION_START" "step" "inbox_check" "" "Checking for received cross-repository tasks"
 ```
 
 **Inbox Check Procedure:**
@@ -72,7 +72,7 @@ audit_log "SESSION_START" "step" "inbox_check" "" "Checking for received cross-r
 4. **Session Integration**: Process as part of SESSION_START workflow execution
 5. **Log Processing Results**:
    ```bash
-   audit_log "SESSION_START" "step" "inbox_processing" "" "Processed $task_count inbox tasks into GitHub issues"
+   claude/wow/scripts/audit-log "SESSION_START" "step" "inbox_processing" "" "Processed $task_count inbox tasks into GitHub issues"
    ```
 
 **Example Output:**
@@ -88,7 +88,7 @@ Executing INBOX workflow to convert tasks to GitHub issues...
 ### **Outbox Distribution** 
 For base repositories (with `projects/` directory), check for pending distribution:
 ```bash
-audit_log "SESSION_START" "step" "outbox_check" "" "Checking for pending task distribution"
+claude/wow/scripts/audit-log "SESSION_START" "step" "outbox_check" "" "Checking for pending task distribution"
 ```
 
 **Outbox Check Procedure:**
@@ -101,7 +101,7 @@ audit_log "SESSION_START" "step" "outbox_check" "" "Checking for pending task di
 7. **Session Integration**: Process as part of SESSION_START workflow execution
 8. **Log Distribution Results**:
    ```bash
-   audit_log "SESSION_START" "step" "outbox_distribution" "" "Distributed $task_count tasks across $repo_count repositories"
+   claude/wow/scripts/audit-log "SESSION_START" "step" "outbox_distribution" "" "Distributed $task_count tasks across $repo_count repositories"
    ```
 
 **Example Output:**
@@ -246,7 +246,7 @@ Previous SESSION_END completed git operations but was interrupted before creatin
 
 ### **Issue Cache Integration Step**
 ```bash
-audit_log "SESSION_START" "step" "issue_cache_validation" "" "Executing ISSUE_CACHE workflow for complete cache sync"
+claude/wow/scripts/audit-log "SESSION_START" "step" "issue_cache_validation" "" "Executing ISSUE_CACHE workflow for complete cache sync"
 ```
 
 **Implementation:**
@@ -257,13 +257,13 @@ echo "Validating and updating issue cache..."
 # - Cache cleanup: Remove closed issues  
 # - Milestone sync: Update milestone data
 # - Metadata update: Record sync timestamp
-audit_log "SESSION_START" "step" "issue_cache_validation" "" "Cache validation completed - $new_issues new issues, $closed_issues closed issues processed"
+claude/wow/scripts/audit-log "SESSION_START" "step" "issue_cache_validation" "" "Cache validation completed - $new_issues new issues, $closed_issues closed issues processed"
 echo "✓ Cache validation completed"
 ```
 
 ### **Session Completion Logging**
 ```bash
-audit_log "SESSION_START" "workflow_complete" "session_initialization" "" "SESSION_START workflow completed - session initialized with clean state and current caches"
+claude/wow/scripts/audit-log "SESSION_START" "workflow_complete" "session_initialization" "" "SESSION_START workflow completed - session initialized with clean state and current caches"
 ```
 
 ### **Connection to INBOX/OUTBOX Workflows**

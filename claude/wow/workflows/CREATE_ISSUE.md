@@ -14,15 +14,15 @@ Manual issue creation workflow with standardized metadata structure to ensure co
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Start issue creation workflow
-audit_log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow for manual issue creation"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow for manual issue creation"
 ```
 
 ### 2. Gather Issue Information
 ```bash
-audit_log "CREATE_ISSUE" "step" "information_gathering" "" "Gathering issue information and metadata"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "step" "information_gathering" "" "Gathering issue information and metadata"
 ```
 **Required Information:**
 - **Title**: Clear, descriptive issue title
@@ -35,7 +35,7 @@ audit_log "CREATE_ISSUE" "step" "information_gathering" "" "Gathering issue info
 
 ### 3. Create Issue with Metadata
 ```bash
-audit_log "CREATE_ISSUE" "step" "issue_creation" "" "Creating GitHub issue with standardized metadata"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "step" "issue_creation" "" "Creating GitHub issue with standardized metadata"
 
 claude/wow/scripts/gh-issue create --title "[Issue Title]" --body "$(cat <<'EOF'
 ## Description
@@ -68,7 +68,7 @@ EOF
 
 ### 4. Apply Labels and Milestone
 ```bash
-audit_log "CREATE_ISSUE" "step" "metadata_assignment" "" "Applying labels and milestone to created issue"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "step" "metadata_assignment" "" "Applying labels and milestone to created issue"
 
 # Add appropriate labels
 claude/wow/scripts/gh-issue edit [ISSUE_NUMBER] --add-label "[priority-label]" --add-label "[work-area-label]"
@@ -79,7 +79,7 @@ claude/wow/scripts/gh-issue edit [ISSUE_NUMBER] --milestone "[current-milestone]
 
 ### 5. Update Dependencies
 ```bash
-audit_log "CREATE_ISSUE" "step" "dependency_updates" "" "Updating dependency relationships for related issues"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "step" "dependency_updates" "" "Updating dependency relationships for related issues"
 ```
 If the issue has dependencies, update related issues:
 ```bash
@@ -89,7 +89,7 @@ If the issue has dependencies, update related issues:
 
 ### 6. Refresh Issue Cache
 ```bash
-audit_log "CREATE_ISSUE" "step" "cache_refresh" "" "Refreshing issue cache to include newly created issue"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "step" "cache_refresh" "" "Refreshing issue cache to include newly created issue"
 ```
 After successful issue creation, update the local issue cache for NEXT_ISSUE performance:
 ```bash
@@ -130,7 +130,7 @@ except Exception as e:
 "
 
 # Workflow completion logging
-audit_log "CREATE_ISSUE" "workflow_complete" "issue_creation" "" "CREATE_ISSUE workflow completed - issue #$ISSUE_NUMBER created with full metadata"
+claude/wow/scripts/audit-log "CREATE_ISSUE" "workflow_complete" "issue_creation" "" "CREATE_ISSUE workflow completed - issue #$ISSUE_NUMBER created with full metadata"
 ```
 
 ## Metadata Standards

@@ -86,25 +86,25 @@ claude/cache/
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Start issue cache workflow
-audit_log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow for cache management"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow for cache management"
 ```
 
 ### 2. Cache Initialization
 ```bash
-audit_log "ISSUE_CACHE" "step" "cache_init" "" "Initializing cache directory and metadata"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "cache_init" "" "Initializing cache directory and metadata"
 ```
 
 **Actions:**
-1. Create cache directory if missing: `mkdir -p claude/cache`
+1. Create cache directory if missing: `claude/wow/scripts/ensure-directory claude/cache`
 2. Initialize metadata.json with default values
 3. Log cache initialization
 
 ### 3. Gap Detection
 ```bash
-audit_log "ISSUE_CACHE" "step" "gap_detection" "" "Checking for missing issues/milestones in cache"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "gap_detection" "" "Checking for missing issues/milestones in cache"
 ```
 
 **Gap Detection Logic:**
@@ -127,7 +127,7 @@ fi
 
 ### 4. Issue Population
 ```bash
-audit_log "ISSUE_CACHE" "step" "issue_population" "" "Caching missing open issues from GitHub"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "issue_population" "" "Caching missing open issues from GitHub"
 ```
 
 **Population Process:**
@@ -156,13 +156,13 @@ fi
 
 ### 5. Milestone Population
 ```bash
-audit_log "ISSUE_CACHE" "step" "milestone_population" "" "Caching milestone data from GitHub"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "milestone_population" "" "Caching milestone data from GitHub"
 ```
 
 **Milestone Caching:**
 ```bash
-# Get all milestones from GitHub
-gh api repos/:owner/:repo/milestones --jq '.[]' > temp_milestones.json
+# Get all milestones from GitHub using automated script
+claude/wow/scripts/gh-api milestones --output temp_milestones.json
 
 # Get current cache or create empty
 CURRENT_MILESTONE_CACHE=$(cat claude/cache/milestones.json 2>/dev/null || echo "{}")
@@ -181,7 +181,7 @@ echo "✓ Milestones cached successfully"
 
 ### 5. Cache Cleanup
 ```bash
-audit_log "ISSUE_CACHE" "step" "cache_cleanup" "" "Remove closed issues/milestones from cache"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "cache_cleanup" "" "Remove closed issues/milestones from cache"
 ```
 
 **Cleanup Process:**
@@ -199,7 +199,7 @@ echo "✓ Cache cleanup completed"
 
 ### 6. Issue Update Detection
 ```bash
-audit_log "ISSUE_CACHE" "step" "update_detection" "" "Detect and sync changed issues"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "update_detection" "" "Detect and sync changed issues"
 ```
 
 **Change Detection Logic:**
@@ -231,7 +231,7 @@ fi
 
 ### 7. Cache Update Functions
 ```bash
-audit_log "ISSUE_CACHE" "step" "cache_functions" "" "Implement cache update and sync functions"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "cache_functions" "" "Implement cache update and sync functions"
 ```
 
 **Update Issue in Cache:**
@@ -304,7 +304,7 @@ sync_to_github() {
 
 ### 8. New Issue Creation
 ```bash
-audit_log "ISSUE_CACHE" "step" "new_issue_creation" "" "Create new issue and update cache"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "new_issue_creation" "" "Create new issue and update cache"
 ```
 
 **Create Issue Flow:**
@@ -348,7 +348,7 @@ create_new_issue() {
 
 ### 9. Metadata Update
 ```bash
-audit_log "ISSUE_CACHE" "step" "metadata_update" "" "Update cache metadata and sync timestamp"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "step" "metadata_update" "" "Update cache metadata and sync timestamp"
 ```
 
 **Metadata Update:**
@@ -371,7 +371,7 @@ echo "✓ Metadata updated"
 
 ### SESSION_START Integration
 ```bash
-audit_log "SESSION_START" "step" "issue_cache_validation" "" "Validate and update issue cache"
+claude/wow/scripts/audit-log "SESSION_START" "step" "issue_cache_validation" "" "Validate and update issue cache"
 ```
 
 **Session Start Integration:**
@@ -512,7 +512,7 @@ if [ ! -d claude/cache ]; then
 fi
 
 # Workflow completion logging
-audit_log "ISSUE_CACHE" "workflow_complete" "cache_synchronization" "" "ISSUE_CACHE workflow completed - cache synchronized with $new_issues new issues and $updated_issues updated issues"
+claude/wow/scripts/audit-log "ISSUE_CACHE" "workflow_complete" "cache_synchronization" "" "ISSUE_CACHE workflow completed - cache synchronized with $new_issues new issues and $updated_issues updated issues"
 ```
 
 ## Success Criteria

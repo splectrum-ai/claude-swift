@@ -28,22 +28,19 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 
 ### 1. Initialize Audit Logging
 ```bash
-# Load Node.js audit functions
-source claude/wow/scripts/audit-functions.sh
-
-# Start inbox workflow
-audit_log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"
+# Start inbox workflow using automated audit logging
+claude/wow/scripts/audit-log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"
 ```
 
 ### 2. Inbox Scanning
 ```bash
-audit_log "INBOX" "step" "task_discovery" "" "Scanning inbox directory for pending tasks"
+claude/wow/scripts/audit-log "INBOX" "step" "task_discovery" "" "Scanning inbox directory for pending tasks"
 ```
 
 **Task Discovery:**
 ```bash
-# Ensure inbox directory exists
-mkdir -p claude/inbox
+# Ensure inbox directory exists using automated directory management
+claude/wow/scripts/ensure-directory claude/inbox
 
 # Find all task files in inbox (*.md files with timestamp format)
 INBOX_TASKS=$(find claude/inbox -name "????-??-??T??-??-??-???Z_*.md" 2>/dev/null | sort || true)
@@ -61,7 +58,7 @@ echo "Processing in chronological order..."
 
 ### 3. Task Processing Loop
 ```bash
-audit_log "INBOX" "step" "task_processing" "" "Processing each task file in timestamp order"
+claude/wow/scripts/audit-log "INBOX" "step" "task_processing" "" "Processing each task file in timestamp order"
 ```
 
 **Sequential Processing:**
@@ -119,7 +116,7 @@ done
 
 ### 3. Issue Creation Integration
 ```bash
-audit_log "INBOX" "step" "issue_conversion" "" "Convert task content to GitHub issue"
+claude/wow/scripts/audit-log "INBOX" "step" "issue_conversion" "" "Convert task content to GitHub issue"
 ```
 
 **Milestone Detection:**
@@ -218,29 +215,26 @@ $task_content
 
 *This issue was automatically created from an inbox task by the INBOX workflow.*"
     
-    # Use optimized JavaScript gh-issue script for issue creation (includes cache sync)
+    # Use automated gh-issue script for issue creation (includes cache sync)
     local temp_file=$(mktemp)
     echo "$issue_body" > "$temp_file"
     
-    # Build gh-issue create command with optional milestone (uses optimized JS GitHub API)
-    local create_cmd="claude/wow/scripts/gh-issue create --title \"$issue_title\" --body-file \"$temp_file\""
+    # Create GitHub issue using automated script
     if [ -n "$milestone" ]; then
-        create_cmd="$create_cmd --milestone \"$milestone\""
+        claude/wow/scripts/gh-issue create --title "$issue_title" --body-file "$temp_file" --milestone "$milestone"
+    else
+        claude/wow/scripts/gh-issue create --title "$issue_title" --body-file "$temp_file"
     fi
     
-    if eval "$create_cmd"; then
-        rm "$temp_file"
-        return 0
-    else
-        rm "$temp_file"
-        return 1
-    fi
+    local exit_code=$?
+    rm "$temp_file"
+    return $exit_code
 }
 ```
 
 ### 4. Issue Cache Update
 ```bash
-audit_log "INBOX" "step" "cache_update" "" "Update issue cache with newly created issues"
+claude/wow/scripts/audit-log "INBOX" "step" "cache_update" "" "Update issue cache with newly created issues"
 ```
 
 **Cache Synchronization:**
@@ -248,43 +242,9 @@ audit_log "INBOX" "step" "cache_update" "" "Update issue cache with newly create
 if [ $PROCESSED_COUNT -gt 0 ]; then
     echo "🔄 Updating issue cache with newly created issues..."
     
-    # Use optimized JavaScript gh-issue script for cache synchronization
-    if claude/wow/scripts/gh-issue list --limit 100 --json number,title,labels,state,milestone,createdAt,updatedAt > /tmp/issues_list.json; then
-        # Use JavaScript cache management system
-        node -e "
-const fs = require('fs');
-const path = require('path');
-
-try {
-    // Read issues from gh-issue output
-    const issuesList = JSON.parse(fs.readFileSync('/tmp/issues_list.json', 'utf8'));
+    # Use automated gh-issue script for cache synchronization
+    claude/wow/scripts/gh-issue cache-refresh
     
-    // Convert to cache format (keyed by issue number)
-    const cache = {};
-    for (const issue of issuesList) {
-        cache[String(issue.number)] = {
-            ...issue,
-            cached_at: new Date().toISOString()
-        };
-    }
-    
-    // Ensure cache directory exists
-    require('child_process').execSync('mkdir -p claude/cache');
-    
-    // Write updated cache
-    fs.writeFileSync('claude/cache/issues.json', JSON.stringify(cache, null, 2));
-    
-    console.log(\`✓ Issue cache updated with \${Object.keys(cache).length} issues\`);
-    
-} catch (error) {
-    console.error(\`⚠ Cache update failed: \${error.message}\`);
-    // Don't fail the workflow if cache update fails
-}
-"
-        rm -f /tmp/issues_list.json
-    else
-        echo "⚠ Failed to fetch issues for cache update"
-    fi
     echo "✓ Issue cache synchronized"
 else
     echo "ℹ No issues created - skipping cache update"
@@ -293,7 +253,7 @@ fi
 
 ### 5. Processing Summary
 ```bash
-audit_log "INBOX" "step" "completion_summary" "" "Provide inbox processing completion summary"
+claude/wow/scripts/audit-log "INBOX" "step" "completion_summary" "" "Provide inbox processing completion summary"
 ```
 
 **Completion Report:**
@@ -325,7 +285,7 @@ echo ""
 echo "Inbox status: $(find inbox -name "*.md" 2>/dev/null | wc -l) tasks remaining"
 
 # Workflow completion logging
-audit_log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow completed - processed $PROCESSED_COUNT tasks, $FAILED_COUNT failed"
+claude/wow/scripts/audit-log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow completed - processed $PROCESSED_COUNT tasks, $FAILED_COUNT failed"
 ```
 
 ## Task File Processing

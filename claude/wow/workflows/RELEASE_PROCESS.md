@@ -90,20 +90,20 @@ claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSIO
 ### Mandatory Workflow Logging
 ```bash
 # Initialize audit logging
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Log workflow start
-audit_log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with `release sesame` trigger"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with `release sesame` trigger"
 
 # Log each major step
-audit_log "RELEASE_PROCESS" "step" "archive_logs" "" "Archive logs with version stamps"
-audit_log "RELEASE_PROCESS" "step" "reset_logs" "" "Reset logs for next version"
-audit_log "RELEASE_PROCESS" "step" "commit_changes" "" "Commit archiving changes to main"
-audit_log "RELEASE_PROCESS" "step" "create_artifacts" "" "Create release artifacts and test installation"
-audit_log "RELEASE_PROCESS" "step" "create_release" "" "Create version tag and GitHub release"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "archive_logs" "" "Archive logs with version stamps"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "reset_logs" "" "Reset logs for next version"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "commit_changes" "" "Commit archiving changes to main"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "create_artifacts" "" "Create release artifacts and test installation"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "create_release" "" "Create version tag and GitHub release"
 
 # Log workflow completion
-audit_log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release created successfully"
+claude/wow/scripts/audit-log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release created successfully"
 ```
 
 ## Version Strategy

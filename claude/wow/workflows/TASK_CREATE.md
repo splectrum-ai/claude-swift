@@ -27,7 +27,7 @@ Interactive task creation workflow that guides users through creating cross-repo
 
 ### 1. Interactive Task Information Collection
 ```bash
-audit_log "TASK_CREATE" "step" "information_gathering" "" "Collect task details through interactive prompts"
+claude/wow/scripts/audit-log "TASK_CREATE" "step" "information_gathering" "" "Collect task details through interactive prompts"
 ```
 
 **Task Information Prompts:**
@@ -197,7 +197,7 @@ fi
 
 ### 2. Task File Generation
 ```bash
-audit_log "TASK_CREATE" "step" "file_generation" "" "Generate task filename and content structure"
+claude/wow/scripts/audit-log "TASK_CREATE" "step" "file_generation" "" "Generate task filename and content structure"
 ```
 
 **Filename Generation:**
@@ -264,17 +264,17 @@ echo "✓ Task content generated"
 
 ### 3. Outbox Directory Setup
 ```bash
-audit_log "TASK_CREATE" "step" "outbox_setup" "" "Ensure outbox directory exists and is properly configured"
+claude/wow/scripts/audit-log "TASK_CREATE" "step" "outbox_setup" "" "Ensure outbox directory exists and is properly configured"
 ```
 
 **Outbox Preparation:**
 ```bash
-# Ensure outbox directory exists
-mkdir -p claude/outbox
+# Ensure outbox directory exists using automated directory management
+claude/wow/scripts/ensure-directory claude/outbox
 
-# Create outbox README if it doesn't exist
+# Create outbox README if it doesn't exist using automated file management
 if [ ! -f "claude/outbox/README.md" ]; then
-    cat > "claude/outbox/README.md" << 'EOF'
+    claude/wow/scripts/create-file "claude/outbox/README.md" << 'EOF'
 # Outbox
 
 This directory contains cross-repository tasks awaiting distribution.
@@ -301,7 +301,7 @@ echo "✓ Outbox directory ready: $(pwd)/outbox"
 
 ### 4. Task File Creation
 ```bash
-audit_log "TASK_CREATE" "step" "file_creation" "" "Write task file to outbox directory"
+claude/wow/scripts/audit-log "TASK_CREATE" "step" "file_creation" "" "Write task file to outbox directory"
 ```
 
 **File Writing:**
@@ -328,7 +328,7 @@ fi
 
 ### 5. Task Creation Summary
 ```bash
-audit_log "TASK_CREATE" "step" "completion_summary" "" "Provide task creation completion summary"
+claude/wow/scripts/audit-log "TASK_CREATE" "step" "completion_summary" "" "Provide task creation completion summary"
 ```
 
 **Completion Report:**

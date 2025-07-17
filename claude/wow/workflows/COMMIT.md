@@ -32,15 +32,15 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 ### 1. Initialize Audit Logging
 ```bash
 # Load Node.js audit functions
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Start workflow with explicit logging
-audit_log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
+claude/wow/scripts/audit-log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
 ```
 
 ### 2. Audit Log Validation
 ```bash
-audit_log "COMMIT" "step" "audit_validation" "" "Verifying recent work has corresponding audit entries"
+claude/wow/scripts/audit-log "COMMIT" "step" "audit_validation" "" "Verifying recent work has corresponding audit entries"
 ```
 
 **Actions:**
@@ -63,7 +63,7 @@ audit_log "COMMIT" "step" "audit_validation" "" "Verifying recent work has corre
 
 ### 3. Change Assessment
 ```bash
-audit_log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
+claude/wow/scripts/audit-log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
 ```
 
 **Actions:**
@@ -74,7 +74,7 @@ audit_log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and 
 
 ### 4. Issue Detection
 ```bash
-audit_log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
+claude/wow/scripts/audit-log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
 ```
 
 **Actions:**
@@ -85,7 +85,7 @@ audit_log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for
 
 ### 5. Commit Message Generation
 ```bash
-audit_log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
+claude/wow/scripts/audit-log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
 ```
 
 **Format varies by context:**
@@ -124,7 +124,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### 6. Commit Execution
 ```bash
-audit_log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
+claude/wow/scripts/audit-log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
 ```
 
 **Actions:**
@@ -143,7 +143,7 @@ claude/wow/scripts/commit --message "Generated commit message"
 
 ### 7. Issue Closure
 ```bash
-audit_log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
+claude/wow/scripts/audit-log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
 ```
 
 **Actions:**
@@ -161,7 +161,7 @@ claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
 
 ### 8. Workflow Completion
 ```bash
-audit_log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
+claude/wow/scripts/audit-log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
 ```
 
 ## Interactive Prompts

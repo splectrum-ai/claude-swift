@@ -27,7 +27,7 @@ The MANDATORY_RULES_REFRESH workflow provides systematic scanning, validation, a
 
 ### Step 1: Rule Scanning
 ```bash
-audit_log "MANDATORY_RULES_REFRESH" "step" "rule_scanning" "" "Scan all files for mandatory rules"
+claude/wow/scripts/audit-log "MANDATORY_RULES_REFRESH" "step" "rule_scanning" "" "Scan all files for mandatory rules"
 ```
 
 **Actions:**
@@ -38,7 +38,7 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "rule_scanning" "" "Scan all files fo
 
 ### Step 2: Compliance Check
 ```bash
-audit_log "MANDATORY_RULES_REFRESH" "step" "compliance_check" "" "Validate current state against all mandatory rules"
+claude/wow/scripts/audit-log "MANDATORY_RULES_REFRESH" "step" "compliance_check" "" "Validate current state against all mandatory rules"
 ```
 
 **Actions:**
@@ -49,7 +49,7 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "compliance_check" "" "Validate curre
 
 ### Step 3: Automatic Corrections
 ```bash
-audit_log "MANDATORY_RULES_REFRESH" "step" "auto_corrections" "" "Apply automatic fixes for correctable violations"
+claude/wow/scripts/audit-log "MANDATORY_RULES_REFRESH" "step" "auto_corrections" "" "Apply automatic fixes for correctable violations"
 ```
 
 **Actions:**
@@ -60,7 +60,7 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "auto_corrections" "" "Apply automati
 
 ### Step 4: Manual Action Planning
 ```bash
-audit_log "MANDATORY_RULES_REFRESH" "step" "manual_actions" "" "Create action items for manual corrections"
+claude/wow/scripts/audit-log "MANDATORY_RULES_REFRESH" "step" "manual_actions" "" "Create action items for manual corrections"
 ```
 
 **Actions:**
@@ -71,7 +71,7 @@ audit_log "MANDATORY_RULES_REFRESH" "step" "manual_actions" "" "Create action it
 
 ### Step 5: Verification
 ```bash
-audit_log "MANDATORY_RULES_REFRESH" "step" "verification" "" "Verify all corrections are properly applied"
+claude/wow/scripts/audit-log "MANDATORY_RULES_REFRESH" "step" "verification" "" "Verify all corrections are properly applied"
 ```
 
 **Actions:**

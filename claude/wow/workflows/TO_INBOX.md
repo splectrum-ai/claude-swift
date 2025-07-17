@@ -32,7 +32,7 @@ Example: `2025-07-16T23-45-00Z_claude-swift_update-documentation.md`
 
 ### 1. Repository Detection
 ```bash
-audit_log "TO_INBOX" "step" "repository_detection" "" "Detect current repository name and validate outbox directory"
+claude/wow/scripts/audit-log "TO_INBOX" "step" "repository_detection" "" "Detect current repository name and validate outbox directory"
 ```
 
 **Actions:**
@@ -51,7 +51,7 @@ echo "📂 Processing outbox for repository: $CURRENT_REPO"
 
 ### 2. Task Discovery
 ```bash
-audit_log "TO_INBOX" "step" "task_discovery" "" "Scan outbox directory for self-targeted tasks"
+claude/wow/scripts/audit-log "TO_INBOX" "step" "task_discovery" "" "Scan outbox directory for self-targeted tasks"
 ```
 
 **Actions:**
@@ -69,7 +69,7 @@ echo "🔍 Found $(echo "$OUTBOX_TASKS" | wc -l) task files in outbox"
 
 ### 3. Self-Target Filtering
 ```bash
-audit_log "TO_INBOX" "step" "self_target_filtering" "" "Filter tasks that target current repository"
+claude/wow/scripts/audit-log "TO_INBOX" "step" "self_target_filtering" "" "Filter tasks that target current repository"
 ```
 
 **Actions:**
@@ -93,7 +93,7 @@ echo "📋 Found $PROCESSED_COUNT self-targeted tasks for $CURRENT_REPO"
 
 ### 4. Task Processing
 ```bash
-audit_log "TO_INBOX" "step" "task_processing" "" "Move self-targeted tasks from outbox to inbox"
+claude/wow/scripts/audit-log "TO_INBOX" "step" "task_processing" "" "Move self-targeted tasks from outbox to inbox"
 ```
 
 **Actions:**
@@ -103,8 +103,8 @@ if [ $PROCESSED_COUNT -eq 0 ]; then
     exit 0
 fi
 
-# Ensure inbox directory exists
-mkdir -p claude/inbox
+# Ensure inbox directory exists using automated directory management
+claude/wow/scripts/ensure-directory claude/inbox
 
 # Process each self-targeted task
 for task_file in $SELF_TARGETED_TASKS; do
@@ -112,8 +112,8 @@ for task_file in $SELF_TARGETED_TASKS; do
     
     echo "📤 Processing task: $task_name"
     
-    # Move task from outbox to inbox
-    mv "$task_file" "claude/inbox/$task_name"
+    # Move task from outbox to inbox using automated file management
+    claude/wow/scripts/move-file "$task_file" "claude/inbox/$task_name"
     
     if [ $? -eq 0 ]; then
         echo "  ✅ Moved to inbox: $task_name"
@@ -127,18 +127,18 @@ echo "🎉 Processed $PROCESSED_COUNT self-targeted tasks"
 
 ### 5. Audit Logging
 ```bash
-audit_log "TO_INBOX" "step" "audit_logging" "" "Record task processing in audit log"
+claude/wow/scripts/audit-log "TO_INBOX" "step" "audit_logging" "" "Record task processing in audit log"
 ```
 
 **Actions:**
 ```bash
 # Use optimized Node.js audit logging
-source claude/wow/scripts/audit-functions.sh
+# Automated audit logging - no manual sourcing required
 
 # Log each processed task
 for task_file in $SELF_TARGETED_TASKS; do
     task_name=$(basename "$task_file")
-    audit_log "TO_INBOX" "task_processed" "$task_name" "" "Moved self-targeted task from outbox to inbox"
+    claude/wow/scripts/audit-log "TO_INBOX" "task_processed" "$task_name" "" "Moved self-targeted task from outbox to inbox"
 done
 ```
 
@@ -210,8 +210,9 @@ Each task file should contain:
 
 ### Missing Directories
 ```bash
-# Auto-create missing directories
-mkdir -p claude/outbox claude/inbox
+# Auto-create missing directories using automated directory management
+claude/wow/scripts/ensure-directory claude/outbox
+claude/wow/scripts/ensure-directory claude/inbox
 ```
 
 ### Invalid Task Files
@@ -225,8 +226,8 @@ fi
 
 ### File System Errors
 ```bash
-# Handle move failures gracefully
-if ! mv "$task_file" "claude/inbox/$task_name"; then
+# Handle move failures gracefully using automated file management
+if ! claude/wow/scripts/move-file "$task_file" "claude/inbox/$task_name"; then
     echo "❌ Failed to move $task_name - leaving in outbox"
     continue
 fi
