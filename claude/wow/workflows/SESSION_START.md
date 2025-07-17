@@ -35,35 +35,12 @@ source claude/wow/scripts/audit-functions.sh
 audit_log "SESSION_START" "workflow_start" "session_initialization" "" "Starting new session with mandatory system checks"
 ```
 
-### Setup Audit Configuration
+### Repository Configuration
 ```bash
-audit_log "SESSION_START" "step" "audit_config_setup" "" "Ensuring audit configuration exists for reliable logging"
-
-# Generate audit-config.json if it doesn't exist
-if [ ! -f claude/local/audit-config.json ]; then
-    PROJECT_ROOT=$(pwd)
-    TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-    
-    # Ensure local directory exists
-    mkdir -p claude/local
-    
-    cat > claude/local/audit-config.json << EOF
-{
-  "auditLogPath": "$PROJECT_ROOT/claude/project/audit/current/current.log",
-  "auditLogDirectory": "$PROJECT_ROOT/claude/project/audit/current",
-  "projectRoot": "$PROJECT_ROOT",
-  "scriptsPath": "$PROJECT_ROOT/claude/wow/scripts",
-  "configVersion": "1.0.0",
-  "generatedBy": "SESSION_START",
-  "lastUpdated": "$TIMESTAMP"
-}
-EOF
-    
-    audit_log "SESSION_START" "step" "config_generated" "claude/local/audit-config.json" "Generated audit configuration with absolute paths"
-else
-    audit_log "SESSION_START" "step" "config_verified" "claude/local/audit-config.json" "Audit configuration already exists"
-fi
+audit_log "SESSION_START" "step" "repo_config_check" "" "Repository configuration auto-generates on first script use"
 ```
+
+**Configuration is now auto-generated on demand** - Scripts automatically create `claude/local/repo-config.json` when first used in any git repository. No manual setup required.
 
 **MANDATORY Rule Scanning:**
 ```bash

@@ -13,7 +13,7 @@
  * Replaces scattered config reading across multiple scripts with single source of truth
  */
 
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
 
@@ -38,7 +38,7 @@ export class RepoConfig {
     }
     
     /**
-     * Load configuration from repo-config.json files
+     * Load configuration from repo-config.json files with auto-generation
      */
     loadConfig() {
         const configPaths = [
@@ -46,6 +46,7 @@ export class RepoConfig {
             path.join(this.workingDirectory, 'claude/project/repo-config.json')
         ];
         
+        // Try to load existing config
         for (const configPath of configPaths) {
             try {
                 const configData = JSON.parse(readFileSync(configPath, 'utf8'));
@@ -66,10 +67,75 @@ export class RepoConfig {
             }
         }
         
-        // No config found, return empty config
+        // No config found - try to auto-generate from git repository
+        try {
+            const generatedConfig = this.generateConfigFromGit();
+            if (generatedConfig) {
+                this.saveConfig(generatedConfig);
+                console.log(`📝 Auto-generated repo-config.json for ${generatedConfig.owner}/${generatedConfig.repo}`);
+                return generatedConfig;
+            }
+        } catch (error) {
+            // Auto-generation failed, return empty config for fallback detection
+        }
+        
+        // Return empty config - will use fallback git detection
         return {};
     }
     
+    /**
+     * Generate configuration from git repository information
+     */
+    generateConfigFromGit() {
+        try {
+            const projectRoot = this.detectProjectRoot();
+            const gitRemote = this.detectGitRemote();
+            const repoInfo = this.extractRepoFromPath(projectRoot);
+            
+            if (!repoInfo || !gitRemote) {
+                throw new Error('Unable to detect repository information from git');
+            }
+            
+            const config = {
+                auditLogPath: `${projectRoot}/claude/project/audit/current/current.log`,
+                auditLogDirectory: `${projectRoot}/claude/project/audit/current`,
+                projectRoot: projectRoot,
+                scriptsPath: `${projectRoot}/claude/wow/scripts`,
+                owner: repoInfo.owner,
+                repo: repoInfo.repo,
+                gitRemote: gitRemote,
+                configVersion: '2.0.0',
+                generatedBy: 'AUTO_GENERATION',
+                lastUpdated: new Date().toISOString()
+            };
+            
+            return config;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Save configuration to local repo-config.json file
+     */
+    saveConfig(config) {
+        try {
+            const localConfigDir = path.join(this.workingDirectory, 'claude/local');
+            const localConfigPath = path.join(localConfigDir, 'repo-config.json');
+            
+            // Ensure directory exists
+            mkdirSync(localConfigDir, { recursive: true });
+            
+            // Write config file
+            writeFileSync(localConfigPath, JSON.stringify(config, null, 2));
+            
+            return localConfigPath;
+        } catch (error) {
+            console.warn(`Warning: Could not save repo-config.json: ${error.message}`);
+            return null;
+        }
+    }
+
     /**
      * Extract repository owner/name from project root path
      */
