@@ -431,9 +431,40 @@ export class GitHubCache extends GitHubIssues {
             return issues;
         }
         
-        // Cache is not available or expired, use API
-        console.log('📋 Cache expired or unavailable, fetching from API...');
-        return await this.listIssues(options);
+        // Cache is not available or expired, sync cache and return
+        console.log('📋 Cache expired or unavailable, syncing cache...');
+        await this.smartSync(options);
+        
+        // Now get from freshly populated cache
+        const cache = await this.loadIssuesCache();
+        let issues = Object.values(cache);
+        
+        // Apply filters
+        if (options.state && options.state !== 'all') {
+            issues = issues.filter(issue => issue.state === options.state.toUpperCase());
+        }
+        
+        if (options.labels) {
+            issues = issues.filter(issue => 
+                issue.labels.some(label => label.name === options.labels)
+            );
+        }
+        
+        if (options.milestone) {
+            issues = issues.filter(issue => 
+                issue.milestone && issue.milestone.title === options.milestone
+            );
+        }
+        
+        // Sort by number descending (most recent first)
+        issues.sort((a, b) => b.number - a.number);
+        
+        // Apply limit
+        if (options.limit) {
+            issues = issues.slice(0, parseInt(options.limit));
+        }
+        
+        return issues;
     }
 
     /**

@@ -107,8 +107,8 @@ async function main() {
         const args = process.argv.slice(2);
         const options = parseArgs(args);
         
-        // Initialize GitHub API client
-        const github = createGitHubReleases();
+        // Initialize GitHub API client with current working directory
+        const github = createGitHubReleases({ workingDirectory: process.cwd() });
         
         // Handle different commands
         switch (options.positional[0]) {

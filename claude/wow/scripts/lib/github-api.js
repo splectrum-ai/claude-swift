@@ -14,7 +14,7 @@
  * - Repository auto-detection
  */
 
-import { promises as fs } from 'fs';
+import { promises as fs, readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -34,9 +34,13 @@ export class GitHubAPI {
     constructor(options = {}) {
         this.baseURL = 'https://api.github.com';
         this.token = options.token || process.env.GITHUB_TOKEN;
-        this.owner = options.owner || this.detectOwner();
-        this.repo = options.repo || this.detectRepo();
         this.userAgent = options.userAgent || 'claude-swift-github-api/1.0.0';
+        this.workingDirectory = options.workingDirectory || process.cwd();
+        
+        // Try config-based detection first, then fallback to git detection
+        const configRepo = this.getRepoFromConfig() || {};
+        this.owner = options.owner || configRepo.owner || this.detectOwner();
+        this.repo = options.repo || configRepo.repo || this.detectRepo();
         
         // Rate limiting configuration
         this.rateLimitRemaining = 5000;
@@ -57,11 +61,50 @@ export class GitHubAPI {
     }
 
     /**
+     * Get repository from local audit config (preferred method)
+     */
+    getRepoFromConfig() {
+        try {
+            // Look for config files in specified working directory
+            const configPaths = [
+                path.join(this.workingDirectory, 'claude/local/audit-config.json'),
+                path.join(this.workingDirectory, 'claude/project/audit-config.json')
+            ];
+            
+            for (const configPath of configPaths) {
+                try {
+                    const configData = JSON.parse(readFileSync(configPath, 'utf8'));
+                    if (configData.projectRoot) {
+                        // Extract owner/repo from project root path
+                        // Expected format: /path/to/sesameh/claude-swift
+                        const pathParts = configData.projectRoot.split('/').filter(Boolean);
+                        if (pathParts.length >= 2) {
+                            const repo = pathParts[pathParts.length - 1]; // last part (claude-swift)
+                            const owner = pathParts[pathParts.length - 2]; // second to last (sesameh)
+                            
+                            // Return config values if detection succeeded
+                            return { owner, repo };
+                        }
+                    }
+                } catch (error) {
+                    // Config file doesn't exist or is invalid, try next
+                    continue;
+                }
+            }
+        } catch (error) {
+            // Config detection failed, keep existing git-detected values
+        }
+    }
+
+    /**
      * Auto-detect repository owner from git remote
      */
     detectOwner() {
         try {
-            const remoteURL = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
+            const remoteURL = execSync('git remote get-url origin', { 
+                encoding: 'utf8', 
+                cwd: this.workingDirectory 
+            }).trim();
             const match = remoteURL.match(/github\.com[/:]([^/]+)\/([^/]+)(\.git)?$/);
             return match ? match[1] : null;
         } catch (error) {
@@ -74,7 +117,10 @@ export class GitHubAPI {
      */
     detectRepo() {
         try {
-            const remoteURL = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
+            const remoteURL = execSync('git remote get-url origin', { 
+                encoding: 'utf8', 
+                cwd: this.workingDirectory 
+            }).trim();
             const match = remoteURL.match(/github\.com[/:]([^/]+)\/([^/]+)(\.git)?$/);
             return match ? match[2].replace(/\.git$/, '') : null;
         } catch (error) {
