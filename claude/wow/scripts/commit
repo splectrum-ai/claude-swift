@@ -22,18 +22,17 @@ import path from 'path';
 /**
  * Audit logging helper
  */
-function auditLog(step, details = '', action = 'step') {
+function auditLog(step, details = '', action = 'step', description = '') {
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-    const entry = `${timestamp}|COMMIT|${action}|${step}|${details}|`;
+    const entry = `${timestamp}|COMMIT|${action}|${step}|${details}|${description}`;
     
     try {
         // Try to append to audit log if it exists
         const auditPath = 'claude/project/audit/current/current.log';
-        const logEntry = entry + (arguments[3] || '') + '\n';
-        execSync(`echo "${logEntry}" >> "${auditPath}"`, { stdio: 'ignore' });
+        execSync(`echo "${entry}" >> "${auditPath}"`, { stdio: 'ignore' });
     } catch (error) {
         // Fallback to console if audit log unavailable
-        console.log(`[AUDIT] ${entry}${arguments[3] || ''}`);
+        console.log(`[AUDIT] ${entry}`);
     }
 }
 
@@ -272,7 +271,7 @@ async function main() {
         const dryRun = args.includes('--dry-run');
         
         // Initialize workflow
-        auditLog('workflow_start', 'commit_sesame', 'workflow_start', 'Initiated COMMIT workflow for session work completion');
+        auditLog('commit_sesame', '', 'workflow_start', 'Initiated COMMIT workflow for session work completion');
         
         console.log('🔄 Starting COMMIT workflow...');
         
@@ -324,12 +323,12 @@ async function main() {
         }
         
         // 6. Complete workflow
-        auditLog('workflow_complete', 'commit_sesame', 'workflow_complete', 'COMMIT workflow completed successfully - changes committed and issues resolved');
+        auditLog('commit_sesame', '', 'workflow_complete', 'COMMIT workflow completed successfully - changes committed and issues resolved');
         console.log('✅ COMMIT workflow completed successfully!');
         
     } catch (error) {
         console.error(`❌ COMMIT workflow failed: ${error.message}`);
-        auditLog('workflow_error', 'commit_sesame', 'workflow_error', `COMMIT workflow failed: ${error.message}`);
+        auditLog('commit_sesame', '', 'workflow_error', `COMMIT workflow failed: ${error.message}`);
         process.exit(1);
     }
 }
