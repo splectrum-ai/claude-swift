@@ -20,51 +20,56 @@
 
 ### Daily Workflow
 ```bash
-# 1. Start session - ensure you're on main
-git checkout main
-git pull origin main
+# 1. Start session - sync with remote
+claude/wow/scripts/git-sync
 
 # 2. Make changes...
 
 # 3. Commit your work
-git add .
-git commit -m "Clear description of changes"
-git push origin main
+claude/wow/scripts/commit
+# Automatically handles: staging, commit message generation, push, issue closure
 ```
 
-### Commit Message Format
+### Automated Commit Message Generation
 ```bash
-git commit -m "Brief summary of changes
+# Standard automated commit
+claude/wow/scripts/commit
 
-- Detailed point about what changed
-- Another detail if needed
+# Custom commit message
+claude/wow/scripts/commit --message "Brief summary of changes
 
-Context: Why this change was made"
+- Detailed implementation points
+- Technical approach and reasoning
+- Integration considerations
+
+Context: Business justification for the change"
+
+# Dry run to preview commit
+claude/wow/scripts/commit --dry-run
 ```
 
-For AI-assisted commits:
-```bash
-git commit -m "$(cat <<'EOF'
+**Generated commit messages follow this format:**
+```
 Summary of changes
 
-- Implementation details
-- Key modifications
+- Implementation details automatically extracted from file changes
+- Technical approach inferred from code patterns
+- Integration points identified from modified files
+
+Context: Generated from change analysis and git history
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
-EOF
-)"
 ```
 
 ## Session Management
 
 ### SESSION_START Git Check
 ```bash
-# Ensure you're on main and up to date
-git checkout main
-git pull origin main
-git status  # Should show clean working tree
+# Ensure repository is synced and check status
+claude/wow/scripts/git-sync  # Sync with remote
+claude/wow/scripts/git-status  # Comprehensive status check
 ```
 
 ### SESSION_END Commit Pattern
@@ -72,10 +77,9 @@ git status  # Should show clean working tree
 # 1. Archive current audit log
 mv claude/project/audit/current/current.log claude/project/audit/current/session_$(date -u +%Y-%m-%dT%H-%M-%S)Z.log
 
-# 2. Commit all work
-git add .
-git commit -m "Session complete: [summary of work done]"
-git push origin main
+# 2. Commit all work using automated script
+claude/wow/scripts/commit --message "Session complete: [summary of work done]"
+# Automatically handles staging, commit, push, and issue closure
 
 # 3. Create fresh audit log
 echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
@@ -85,13 +89,17 @@ echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
 
 When working on GitHub issues:
 ```bash
-# Reference issue number in commit
-git commit -m "Fix authentication bug (#XX)
+# The commit script automatically:
+# 1. Scans recent work for issue references
+# 2. Detects resolved issues from context
+# 3. Closes issues with commit references
+# 4. Updates local cache and GitHub
 
-- Updated token validation
-- Added error handling
+claude/wow/scripts/commit
+# Automatically includes issue closure if detected
 
-Closes #XX"
+# Manual issue closure if needed:
+claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [hash]"
 ```
 
 ## Version Release Workflow
@@ -101,15 +109,13 @@ Closes #XX"
 # 1. Archive audit logs
 mv claude/project/audit/current/current.log claude/project/audit/v{VERSION}/audit_v{VERSION}.log
 
-# 2. Commit version preparation
-git add .
-git commit -m "Prepare v{VERSION} release"
-git push origin main
-
-# 3. Create tag and release
-git tag v{VERSION}
-git push origin v{VERSION}
-claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release-notes.md
+# 2. Create release using automated script
+claude/wow/scripts/git-release v{VERSION} --message "Release v{VERSION} with latest improvements"
+# Automatically handles:
+# - Release commit creation
+# - Git tag creation and push
+# - GitHub release creation
+# - Error handling and validation
 ```
 
 ## Common Scenarios

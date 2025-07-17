@@ -131,7 +131,7 @@ Executing OUTBOX workflow to distribute tasks to target repositories...
 ## UNCOMMITTED WORK CHECK
 
 **MANDATORY Uncommitted Work Assessment:**
-1. **Check Git Status**: Run `git status` to identify any uncommitted changes
+1. **Check Git Status**: Run `claude/wow/scripts/git-status` to get comprehensive repository status
 2. **Evaluate Significance**: Determine if changes represent meaningful work
 3. **Apply Significance Rules**: Check audit log and change patterns
 4. **Execute Appropriate Action**: SESSION_END for significant, approval for unclear, discard for insignificant

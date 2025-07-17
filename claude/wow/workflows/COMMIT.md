@@ -67,8 +67,8 @@ audit_log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and 
 ```
 
 **Actions:**
-1. Run `git status` to identify changed files
-2. Run `git diff --stat` to see scope of changes
+1. Run `claude/wow/scripts/git-status` to get comprehensive repository status
+2. Analyze changed files, staged/unstaged status, and scope of changes
 3. Check for untracked files that should be included
 4. Validate changes represent a logical commit unit
 
@@ -124,53 +124,40 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### 6. Commit Execution
 ```bash
-audit_log "COMMIT" "step" "commit_execution" "" "Staging, committing, and pushing changes"
+audit_log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
 ```
 
 **Actions:**
 ```bash
-# Stage all changes
-git add .
+# Execute automated commit script with generated message
+claude/wow/scripts/commit --message "Generated commit message"
 
-# Commit with generated message
-git commit -m "Generated commit message"
-
-# Push to main
-git push origin main
-
-# Log successful commit
-audit_log "COMMIT" "step" "commit_execution" "" "Staged all changes, committed as $(git rev-parse --short HEAD), pushed to main successfully"
+# The commit script automatically handles:
+# - Staging all changes (git add .)
+# - Creating commit with message
+# - Pushing to main branch
+# - Audit logging throughout process
+# - Issue detection and closure
+# - Error handling and recovery
 ```
 
 ### 7. Issue Closure
 ```bash
-audit_log "COMMIT" "step" "issue_closure" "" "Closing resolved GitHub issues"
+audit_log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
 ```
 
 **Actions:**
-1. For each detected resolved issue:
-   ```bash
-   claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
-   ```
-2. Add comment explaining resolution
-3. **Cache-first closure**: Update cache first, then sync to GitHub
-   ```bash
-   # Only close issues that exist in cache (cache-first rule)
-   python3 -c "
-   import json
-   with open('claude/cache/issues.json', 'r') as f:
-       cache = json.load(f)
-   del cache['123']
-   with open('claude/cache/issues.json', 'w') as f:
-       json.dump(cache, f, indent=2)
-   print('✓ Removed issue #XX from cache')
-   "
-   claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
-   ```
-4. Log issue closure in audit log
-   ```bash
-   audit_log "COMMIT" "step" "issue_closure" "$issue_number" "Closed issue #$issue_number via commit resolution"
-   ```
+The automated commit script handles issue closure automatically:
+1. **Issue Detection**: Scans commit context and recent audit logs for resolved issues
+2. **GitHub API Integration**: Uses `claude/wow/scripts/gh-issue` to close issues
+3. **Cache-first closure**: Updates local cache, then syncs to GitHub
+4. **Audit logging**: Records all issue closures with commit references
+
+**Manual issue closure** (if needed):
+```bash
+# Close specific issue with commit reference
+claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
+```
 
 ### 8. Workflow Completion
 ```bash
@@ -229,24 +216,23 @@ Proceed with this commit? (yes/edit/cancel):
 ### No Changes Detected
 ```
 No changes detected for commit.
-Run 'git status' to verify current state.
+Run 'claude/wow/scripts/git-status' to verify current state.
 ```
 
 ### Merge Conflicts
 ```
 Merge conflicts detected. Resolve conflicts before committing:
-git status  # See conflicted files
+claude/wow/scripts/git-status  # See conflicted files
 # Resolve conflicts manually
-git add .   # Stage resolved files
-`commit sesame`  # Retry commit
+claude/wow/scripts/commit  # Retry automated commit
 ```
 
 ### Push Failures
 ```
 Push failed. Syncing with remote:
-git pull origin main --rebase
+claude/wow/scripts/git-sync --force  # Sync with remote
 # Resolve any conflicts
-git push origin main
+claude/wow/scripts/commit  # Retry automated commit
 ```
 
 ## Integration Points
