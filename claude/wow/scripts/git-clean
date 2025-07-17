@@ -1,0 +1,305 @@
+#!/usr/bin/env node
+
+/**
+ * Git Clean Script - Safe workspace cleanup
+ * 
+ * Provides safe workspace cleaning operations:
+ * - Remove untracked files and directories
+ * - Reset working directory changes
+ * - Clean with safety confirmations
+ * - Stash changes before cleaning
+ * 
+ * Usage:
+ *   git-clean [--force] [--dry-run] [--stash] [--reset]
+ */
+
+import { execSync } from 'child_process';
+import { createInterface } from 'readline';
+
+/**
+ * Audit logging helper
+ */
+function auditLog(step, details = '', action = 'step', description = '') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const entry = `${timestamp}|GIT_CLEAN|${action}|${step}|${details}|${description}`;
+    
+    try {
+        const auditPath = 'claude/project/audit/current/current.log';
+        execSync(`echo "${entry}" >> "${auditPath}"`, { stdio: 'ignore' });
+    } catch (error) {
+        console.log(`[AUDIT] ${entry}`);
+    }
+}
+
+/**
+ * Execute git command with error handling
+ */
+function gitCommand(command, description, allowFailure = false) {
+    try {
+        const result = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+        return result.trim();
+    } catch (error) {
+        if (allowFailure) {
+            return null;
+        }
+        throw new Error(`Git command failed (${description}): ${error.message}`);
+    }
+}
+
+/**
+ * Get user confirmation
+ */
+function getUserConfirmation(message) {
+    return new Promise((resolve) => {
+        const rl = createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        
+        rl.question(`${message} (y/N): `, (answer) => {
+            rl.close();
+            resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
+        });
+    });
+}
+
+/**
+ * Analyze workspace status
+ */
+function analyzeWorkspace() {
+    auditLog('workspace_analysis', '', 'step', 'Analyzing workspace status');
+    
+    const status = gitCommand('git status --porcelain', 'workspace status');
+    const untrackedFiles = gitCommand('git ls-files --others --exclude-standard', 'untracked files', true);
+    const modifiedFiles = gitCommand('git diff --name-only', 'modified files', true);
+    const stagedFiles = gitCommand('git diff --cached --name-only', 'staged files', true);
+    
+    const analysis = {
+        hasChanges: status.length > 0,
+        untracked: untrackedFiles ? untrackedFiles.split('\n').filter(f => f.trim()) : [],
+        modified: modifiedFiles ? modifiedFiles.split('\n').filter(f => f.trim()) : [],
+        staged: stagedFiles ? stagedFiles.split('\n').filter(f => f.trim()) : []
+    };
+    
+    auditLog('workspace_analysis', 
+        `${analysis.untracked.length}|${analysis.modified.length}|${analysis.staged.length}`, 
+        'step', 
+        `Found ${analysis.untracked.length} untracked, ${analysis.modified.length} modified, ${analysis.staged.length} staged files`
+    );
+    
+    return analysis;
+}
+
+/**
+ * Show what would be cleaned
+ */
+function showCleanPreview(analysis) {
+    console.log('\n📋 Workspace Analysis:');
+    
+    if (analysis.staged.length > 0) {
+        console.log(`   📝 Staged files: ${analysis.staged.length}`);
+        analysis.staged.forEach(file => console.log(`      + ${file}`));
+    }
+    
+    if (analysis.modified.length > 0) {
+        console.log(`   ✏️  Modified files: ${analysis.modified.length}`);
+        analysis.modified.forEach(file => console.log(`      ~ ${file}`));
+    }
+    
+    if (analysis.untracked.length > 0) {
+        console.log(`   ❓ Untracked files: ${analysis.untracked.length}`);
+        analysis.untracked.forEach(file => console.log(`      ? ${file}`));
+    }
+    
+    if (!analysis.hasChanges) {
+        console.log('   ✓ Workspace is already clean');
+    }
+}
+
+/**
+ * Stash current changes
+ */
+function stashChanges(analysis) {
+    if (!analysis.hasChanges) {
+        auditLog('stash_skip', '', 'step', 'No changes to stash');
+        return null;
+    }
+    
+    auditLog('stash_create', '', 'step', 'Creating stash for current changes');
+    
+    const stashMessage = `git-clean stash: ${new Date().toISOString()}`;
+    gitCommand(`git stash push -m "${stashMessage}"`, 'creating stash');
+    
+    // Get stash reference
+    const stashRef = gitCommand('git stash list -1 --format="%gd"', 'getting stash reference', true);
+    
+    auditLog('stash_create', stashRef || 'stash@{0}', 'step', `Created stash: ${stashMessage}`);
+    console.log(`✓ Changes stashed as: ${stashMessage}`);
+    
+    return stashRef || 'stash@{0}';
+}
+
+/**
+ * Remove untracked files
+ */
+function removeUntrackedFiles(analysis, force = false) {
+    if (analysis.untracked.length === 0) {
+        auditLog('clean_untracked', '', 'step', 'No untracked files to remove');
+        console.log('✓ No untracked files to remove');
+        return;
+    }
+    
+    auditLog('clean_untracked', analysis.untracked.length.toString(), 'step', `Removing ${analysis.untracked.length} untracked files`);
+    
+    // Use git clean to remove untracked files and directories
+    const cleanCommand = force ? 'git clean -fd' : 'git clean -fdi';
+    
+    if (force) {
+        gitCommand(cleanCommand, 'removing untracked files');
+        console.log(`✓ Removed ${analysis.untracked.length} untracked files/directories`);
+    } else {
+        // Interactive mode - let git handle the prompts
+        console.log('🧹 Starting interactive cleanup of untracked files...');
+        try {
+            execSync(cleanCommand, { stdio: 'inherit' });
+            console.log('✓ Interactive cleanup completed');
+        } catch (error) {
+            console.log('ℹ️  Cleanup cancelled or completed');
+        }
+    }
+    
+    auditLog('clean_untracked', '', 'step', 'Untracked files cleanup completed');
+}
+
+/**
+ * Reset working directory
+ */
+function resetWorkingDirectory(analysis) {
+    if (analysis.modified.length === 0) {
+        auditLog('reset_skip', '', 'step', 'No modified files to reset');
+        console.log('✓ No modified files to reset');
+        return;
+    }
+    
+    auditLog('reset_working', analysis.modified.length.toString(), 'step', `Resetting ${analysis.modified.length} modified files`);
+    
+    gitCommand('git checkout -- .', 'resetting working directory');
+    
+    auditLog('reset_working', '', 'step', 'Working directory reset completed');
+    console.log(`✓ Reset ${analysis.modified.length} modified files`);
+}
+
+/**
+ * Reset staged changes
+ */
+function resetStagedChanges(analysis) {
+    if (analysis.staged.length === 0) {
+        auditLog('reset_staged_skip', '', 'step', 'No staged files to reset');
+        console.log('✓ No staged files to reset');
+        return;
+    }
+    
+    auditLog('reset_staged', analysis.staged.length.toString(), 'step', `Resetting ${analysis.staged.length} staged files`);
+    
+    gitCommand('git reset HEAD .', 'resetting staged changes');
+    
+    auditLog('reset_staged', '', 'step', 'Staged changes reset completed');
+    console.log(`✓ Unstaged ${analysis.staged.length} files`);
+}
+
+/**
+ * Main clean workflow
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const force = args.includes('--force');
+        const dryRun = args.includes('--dry-run');
+        const stash = args.includes('--stash');
+        const reset = args.includes('--reset');
+        
+        // Initialize workflow
+        auditLog('clean_start', '', 'workflow_start', 'Starting workspace cleanup workflow');
+        console.log('🧹 Starting workspace cleanup...');
+        
+        // 1. Analyze current workspace
+        console.log('🔍 Analyzing workspace...');
+        const analysis = analyzeWorkspace();
+        
+        // 2. Show preview
+        showCleanPreview(analysis);
+        
+        if (!analysis.hasChanges) {
+            console.log('\n✅ Workspace is already clean!');
+            auditLog('clean_complete', '', 'workflow_complete', 'Workspace cleanup completed - already clean');
+            return;
+        }
+        
+        if (dryRun) {
+            console.log('\n🔍 Dry run complete - no changes made');
+            console.log('\nTo clean workspace:');
+            console.log('  git-clean --force          # Force clean all');
+            console.log('  git-clean --stash          # Stash changes first');
+            console.log('  git-clean --reset          # Reset working directory');
+            return;
+        }
+        
+        // 3. Get user confirmation if not forced
+        if (!force) {
+            const proceed = await getUserConfirmation('\nProceed with cleanup?');
+            if (!proceed) {
+                console.log('🚫 Cleanup cancelled');
+                auditLog('clean_cancelled', '', 'workflow_complete', 'Workspace cleanup cancelled by user');
+                return;
+            }
+        }
+        
+        console.log('\n🧹 Starting cleanup operations...');
+        
+        // 4. Stash changes if requested
+        let stashRef = null;
+        if (stash && (analysis.modified.length > 0 || analysis.staged.length > 0)) {
+            console.log('📦 Stashing current changes...');
+            stashRef = stashChanges(analysis);
+        }
+        
+        // 5. Reset staged changes if requested
+        if (reset) {
+            console.log('🔄 Resetting staged changes...');
+            resetStagedChanges(analysis);
+        }
+        
+        // 6. Reset working directory if requested
+        if (reset) {
+            console.log('🔄 Resetting working directory...');
+            resetWorkingDirectory(analysis);
+        }
+        
+        // 7. Clean untracked files
+        console.log('🗑️  Cleaning untracked files...');
+        removeUntrackedFiles(analysis, force);
+        
+        // 8. Final status
+        console.log('\n📊 Final workspace status:');
+        const finalAnalysis = analyzeWorkspace();
+        showCleanPreview(finalAnalysis);
+        
+        // Complete workflow
+        auditLog('clean_complete', '', 'workflow_complete', 'Workspace cleanup completed successfully');
+        console.log('\n✅ Workspace cleanup completed!');
+        
+        if (stashRef) {
+            console.log(`💡 To restore changes: git stash apply ${stashRef}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Cleanup failed: ${error.message}`);
+        auditLog('clean_error', '', 'workflow_error', `Workspace cleanup failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}

@@ -1,0 +1,322 @@
+#!/usr/bin/env node
+
+/**
+ * Git Release Script - Automated release workflow
+ * 
+ * Handles complete release process:
+ * - Version validation and tagging
+ * - Release commit creation
+ * - Git tag creation and pushing
+ * - GitHub release creation via API
+ * - Audit logging throughout process
+ * 
+ * Usage:
+ *   git-release <version> [--message "Release notes"] [--draft] [--prerelease] [--dry-run]
+ */
+
+import { execSync } from 'child_process';
+import { createGitHubReleases } from './lib/github-releases.js';
+import { promises as fs } from 'fs';
+
+/**
+ * Audit logging helper
+ */
+function auditLog(step, details = '', action = 'step', description = '') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const entry = `${timestamp}|GIT_RELEASE|${action}|${step}|${details}|${description}`;
+    
+    try {
+        const auditPath = 'claude/project/audit/current/current.log';
+        execSync(`echo "${entry}" >> "${auditPath}"`, { stdio: 'ignore' });
+    } catch (error) {
+        console.log(`[AUDIT] ${entry}`);
+    }
+}
+
+/**
+ * Execute git command with error handling
+ */
+function gitCommand(command, description) {
+    try {
+        const result = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+        return result.trim();
+    } catch (error) {
+        throw new Error(`Git command failed (${description}): ${error.message}`);
+    }
+}
+
+/**
+ * Validate version format
+ */
+function validateVersion(version) {
+    auditLog('version_validation', version, 'step', 'Validating version format');
+    
+    // Check if version follows semantic versioning
+    const semverPattern = /^v?\d+\.\d+\.\d+(?:-[a-zA-Z0-9-]+)?(?:\+[a-zA-Z0-9-]+)?$/;
+    
+    if (!semverPattern.test(version)) {
+        throw new Error(`Invalid version format: ${version}. Expected format: v1.2.3 or 1.2.3`);
+    }
+    
+    // Ensure version starts with 'v'
+    const normalizedVersion = version.startsWith('v') ? version : `v${version}`;
+    
+    auditLog('version_validation', normalizedVersion, 'step', `Version validated: ${normalizedVersion}`);
+    return normalizedVersion;
+}
+
+/**
+ * Check if tag already exists
+ */
+function checkExistingTag(version) {
+    auditLog('tag_check', version, 'step', 'Checking if tag already exists');
+    
+    try {
+        const existingTags = gitCommand('git tag -l', 'list tags');
+        const tagExists = existingTags.split('\n').includes(version);
+        
+        if (tagExists) {
+            auditLog('tag_check', version, 'step', `Tag ${version} already exists`);
+            throw new Error(`Tag ${version} already exists. Use a different version or delete the existing tag.`);
+        }
+        
+        auditLog('tag_check', version, 'step', `Tag ${version} is available`);
+    } catch (error) {
+        if (error.message.includes('already exists')) {
+            throw error;
+        }
+        // If git tag command fails, assume no tags exist and continue
+        auditLog('tag_check', version, 'step', 'No existing tags found');
+    }
+}
+
+/**
+ * Check for uncommitted changes
+ */
+function checkWorkingDirectory() {
+    auditLog('working_check', '', 'step', 'Checking working directory status');
+    
+    const status = gitCommand('git status --porcelain', 'working status');
+    
+    if (status) {
+        const changedFiles = status.split('\n').filter(line => line.trim()).length;
+        auditLog('working_check', changedFiles.toString(), 'step', `Found ${changedFiles} uncommitted changes`);
+        throw new Error(`Working directory has uncommitted changes. Commit or stash changes before creating a release.`);
+    }
+    
+    auditLog('working_check', '', 'step', 'Working directory is clean');
+}
+
+/**
+ * Create release commit
+ */
+function createReleaseCommit(version, releaseNotes) {
+    auditLog('release_commit', version, 'step', 'Creating release commit');
+    
+    // Generate release commit message
+    const commitMessage = `Prepare ${version} release
+
+${releaseNotes || `Release ${version} with latest changes and improvements.`}
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>`;
+    
+    // Check if there are any changes to commit (might have version file updates)
+    const status = gitCommand('git status --porcelain', 'pre-commit status');
+    
+    if (status) {
+        // Stage all changes
+        gitCommand('git add .', 'staging changes');
+        
+        // Create commit
+        gitCommand(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, 'creating release commit');
+        
+        const commitHash = gitCommand('git rev-parse --short HEAD', 'getting commit hash');
+        auditLog('release_commit', commitHash, 'step', `Created release commit: ${commitHash}`);
+        console.log(`✓ Created release commit: ${commitHash}`);
+        
+        return commitHash;
+    } else {
+        auditLog('release_commit', '', 'step', 'No changes to commit for release');
+        console.log('✓ No changes to commit for release');
+        return null;
+    }
+}
+
+/**
+ * Create and push git tag
+ */
+function createGitTag(version, releaseNotes) {
+    auditLog('git_tag', version, 'step', 'Creating git tag');
+    
+    // Create annotated tag with release notes
+    const tagMessage = releaseNotes || `Release ${version}`;
+    gitCommand(`git tag -a ${version} -m "${tagMessage.replace(/"/g, '\\"')}"`, 'creating tag');
+    
+    auditLog('git_tag', version, 'step', `Created git tag: ${version}`);
+    console.log(`✓ Created git tag: ${version}`);
+    
+    // Push the tag
+    auditLog('git_push', version, 'step', 'Pushing tag to remote');
+    gitCommand(`git push origin ${version}`, 'pushing tag');
+    
+    auditLog('git_push', version, 'step', `Pushed tag ${version} to remote`);
+    console.log(`✓ Pushed tag to remote: ${version}`);
+}
+
+/**
+ * Create GitHub release
+ */
+async function createGitHubRelease(version, releaseNotes, options = {}) {
+    auditLog('github_release', version, 'step', 'Creating GitHub release');
+    
+    try {
+        const github = createGitHubReleases({ workingDirectory: process.cwd() });
+        
+        const releaseData = {
+            tagName: version,
+            name: `Release ${version}`,
+            body: releaseNotes || `Release ${version} with latest changes and improvements.`,
+            draft: options.draft || false,
+            prerelease: options.prerelease || false,
+            targetCommitish: 'main'
+        };
+        
+        const release = await github.createRelease(releaseData);
+        
+        auditLog('github_release', version, 'step', `Created GitHub release: ${release.url}`);
+        console.log(`✓ Created GitHub release: ${release.url}`);
+        
+        return release;
+    } catch (error) {
+        auditLog('github_release', version, 'step', `GitHub release failed: ${error.message}`);
+        console.warn(`⚠️  GitHub release creation failed: ${error.message}`);
+        console.warn('   Tag was created successfully, but GitHub release needs manual creation');
+        return null;
+    }
+}
+
+/**
+ * Push commits to remote
+ */
+function pushCommits() {
+    auditLog('commit_push', '', 'step', 'Pushing commits to remote');
+    
+    try {
+        gitCommand('git push origin main', 'pushing commits');
+        auditLog('commit_push', '', 'step', 'Successfully pushed commits to remote');
+        console.log('✓ Pushed commits to remote');
+    } catch (error) {
+        auditLog('commit_push', '', 'step', `Failed to push commits: ${error.message}`);
+        throw new Error(`Failed to push commits: ${error.message}`);
+    }
+}
+
+/**
+ * Main release workflow
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        
+        if (args.length === 0 || args[0].startsWith('--')) {
+            console.log('Git Release Script - Automated release workflow');
+            console.log('');
+            console.log('Usage:');
+            console.log('  git-release <version> [options]');
+            console.log('');
+            console.log('Options:');
+            console.log('  --message "text"  Custom release notes');
+            console.log('  --draft           Create as draft release');
+            console.log('  --prerelease      Mark as pre-release');
+            console.log('  --dry-run         Show what would be done');
+            console.log('');
+            console.log('Examples:');
+            console.log('  git-release v1.2.3');
+            console.log('  git-release 2.0.0 --message "Major update with breaking changes"');
+            console.log('  git-release v1.3.0-beta.1 --prerelease');
+            return;
+        }
+        
+        const version = args[0];
+        const customMessage = args.includes('--message') ? args[args.indexOf('--message') + 1] : null;
+        const draft = args.includes('--draft');
+        const prerelease = args.includes('--prerelease');
+        const dryRun = args.includes('--dry-run');
+        
+        // Initialize workflow
+        auditLog('release_start', version, 'workflow_start', `Starting release workflow for ${version}`);
+        console.log(`🚀 Starting release workflow for ${version}...`);
+        
+        // 1. Validate version
+        console.log('🔍 Validating version...');
+        const normalizedVersion = validateVersion(version);
+        
+        // 2. Check if tag exists
+        console.log('🏷️  Checking for existing tags...');
+        if (!dryRun) {
+            checkExistingTag(normalizedVersion);
+        } else {
+            console.log(`   Would check if tag ${normalizedVersion} exists`);
+        }
+        
+        // 3. Check working directory
+        console.log('📁 Checking working directory...');
+        if (!dryRun) {
+            checkWorkingDirectory();
+        } else {
+            console.log('   Would check for uncommitted changes');
+        }
+        
+        if (dryRun) {
+            console.log('\n🔍 Dry run - would perform the following:');
+            console.log(`   1. Create release commit for ${normalizedVersion}`);
+            console.log(`   2. Create git tag ${normalizedVersion}`);
+            console.log(`   3. Push commits and tag to remote`);
+            console.log(`   4. Create GitHub release${draft ? ' (draft)' : ''}${prerelease ? ' (prerelease)' : ''}`);
+            console.log('\n🔍 Dry run complete - no changes made');
+            return;
+        }
+        
+        // 4. Create release commit (if needed)
+        console.log('💾 Creating release commit...');
+        const commitHash = createReleaseCommit(normalizedVersion, customMessage);
+        
+        // 5. Push commits first
+        console.log('📤 Pushing commits...');
+        pushCommits();
+        
+        // 6. Create and push git tag
+        console.log('🏷️  Creating git tag...');
+        createGitTag(normalizedVersion, customMessage);
+        
+        // 7. Create GitHub release
+        console.log('🌟 Creating GitHub release...');
+        const release = await createGitHubRelease(normalizedVersion, customMessage, { draft, prerelease });
+        
+        // Complete workflow
+        auditLog('release_complete', normalizedVersion, 'workflow_complete', `Release workflow completed successfully for ${normalizedVersion}`);
+        console.log(`\n✅ Release ${normalizedVersion} created successfully!`);
+        
+        if (release) {
+            console.log(`📍 GitHub Release: ${release.url}`);
+        }
+        
+        console.log(`🏷️  Git Tag: ${normalizedVersion}`);
+        
+        if (commitHash) {
+            console.log(`💾 Release Commit: ${commitHash}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Release failed: ${error.message}`);
+        auditLog('release_error', '', 'workflow_error', `Release workflow failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}
