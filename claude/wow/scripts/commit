@@ -1,0 +1,340 @@
+#!/usr/bin/env node
+
+/**
+ * COMMIT Workflow Script - Automated intelligent commit workflow
+ * 
+ * Implements the complete COMMIT workflow:
+ * - Change assessment and validation
+ * - Intelligent commit message generation  
+ * - Issue detection and closure
+ * - Git operations (add, commit, push)
+ * - Audit logging throughout process
+ * 
+ * Usage:
+ *   commit [--message "Custom message"] [--no-push] [--dry-run]
+ */
+
+import { execSync } from 'child_process';
+import { promises as fs } from 'fs';
+import { createGitHubCache } from './lib/github-cache.js';
+import path from 'path';
+
+/**
+ * Audit logging helper
+ */
+function auditLog(step, details = '', action = 'step') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const entry = `${timestamp}|COMMIT|${action}|${step}|${details}|`;
+    
+    try {
+        // Try to append to audit log if it exists
+        const auditPath = 'claude/project/audit/current/current.log';
+        const logEntry = entry + (arguments[3] || '') + '\n';
+        execSync(`echo "${logEntry}" >> "${auditPath}"`, { stdio: 'ignore' });
+    } catch (error) {
+        // Fallback to console if audit log unavailable
+        console.log(`[AUDIT] ${entry}${arguments[3] || ''}`);
+    }
+}
+
+/**
+ * Execute git command with error handling
+ */
+function gitCommand(command, description) {
+    try {
+        const result = execSync(command, { encoding: 'utf8', stdio: 'pipe' });
+        return result.trim();
+    } catch (error) {
+        throw new Error(`Git command failed (${description}): ${error.message}`);
+    }
+}
+
+/**
+ * Analyze current git changes
+ */
+function analyzeChanges() {
+    auditLog('change_assessment', '', 'step', 'Analyzing current changes and git status');
+    
+    const status = gitCommand('git status --porcelain', 'status check');
+    const diff = gitCommand('git diff --stat', 'diff stat');
+    
+    if (!status) {
+        throw new Error('No changes detected for commit');
+    }
+    
+    // Parse changed files
+    const changedFiles = status.split('\n')
+        .filter(line => line.trim())
+        .map(line => ({
+            status: line.substring(0, 2),
+            file: line.substring(3)
+        }));
+    
+    return {
+        hasChanges: changedFiles.length > 0,
+        changedFiles,
+        diffStat: diff
+    };
+}
+
+/**
+ * Detect resolved issues from changes and context
+ */
+async function detectResolvedIssues(changedFiles) {
+    auditLog('issue_detection', '', 'step', 'Scanning changes and context for resolved issues');
+    
+    const resolvedIssues = [];
+    
+    try {
+        // Check recent audit log for issue references
+        const auditPath = 'claude/project/audit/current/current.log';
+        const auditContent = await fs.readFile(auditPath, 'utf8');
+        const recentEntries = auditContent.split('\n').slice(-50); // Last 50 entries
+        
+        // Look for issue patterns in recent audit entries
+        const issuePattern = /#(\d+)/g;
+        const foundIssues = new Set();
+        
+        for (const entry of recentEntries) {
+            let match;
+            while ((match = issuePattern.exec(entry)) !== null) {
+                foundIssues.add(parseInt(match[1]));
+            }
+        }
+        
+        // Check if we have GitHub access to validate issues
+        try {
+            const github = createGitHubCache({ workingDirectory: process.cwd() });
+            
+            for (const issueNumber of foundIssues) {
+                try {
+                    const issue = await github.getIssue(issueNumber);
+                    if (issue && issue.state === 'OPEN') {
+                        resolvedIssues.push({
+                            number: issueNumber,
+                            title: issue.title,
+                            confidence: 'medium' // Found in recent audit entries
+                        });
+                    }
+                } catch (error) {
+                    // Issue might not exist or be accessible
+                    console.warn(`Could not verify issue #${issueNumber}: ${error.message}`);
+                }
+            }
+        } catch (error) {
+            console.warn('GitHub access unavailable for issue detection');
+        }
+        
+    } catch (error) {
+        console.warn(`Issue detection limited: ${error.message}`);
+    }
+    
+    return resolvedIssues;
+}
+
+/**
+ * Generate intelligent commit message
+ */
+function generateCommitMessage(changes, resolvedIssues, customMessage = null) {
+    auditLog('message_generation', '', 'step', 'Generating descriptive commit message');
+    
+    if (customMessage) {
+        return `${customMessage}
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>`;
+    }
+    
+    // Analyze file types and changes
+    const fileTypes = new Set();
+    const modifiedFiles = [];
+    const addedFiles = [];
+    const deletedFiles = [];
+    
+    for (const file of changes.changedFiles) {
+        const ext = path.extname(file.file);
+        if (ext) fileTypes.add(ext);
+        
+        if (file.status.startsWith('M')) modifiedFiles.push(file.file);
+        if (file.status.startsWith('A')) addedFiles.push(file.file);
+        if (file.status.startsWith('D')) deletedFiles.push(file.file);
+    }
+    
+    // Generate summary based on changes
+    let summary = '';
+    let details = [];
+    
+    // Determine change type
+    if (addedFiles.length > 0 && modifiedFiles.length === 0) {
+        summary = 'Add new functionality';
+        details = addedFiles.map(f => `- Add ${path.basename(f)}`);
+    } else if (deletedFiles.length > 0 && addedFiles.length === 0) {
+        summary = 'Remove deprecated functionality';
+        details = deletedFiles.map(f => `- Remove ${path.basename(f)}`);
+    } else if (fileTypes.has('.md')) {
+        summary = 'Update documentation';
+        details.push('- Improve documentation and guides');
+    } else if (fileTypes.has('.js') || fileTypes.has('.ts')) {
+        summary = 'Improve code functionality';
+        details.push('- Enhance implementation');
+        details.push('- Fix potential issues');
+    } else {
+        summary = 'Update project files';
+        details.push('- Improve project structure');
+    }
+    
+    // Add file-specific details
+    if (changes.changedFiles.length <= 5) {
+        details = changes.changedFiles.map(f => 
+            `- ${f.status.startsWith('M') ? 'Update' : f.status.startsWith('A') ? 'Add' : 'Remove'} ${path.basename(f.file)}`
+        );
+    }
+    
+    // Build message
+    let message = summary + '\n\n' + details.join('\n');
+    
+    // Add issue closures
+    if (resolvedIssues.length > 0) {
+        message += '\n\n';
+        if (resolvedIssues.length === 1) {
+            message += `Closes #${resolvedIssues[0].number}`;
+        } else {
+            message += `Closes ${resolvedIssues.map(i => `#${i.number}`).join(', ')}`;
+        }
+    }
+    
+    message += `\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>`;
+    
+    return message;
+}
+
+/**
+ * Execute commit and push
+ */
+function executeCommit(message, noPush = false) {
+    auditLog('commit_execution', '', 'step', 'Staging, committing, and pushing changes');
+    
+    // Stage all changes
+    gitCommand('git add .', 'staging changes');
+    
+    // Commit with message
+    gitCommand(`git commit -m "${message.replace(/"/g, '\\"')}"`, 'committing changes');
+    
+    // Get commit hash
+    const commitHash = gitCommand('git rev-parse --short HEAD', 'getting commit hash');
+    
+    // Push to main unless disabled
+    if (!noPush) {
+        gitCommand('git push origin main', 'pushing to remote');
+        auditLog('commit_execution', commitHash, 'step', 'Staged all changes, committed and pushed to main successfully');
+    } else {
+        auditLog('commit_execution', commitHash, 'step', 'Staged all changes and committed successfully (push skipped)');
+    }
+    
+    return commitHash;
+}
+
+/**
+ * Close resolved issues
+ */
+async function closeResolvedIssues(resolvedIssues, commitHash) {
+    if (resolvedIssues.length === 0) return;
+    
+    auditLog('issue_closure', '', 'step', 'Closing resolved GitHub issues');
+    
+    try {
+        const github = createGitHubCache({ workingDirectory: process.cwd() });
+        
+        for (const issue of resolvedIssues) {
+            try {
+                const comment = `Resolved in commit: ${commitHash}`;
+                await github.closeIssue(issue.number, comment);
+                auditLog('issue_closure', issue.number.toString(), 'step', `Closed issue #${issue.number} via commit resolution`);
+                console.log(`✓ Closed issue #${issue.number}: ${issue.title}`);
+            } catch (error) {
+                console.error(`✗ Failed to close issue #${issue.number}: ${error.message}`);
+            }
+        }
+    } catch (error) {
+        console.warn(`Issue closure unavailable: ${error.message}`);
+    }
+}
+
+/**
+ * Main commit workflow
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const customMessage = args.includes('--message') ? args[args.indexOf('--message') + 1] : null;
+        const noPush = args.includes('--no-push');
+        const dryRun = args.includes('--dry-run');
+        
+        // Initialize workflow
+        auditLog('workflow_start', 'commit_sesame', 'workflow_start', 'Initiated COMMIT workflow for session work completion');
+        
+        console.log('🔄 Starting COMMIT workflow...');
+        
+        // 1. Analyze changes
+        console.log('📊 Analyzing changes...');
+        const changes = analyzeChanges();
+        
+        if (!changes.hasChanges) {
+            console.log('ℹ️  No changes detected for commit');
+            return;
+        }
+        
+        console.log(`📁 Found ${changes.changedFiles.length} changed files`);
+        
+        // 2. Detect resolved issues
+        console.log('🔍 Detecting resolved issues...');
+        const resolvedIssues = await detectResolvedIssues(changes.changedFiles);
+        
+        if (resolvedIssues.length > 0) {
+            console.log(`🎯 Detected ${resolvedIssues.length} potentially resolved issues:`);
+            resolvedIssues.forEach(issue => {
+                console.log(`   - #${issue.number}: ${issue.title}`);
+            });
+        }
+        
+        // 3. Generate commit message
+        console.log('💬 Generating commit message...');
+        const message = generateCommitMessage(changes, resolvedIssues, customMessage);
+        
+        console.log('\n📝 Generated commit message:');
+        console.log('---');
+        console.log(message);
+        console.log('---\n');
+        
+        if (dryRun) {
+            console.log('🔍 Dry run complete - no changes committed');
+            return;
+        }
+        
+        // 4. Execute commit
+        console.log('💾 Committing and pushing changes...');
+        const commitHash = executeCommit(message, noPush);
+        console.log(`✓ Committed as ${commitHash}${noPush ? ' (not pushed)' : ' and pushed'}`);
+        
+        // 5. Close resolved issues
+        if (resolvedIssues.length > 0) {
+            console.log('🎯 Closing resolved issues...');
+            await closeResolvedIssues(resolvedIssues, commitHash);
+        }
+        
+        // 6. Complete workflow
+        auditLog('workflow_complete', 'commit_sesame', 'workflow_complete', 'COMMIT workflow completed successfully - changes committed and issues resolved');
+        console.log('✅ COMMIT workflow completed successfully!');
+        
+    } catch (error) {
+        console.error(`❌ COMMIT workflow failed: ${error.message}`);
+        auditLog('workflow_error', 'commit_sesame', 'workflow_error', `COMMIT workflow failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}
