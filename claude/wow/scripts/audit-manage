@@ -1,0 +1,251 @@
+#!/usr/bin/env node
+
+/**
+ * Audit Management Script - Automated audit log operations
+ * 
+ * Handles common audit log operations without user prompts:
+ * - Archive current log (for session end)
+ * - Create fresh log with marker
+ * - Archive for version releases
+ * - Clean up old logs
+ * 
+ * Usage:
+ *   audit-manage archive-session
+ *   audit-manage archive-version <version>
+ *   audit-manage fresh-log
+ *   audit-manage cleanup [--days 30]
+ */
+
+import { promises as fs, existsSync, mkdirSync } from 'fs';
+import { createRepoConfig } from './lib/repo-config.js';
+import path from 'path';
+
+/**
+ * Audit logging helper - uses calling workflow context
+ */
+function auditLog(workflow, step, details = '', action = 'step', description = '') {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    const entry = `${timestamp}|${workflow}|${action}|${step}|${details}|${description}`;
+    
+    try {
+        const auditPath = 'claude/project/audit/current/current.log';
+        const logCmd = `echo "${entry}" >> "${auditPath}"`;
+        require('child_process').execSync(logCmd, { stdio: 'ignore' });
+    } catch (error) {
+        console.log(`[AUDIT] ${entry}`);
+    }
+}
+
+/**
+ * Get audit paths from repo config
+ */
+function getAuditPaths() {
+    try {
+        const repoConfig = createRepoConfig();
+        const config = repoConfig.getRepositoryInfo();
+        
+        return {
+            currentLog: path.join(config.projectRoot, 'claude/project/audit/current/current.log'),
+            currentDir: path.join(config.projectRoot, 'claude/project/audit/current'),
+            auditDir: path.join(config.projectRoot, 'claude/project/audit'),
+            projectRoot: config.projectRoot
+        };
+    } catch (error) {
+        throw new Error(`Cannot determine audit paths: ${error.message}`);
+    }
+}
+
+/**
+ * Archive current log for session end
+ */
+async function archiveSession(workflow = 'SESSION_END') {
+    auditLog(workflow, 'archive_session', '', 'workflow_start', 'Starting session log archive');
+    
+    const paths = getAuditPaths();
+    
+    // Ensure current log exists
+    if (!existsSync(paths.currentLog)) {
+        auditLog(workflow, 'archive_session', '', 'workflow_error', 'Current log not found');
+        throw new Error('Current audit log not found');
+    }
+    
+    // Create archive filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const archiveName = `session_${timestamp}Z.log`;
+    const archivePath = path.join(paths.currentDir, archiveName);
+    
+    // Move current log to archive
+    await fs.rename(paths.currentLog, archivePath);
+    auditLog(workflow, 'archive_session', archiveName, 'step', `Archived current log as ${archiveName}`);
+    
+    // Create fresh log
+    await createFreshLog(workflow);
+    
+    auditLog(workflow, 'archive_session', '', 'workflow_complete', 'Session log archived successfully');
+    console.log(`✓ Session log archived as ${archiveName}`);
+    
+    return archivePath;
+}
+
+/**
+ * Archive audit logs for version release
+ */
+async function archiveVersion(version, workflow = 'RELEASE_PROCESS') {
+    auditLog(workflow, 'archive_version', version, 'workflow_start', `Starting version archive for ${version}`);
+    
+    const paths = getAuditPaths();
+    const versionDir = path.join(paths.auditDir, version);
+    
+    // Create version directory
+    mkdirSync(versionDir, { recursive: true });
+    auditLog(workflow, 'archive_version', version, 'step', `Created version directory ${version}`);
+    
+    // Archive current log
+    if (existsSync(paths.currentLog)) {
+        const versionLogPath = path.join(versionDir, `audit_${version}.log`);
+        await fs.rename(paths.currentLog, versionLogPath);
+        auditLog(workflow, 'archive_version', version, 'step', `Archived current log as audit_${version}.log`);
+    }
+    
+    // Move any other current files to version directory
+    try {
+        const currentFiles = await fs.readdir(paths.currentDir);
+        for (const file of currentFiles) {
+            if (file !== 'current.log' && file.endsWith('.log')) {
+                const sourcePath = path.join(paths.currentDir, file);
+                const destPath = path.join(versionDir, file);
+                await fs.rename(sourcePath, destPath);
+                auditLog(workflow, 'archive_version', version, 'step', `Moved ${file} to version directory`);
+            }
+        }
+    } catch (error) {
+        // Directory might be empty, continue
+    }
+    
+    // Create fresh log
+    await createFreshLog(workflow);
+    
+    auditLog(workflow, 'archive_version', version, 'workflow_complete', `Version ${version} archive completed`);
+    console.log(`✓ Version ${version} audit logs archived to ${versionDir}`);
+    
+    return versionDir;
+}
+
+/**
+ * Create fresh audit log with marker
+ */
+async function createFreshLog(workflow = 'MANUAL') {
+    const paths = getAuditPaths();
+    
+    // Ensure directory exists
+    mkdirSync(paths.currentDir, { recursive: true });
+    
+    // Create fresh log with marker
+    const marker = '##APPEND_MARKER_UNIQUE##\n';
+    await fs.writeFile(paths.currentLog, marker);
+    
+    auditLog(workflow, 'fresh_log', '', 'step', 'Created fresh audit log with marker');
+    console.log(`✓ Created fresh audit log: ${paths.currentLog}`);
+    
+    return paths.currentLog;
+}
+
+/**
+ * Clean up old archived logs
+ */
+async function cleanup(days = 30, workflow = 'MANUAL') {
+    auditLog(workflow, 'cleanup', days.toString(), 'workflow_start', `Starting cleanup of logs older than ${days} days`);
+    
+    const paths = getAuditPaths();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    let cleanedCount = 0;
+    
+    try {
+        const currentFiles = await fs.readdir(paths.currentDir);
+        
+        for (const file of currentFiles) {
+            if (file.startsWith('session_') && file.endsWith('.log')) {
+                const filePath = path.join(paths.currentDir, file);
+                const stats = await fs.stat(filePath);
+                
+                if (stats.mtime < cutoffDate) {
+                    await fs.unlink(filePath);
+                    cleanedCount++;
+                    auditLog(workflow, 'cleanup', file, 'step', `Deleted old log file: ${file}`);
+                }
+            }
+        }
+    } catch (error) {
+        auditLog(workflow, 'cleanup', '', 'workflow_error', `Cleanup error: ${error.message}`);
+        throw error;
+    }
+    
+    auditLog(workflow, 'cleanup', cleanedCount.toString(), 'workflow_complete', `Cleanup completed - removed ${cleanedCount} old log files`);
+    console.log(`✓ Cleanup completed - removed ${cleanedCount} old log files`);
+    
+    return cleanedCount;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const command = args[0];
+        
+        if (!command) {
+            console.log('Audit Management Script - Available commands:');
+            console.log('  archive-session - Archive current log for session end');
+            console.log('  archive-version <version> - Archive logs for version release');
+            console.log('  fresh-log - Create fresh audit log with marker');
+            console.log('  cleanup [--days N] - Clean up old logs (default 30 days)');
+            console.log('');
+            console.log('Examples:');
+            console.log('  audit-manage archive-session');
+            console.log('  audit-manage archive-version v1.2.3');
+            console.log('  audit-manage fresh-log');
+            console.log('  audit-manage cleanup --days 60');
+            return;
+        }
+        
+        switch (command) {
+            case 'archive-session':
+                await archiveSession();
+                break;
+                
+            case 'archive-version':
+                const version = args[1];
+                if (!version) {
+                    throw new Error('Version is required for archive-version command');
+                }
+                await archiveVersion(version);
+                break;
+                
+            case 'fresh-log':
+                await createFreshLog();
+                break;
+                
+            case 'cleanup':
+                const daysIndex = args.indexOf('--days');
+                const days = daysIndex !== -1 ? parseInt(args[daysIndex + 1]) : 30;
+                await cleanup(days);
+                break;
+                
+            default:
+                throw new Error(`Unknown command: ${command}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Audit management failed: ${error.message}`);
+        auditLog('MANUAL', 'error', '', 'workflow_error', `Audit management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}

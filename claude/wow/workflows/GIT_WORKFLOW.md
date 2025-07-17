@@ -75,14 +75,13 @@ claude/wow/scripts/git-status  # Comprehensive status check
 ### SESSION_END Commit Pattern
 ```bash
 # 1. Archive current audit log
-mv claude/project/audit/current/current.log claude/project/audit/current/session_$(date -u +%Y-%m-%dT%H-%M-%S)Z.log
+claude/wow/scripts/audit-manage archive-session
 
 # 2. Commit all work using automated script
 claude/wow/scripts/commit --message "Session complete: [summary of work done]"
 # Automatically handles staging, commit, push, and issue closure
 
-# 3. Create fresh audit log
-echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log
+# Note: Fresh audit log is created automatically by audit-manage
 ```
 
 ## Issue-Based Work
@@ -106,8 +105,8 @@ claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [hash]"
 
 ### Creating a Release
 ```bash
-# 1. Archive audit logs
-mv claude/project/audit/current/current.log claude/project/audit/v{VERSION}/audit_v{VERSION}.log
+# 1. Archive audit logs for version
+claude/wow/scripts/audit-manage archive-version v{VERSION}
 
 # 2. Create release using automated script
 claude/wow/scripts/git-release v{VERSION} --message "Release v{VERSION} with latest improvements"

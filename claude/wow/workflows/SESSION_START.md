@@ -193,7 +193,7 @@ At the start of each session, Claude MUST:
 1. **Check audit log existence**: Verify `claude/project/audit/current/current.log` exists
    - If missing, check for recent session archives in `claude/project/audit/`
    - If session archive exists but no current.log, this indicates interrupted SESSION_END after git operations
-   - Create fresh current.log: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
+   - Create fresh current.log: `claude/wow/scripts/audit-manage fresh-log`
    - Log recovery: Add entry indicating SESSION_END recovery completed
 2. **Read the current audit log** to check the last entry
 3. If last entry is `SESSION_END | workflow_complete:` with no subsequent activities, previous session ended cleanly

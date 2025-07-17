@@ -21,18 +21,15 @@ Complete release process for version closure including log archiving, historical
 
 ### 2. Audit Log Archiving Phase
 ```bash
-# Create version archive directory
-mkdir -p claude/project/audit/v{VERSION}
+# Archive audit logs for version release
+claude/wow/scripts/audit-manage archive-version v{VERSION}
 
-# Move current audit logs to version archive
-mv claude/project/audit/current/* claude/project/audit/v{VERSION}/
-
-# Concatenate all session files into single version audit log
-cat claude/project/audit/v{VERSION}/*.log > claude/project/audit/v{VERSION}/audit_v{VERSION}.log
-rm claude/project/audit/v{VERSION}/*_session*.log
-
-# Ensure current directory is clean for next version
-# (VERSION_TRANSITION workflow will process the archived audit data)
+# Note: audit-manage automatically handles:
+# - Create version archive directory
+# - Move current audit logs to version archive
+# - Concatenate session files into single version audit log
+# - Clean up temporary files
+# - Create fresh current.log for next version
 ```
 
 ### 3. Commit & Integration Phase

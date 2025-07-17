@@ -81,11 +81,11 @@ audit_log "SESSION_END" "step" "git_operations" "" "Executing COMMIT workflow fo
    timestamp=$(date -u +%Y-%m-%dT%H-%M-%SZ)
    
    # Archive session log in current directory (belongs to target version until release)
-   cp claude/project/audit/current/current.log "claude/project/audit/current/session_${timestamp}.log"
+   claude/wow/scripts/audit-manage archive-session
    
    audit_log "SESSION_END" "step" "log_archiving" "" "Archiving session audit log to current/session_${timestamp}.log"
    ```
-3. **Create fresh current.log** with clean marker: `echo "##APPEND_MARKER_UNIQUE##" > ./claude/project/audit/current/current.log`
+3. **Create fresh current.log** with clean marker: Handled automatically by audit-manage archive-session
    ```bash
    audit_log "SESSION_END" "step" "log_reset" "" "Created fresh audit log for next session"
    ```
