@@ -57,6 +57,8 @@ Use natural language with "sesame" suffix:
 ## Critical Audit Logging Rule
 
 **Audit Format and Procedures**: See `claude/wow/scripts/AUDIT_REFERENCE.md` for complete audit logging requirements, format specifications, and error handling procedures.
+
+**MANDATORY TOOL SPECIFICATION**: Workflow automation uses Node.js scripts in `claude/wow/scripts/` directory. All script references should be executed as direct commands (leveraging shebangs) rather than shell commands unless explicitly specified otherwise.
 ## Critical Workflow Execution Rule
 
 **SESSION_START SPECIAL REQUIREMENT**: When SESSION_START workflow is recognized, Claude MUST check system time first to ensure accurate timestamps for all session activities. If significant uncommitted work is detected, SESSION_START will automatically execute SESSION_END to preserve work before continuing.
