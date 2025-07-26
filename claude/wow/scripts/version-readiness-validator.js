@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Version Readiness Validator
  * VERSION_TRANSITION Step 5: Validate next version preparation completion

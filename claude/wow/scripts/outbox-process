@@ -1,0 +1,283 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+// Determine execution mode based on registered projects config
+function determineMode() {
+    const registryPath = 'claude/project/registered-projects.json';
+    const hasProjects = fs.existsSync('projects');
+    const hasRegistry = fs.existsSync(registryPath);
+    
+    if (hasProjects && hasRegistry) {
+        return { mode: 'orchestrator', registryPath };
+    } else {
+        return { mode: 'universal', registryPath: null };
+    }
+}
+
+// Get current repository name
+function getCurrentRepo() {
+    try {
+        const gitRoot = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();
+        return path.basename(gitRoot);
+    } catch (error) {
+        console.error('Error: Not in a git repository');
+        process.exit(1);
+    }
+}
+
+// Ensure directory exists
+function ensureDirectory(dirPath) {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        console.log(`✓ Created directory: ${dirPath}`);
+    }
+}
+
+// Extract target repo from filename
+function extractTargetRepo(filename) {
+    // Format: TIMESTAMP_TARGET-REPO_DESCRIPTION.md
+    const parts = filename.split('_');
+    return parts.length >= 2 ? parts[1] : null;
+}
+
+// Move file between directories
+function moveFile(srcPath, destPath) {
+    try {
+        fs.renameSync(srcPath, destPath);
+        return true;
+    } catch (error) {
+        console.error(`Failed to move ${srcPath}: ${error.message}`);
+        return false;
+    }
+}
+
+// Load registered projects (orchestrator mode only)
+function loadRegisteredProjects(registryPath) {
+    try {
+        const registryData = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+        return registryData.registered_projects || [];
+    } catch (error) {
+        console.error(`Error reading registry: ${error.message}`);
+        return [];
+    }
+}
+
+// Collect tasks from registered projects (orchestrator mode)
+function collectFromRegisteredProjects(registeredProjects) {
+    let collectedCount = 0;
+    
+    console.log('=== COLLECTION PHASE ===');
+    ensureDirectory('claude/outbox');
+    
+    for (const project of registeredProjects) {
+        const projectPath = project.path;
+        const outboxPath = path.join(projectPath, 'claude/outbox');
+        
+        if (fs.existsSync(outboxPath)) {
+            const orgName = path.basename(path.dirname(projectPath));
+            const projectName = path.basename(projectPath);
+            
+            try {
+                const files = fs.readdirSync(outboxPath);
+                const taskFiles = files.filter(file => 
+                    file.endsWith('.md') && 
+                    file !== 'README.md' &&
+                    /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3}Z_.*_.*\.md$/.test(file)
+                );
+                
+                if (taskFiles.length > 0) {
+                    console.log(`Collecting from ${orgName}/${projectName}:`);
+                    let projectTaskCount = 0;
+                    
+                    for (const taskFile of taskFiles) {
+                        const srcPath = path.join(outboxPath, taskFile);
+                        const destPath = path.join('claude/outbox', taskFile);
+                        
+                        if (moveFile(srcPath, destPath)) {
+                            console.log(`  ✓ Collected: ${taskFile}`);
+                            collectedCount++;
+                            projectTaskCount++;
+                        } else {
+                            console.log(`  ❌ Failed to collect: ${taskFile}`);
+                        }
+                    }
+                    
+                    if (projectTaskCount > 0) {
+                        console.log(`  → Collected ${projectTaskCount} tasks from ${orgName}/${projectName}`);
+                    }
+                }
+            } catch (error) {
+                console.log(`  ⚠ Error accessing ${orgName}/${projectName}: ${error.message}`);
+            }
+        }
+    }
+    
+    console.log(`✓ Collection complete: ${collectedCount} tasks collected`);
+    return collectedCount;
+}
+
+// Distribute tasks to target repositories
+function distributeTasks(mode, registeredProjects = [], currentRepo) {
+    console.log('=== DISTRIBUTION PHASE ===');
+    
+    // Find all tasks in outbox
+    let outboxTasks = [];
+    try {
+        if (fs.existsSync('claude/outbox')) {
+            const files = fs.readdirSync('claude/outbox');
+            outboxTasks = files
+                .filter(file => 
+                    file.endsWith('.md') && 
+                    file !== 'README.md' &&
+                    /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3}Z_.*_.*\.md$/.test(file)
+                )
+                .map(file => path.join('claude/outbox', file));
+        }
+    } catch (error) {
+        console.error('Error reading outbox directory:', error.message);
+        return { distributed: 0, failed: 0 };
+    }
+    
+    if (outboxTasks.length === 0) {
+        console.log('No tasks to distribute');
+        return { distributed: 0, failed: 0 };
+    }
+    
+    console.log(`Found ${outboxTasks.length} tasks for distribution`);
+    
+    let distributedCount = 0;
+    let failedCount = 0;
+    
+    // Ensure local inbox exists for self-targeted tasks
+    ensureDirectory('claude/inbox');
+    
+    for (const taskFile of outboxTasks) {
+        const taskName = path.basename(taskFile);
+        const targetRepo = extractTargetRepo(taskName);
+        
+        if (!targetRepo) {
+            console.log(`✗ Invalid task filename format: ${taskName}`);
+            failedCount++;
+            continue;
+        }
+        
+        console.log(`📤 Processing: ${taskName} → ${targetRepo}`);
+        
+        // Handle self-targeted tasks
+        if (targetRepo === currentRepo) {
+            const destPath = path.join('claude/inbox', taskName);
+            if (moveFile(taskFile, destPath)) {
+                console.log(`  ✓ Self-targeted: moved to local inbox`);
+                distributedCount++;
+            } else {
+                console.log(`  ❌ Failed to move to local inbox`);
+                failedCount++;
+            }
+            continue;
+        }
+        
+        // Handle cross-repository tasks
+        if (mode === 'orchestrator') {
+            // Find target project in registry
+            const targetProject = registeredProjects.find(project => {
+                const repoName = project.repository.split('/').pop();
+                return repoName === targetRepo;
+            });
+            
+            if (targetProject && fs.existsSync(targetProject.path)) {
+                const targetInboxPath = path.join(targetProject.path, 'claude/inbox');
+                ensureDirectory(targetInboxPath);
+                
+                const destPath = path.join(targetInboxPath, taskName);
+                if (moveFile(taskFile, destPath)) {
+                    console.log(`  ✓ Delivered to ${targetRepo}`);
+                    distributedCount++;
+                } else {
+                    console.log(`  ❌ Failed to deliver to ${targetRepo}`);
+                    failedCount++;
+                }
+            } else {
+                console.log(`  ✗ Target repository '${targetRepo}' not found in registry`);
+                console.log(`    Task remains in outbox for manual handling`);
+                failedCount++;
+            }
+        } else {
+            // Universal mode - can only handle self-targeted tasks
+            console.log(`  ✗ Cross-repository task '${targetRepo}' requires orchestrator mode`);
+            console.log(`    Run from base repository with projects/ directory`);
+            failedCount++;
+        }
+    }
+    
+    console.log(`✓ Distribution complete: ${distributedCount} delivered, ${failedCount} failed`);
+    return { distributed: distributedCount, failed: failedCount };
+}
+
+// Main function
+function main() {
+    console.log('📦 OUTBOX: Task routing and distribution');
+    
+    // Determine execution mode
+    const { mode, registryPath } = determineMode();
+    const currentRepo = getCurrentRepo();
+    
+    console.log(`Mode: ${mode}`);
+    console.log(`Repository: ${currentRepo}`);
+    
+    let collectedCount = 0;
+    let registeredProjects = [];
+    
+    if (mode === 'orchestrator') {
+        console.log('📋 Orchestrator mode: processing registered projects');
+        
+        // Load registered projects
+        registeredProjects = loadRegisteredProjects(registryPath);
+        if (registeredProjects.length === 0) {
+            console.log('⚠ No registered projects found');
+            console.log('Use PROJECT_REGISTER workflow to register projects first');
+        } else {
+            console.log(`✓ Found ${registeredProjects.length} registered projects`);
+            
+            // Collect tasks from all registered projects
+            collectedCount = collectFromRegisteredProjects(registeredProjects);
+        }
+    } else {
+        console.log('🔄 Universal mode: processing local outbox only');
+    }
+    
+    // Distribute all tasks (collected + local)
+    const { distributed, failed } = distributeTasks(mode, registeredProjects, currentRepo);
+    
+    // Summary
+    console.log('\n=== OUTBOX WORKFLOW COMPLETE ===');
+    if (mode === 'orchestrator') {
+        console.log(`Collection: ${collectedCount} tasks gathered from registered projects`);
+    }
+    console.log(`Distribution: ${distributed} tasks delivered successfully`);
+    
+    if (failed > 0) {
+        console.log(`Failures: ${failed} tasks remain in outbox (see errors above)`);
+        console.log('Check target repositories and retry outbox workflow');
+    } else if (distributed > 0) {
+        console.log('Status: All tasks distributed successfully');
+    }
+    
+    if (mode === 'orchestrator') {
+        console.log(`Registry: ${registeredProjects.length} registered projects processed`);
+    }
+    
+    console.log('\nNext steps:');
+    console.log('- Target repositories can run `inbox sesame` to process received tasks');
+    console.log('- Use `next sesame` to see recommended issues after task processing');
+    
+    // Exit with appropriate code
+    process.exit(failed > 0 ? 1 : 0);
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

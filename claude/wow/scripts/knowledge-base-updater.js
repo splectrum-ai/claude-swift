@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Knowledge Base Updater
  * VERSION_TRANSITION Step 5: Create data-driven knowledge base documentation

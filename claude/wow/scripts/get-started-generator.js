@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Get Started Documentation Generator
  * VERSION_TRANSITION Step 6: Create onboarding-focused documentation from actual development experience

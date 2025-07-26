@@ -1,0 +1,186 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+// Generate timestamp with milliseconds
+function generateTimestamp() {
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/:/g, '-').replace(/\.\d{3}Z$/, '');
+    const ms = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+    return `${timestamp}-${ms}Z`;
+}
+
+// Get source repository
+function getSourceRepository() {
+    try {
+        // Try to read from project-info.md
+        const projectInfoPath = 'claude/project/project-info.md';
+        if (fs.existsSync(projectInfoPath)) {
+            const content = fs.readFileSync(projectInfoPath, 'utf8');
+            const match = content.match(/REPOSITORY.*:\s*([^\s]+)/);
+            if (match) return match[1];
+        }
+        
+        // Fallback: try git remote
+        const { execSync } = require('child_process');
+        try {
+            const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
+            const match = remoteUrl.match(/[/:]([^/]+\/[^/]+)\.git/);
+            if (match) return match[1];
+        } catch (e) {
+            // Git command failed
+        }
+    } catch (e) {
+        // File operations failed
+    }
+    
+    return 'unknown';
+}
+
+// Ensure directory exists
+function ensureDirectory(dirPath) {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+}
+
+// Create outbox README if needed
+function createOutboxReadme() {
+    const readmePath = 'claude/outbox/README.md';
+    if (!fs.existsSync(readmePath)) {
+        const content = `# Outbox
+
+This directory contains cross-repository tasks awaiting distribution.
+
+## File Format
+- **Filename**: \`YYYY-MM-DDTHH-MM-SS-sssZ_target-repo_task-name.md\`
+- **Content**: Standardized task format with metadata header
+
+## Workflow Integration
+- Tasks created here via \`task sesame\` (TASK_CREATE workflow)
+- Tasks distributed via \`outbox sesame\` (OUTBOX workflow)
+- Tasks processed at target via \`inbox sesame\` (INBOX workflow)
+
+## Status
+- Files in this directory are **pending distribution**
+- Files are moved during OUTBOX workflow execution
+- Empty directory indicates all tasks have been distributed
+`;
+        fs.writeFileSync(readmePath, content);
+        console.log('✓ Created outbox README');
+    }
+}
+
+// Clean task name for filename
+function cleanTaskName(name) {
+    return name
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+// Extract target repo name from target input
+function extractTargetRepo(targetInput) {
+    if (targetInput === '.') {
+        return path.basename(process.cwd());
+    }
+    return targetInput.includes('/') ? targetInput.split('/')[1] : targetInput;
+}
+
+// Main function
+function main() {
+    // Read task content from stdin
+    let taskContent = '';
+    
+    if (process.stdin.isTTY) {
+        console.error('Error: Task content must be provided via stdin');
+        console.error('Usage: echo "task content" | claude/wow/scripts/task-create');
+        process.exit(1);
+    }
+    
+    process.stdin.setEncoding('utf8');
+    
+    process.stdin.on('readable', () => {
+        let chunk;
+        while (null !== (chunk = process.stdin.read())) {
+            taskContent += chunk;
+        }
+    });
+    
+    process.stdin.on('end', () => {
+        try {
+            // Parse metadata from content to get target and task name
+            const metadataMatch = taskContent.match(/^---\n([\s\S]*?)\n---/);
+            if (!metadataMatch) {
+                console.error('Error: Task content must include YAML frontmatter');
+                process.exit(1);
+            }
+            
+            const metadata = metadataMatch[1];
+            const targetMatch = metadata.match(/target:\s*(.+)/);
+            const titleMatch = taskContent.match(/^# (.+)$/m);
+            
+            if (!targetMatch || !titleMatch) {
+                console.error('Error: Could not extract target repository or title from task content');
+                process.exit(1);
+            }
+            
+            const targetInput = targetMatch[1].trim();
+            const targetRepo = extractTargetRepo(targetInput);
+            const title = titleMatch[1].trim();
+            const taskName = cleanTaskName(title);
+            
+            // Generate filename
+            const timestamp = generateTimestamp();
+            const filename = `${timestamp}_${targetRepo}_${taskName}.md`;
+            
+            console.log(`Generated filename: ${filename}`);
+            
+            // Setup outbox directory
+            ensureDirectory('claude/outbox');
+            createOutboxReadme();
+            console.log(`✓ Outbox directory ready: ${process.cwd()}/claude/outbox`);
+            
+            // Write task file
+            const taskFilePath = path.join('claude/outbox', filename);
+            fs.writeFileSync(taskFilePath, taskContent);
+            console.log(`✓ Task file created: ${taskFilePath}`);
+            
+            // Verify file
+            const stats = fs.statSync(taskFilePath);
+            if (stats.size > 0) {
+                const lineCount = taskContent.split('\n').length;
+                console.log(`✓ Task file verified (${lineCount} lines)`);
+            } else {
+                console.log('✗ Task file verification failed');
+                process.exit(1);
+            }
+            
+            // Completion summary
+            console.log('\n=== TASK CREATION COMPLETE ===');
+            console.log(`Task file: ${filename}`);
+            console.log(`Location: ${process.cwd()}/claude/outbox/`);
+            console.log(`Target repository: ${targetRepo}`);
+            console.log(`Task title: ${title}`);
+            console.log(`\nFile size: ${(stats.size / 1024).toFixed(1)}KB`);
+            console.log(`Lines: ${lineCount}`);
+            console.log('\nNext steps:');
+            console.log(`1. Review task file: cat claude/outbox/${filename}`);
+            console.log('2. Distribute task: \`outbox sesame\` (from base repository)');
+            console.log('3. Target repository will receive task in their inbox');
+            console.log('4. Target can process: \`inbox sesame\` (converts to GitHub issue)');
+            console.log('\nTask is ready for distribution! 🚀');
+            
+        } catch (error) {
+            console.error('Error:', error.message);
+            process.exit(1);
+        }
+    });
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

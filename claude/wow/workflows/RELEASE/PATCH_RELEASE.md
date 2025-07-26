@@ -1,16 +1,15 @@
 [← Back to Workflows](../workflows/) | [← Back to Claude-Swift Home](../../../README.md)
 
-# RELEASE_PROCESS Workflow
+# PATCH_RELEASE Sub-Workflow
 
-**Note:** This is a specialized workflow coordinated by the main VERSION workflow.
+**Note:** This is a specialized workflow coordinated by the main RELEASE workflow.
 
 ## Trigger
-**User-Friendly**: `release sesame` or `patch sesame`
-**Technical**: `RELEASE_PROCESS`
+Called from main RELEASE workflow when user requests patch release.
 
 ## Overview
 
-Complete release process for version closure including log archiving, historical preservation, and release artifact creation.
+Patch release process for current version including release artifact creation and GitHub release publishing. Does not include audit log archiving (reserved for target version releases).
 
 ## Workflow Steps
 
@@ -19,91 +18,49 @@ Complete release process for version closure including log archiving, historical
 - Confirm all current version work completed
 - Validate repository clean state
 
-### 2. Audit Log Archiving Phase
-```bash
-# Archive audit logs for version release
-claude/wow/scripts/audit-manage archive-version v{VERSION}
+### 2. Release Validation
+- Verify repository is in clean state
+- Confirm all patch-related changes are committed
+- Validate version number format and increment
 
-# Note: audit-manage automatically handles:
-# - Create version archive directory
-# - Move current audit logs to version archive
-# - Concatenate session files into single version audit log
-# - Clean up temporary files
-# - Create fresh current.log for next version
+### 3. Commit Preparation
+```bash
+# Commit any final changes for patch release
+claude/wow/scripts/commit --message "Prepare for patch release v{VERSION}"
 ```
 
-### 3. Commit & Integration Phase
+### 4. Project-Specific Release Process
 ```bash
-# Commit archiving changes
-git add claude/project/audit/
-git commit -m "Archive v{VERSION} audit logs and prepare for release
-
-- Move claude/project/audit/current/* to claude/project/audit/v{VERSION}/
-- Concatenate session logs into audit_v{VERSION}.log
-- Preserve complete development audit trail
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
-
-# Commit and push directly to main
-git push origin main
-```
-
-### 4. Release Artifact Creation
-```bash
-# Read project configuration
-source claude/project/version-config.md
-source claude/project/project-info.md
-
-# Execute project-specific build commands
-for cmd in "${BUILD_COMMANDS[@]}"; do
-    echo "Executing: $cmd"
-    eval $cmd
-done
-
-# Execute project-specific test commands  
-for cmd in "${TEST_COMMANDS[@]}"; do
-    echo "Testing: $cmd"
-    eval $cmd
-done
-
-# Create release artifacts
-for cmd in "${ARTIFACT_COMMANDS[@]}"; do
-    echo "Creating artifact: $cmd"
-    eval $cmd
-done
+# Check for project-specific patch release workflow
+if [ -f "claude/project/workflows/patch-release.sh" ]; then
+    echo "Executing project-specific patch release process..."
+    claude/project/workflows/patch-release.sh
+else
+    echo "No project-specific patch release workflow found"
+    echo "Standard patch release (no artifacts) - proceed to GitHub release"
+fi
 ```
 
 ### 5. GitHub Release Creation
 ```bash
-# Create version tag
-git tag v{VERSION}
-git push origin v{VERSION}
+# Create and push version tag
+claude/wow/scripts/git-release v{VERSION}
 
-# Create GitHub release with release notes
-claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes "$(cat release_notes.md)" {ARTIFACT_NAME}.7z
+# Create GitHub release
+claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release_notes.md
 ```
 
 ## Release Workflow Execution
 
-### Mandatory Workflow Logging
+### Workflow Execution Script
 ```bash
-# Initialize audit logging
-# Automated audit logging - no manual sourcing required
+# Execute patch release workflow with audit logging
+claude/wow/scripts/audit-log "PATCH_RELEASE" "workflow_start" "patch_release" "" "Starting PATCH_RELEASE workflow"
 
-# Log workflow start
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "workflow_start" "release" "" "Starting RELEASE_PROCESS workflow with `release sesame` trigger"
+# Execute patch release script (contains all above steps with logging)
+claude/wow/scripts/patch-release-process
 
-# Log each major step
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "archive_logs" "" "Archive logs with version stamps"
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "reset_logs" "" "Reset logs for next version"
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "commit_changes" "" "Commit archiving changes to main"
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "create_artifacts" "" "Create release artifacts and test installation"
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "step" "create_release" "" "Create version tag and GitHub release"
-
-# Log workflow completion
-claude/wow/scripts/audit-log "RELEASE_PROCESS" "workflow_complete" "release" "" "v{VERSION} release created successfully"
+claude/wow/scripts/audit-log "PATCH_RELEASE" "workflow_complete" "patch_release" "" "Patch release v{VERSION} completed successfully"
 ```
 
 ## Version Strategy

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Knowledge Base Synchronization Engine
  * VERSION_TRANSITION Step 2: Analyzes audit metrics and generates documentation update recommendations

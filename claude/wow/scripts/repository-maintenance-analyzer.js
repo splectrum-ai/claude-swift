@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Repository Maintenance Analyzer
  * Analyzes repository for maintenance needs: stale content, broken links, temporary content, consistency issues

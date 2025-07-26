@@ -4,9 +4,9 @@
 
 **Note:** This is a specialized workflow coordinated by the main VERSION workflow.
 
-## ⚠️ MANDATORY VERSION TRANSITION ⚠️
+## Version Transition Process
 
-**MANDATORY VERSION TRANSITION**: After any version release completion, Claude MUST execute this systematic transition workflow to process development knowledge and prepare for next version.
+Systematic transition workflow to process development knowledge and prepare for next version after release completion.
 
 ## Trigger
 **User-Friendly**: `transition sesame`
@@ -15,80 +15,39 @@
 **Input**: Closed version audit logs in `claude/project/audit/v{version}/`
 **Output**: Updated knowledge base, onboarding documentation, and clean next version preparation
 
-## MANDATORY TRANSITION SEQUENCE:
+## Workflow Steps
 
-### 1. Audit Log Analysis and Processing
-- **Process Version Audit Data**: Analyze all files in `claude/project/audit/v{version}/` for systematic knowledge extraction
-- **Extract Knowledge Domains**: Generate frequency analysis of knowledge domains touched during version
-- **Identify New Components**: Catalog new files, modules, and system areas discovered during development
-- **Calculate Development Metrics**: Quantify time distribution, activity patterns, and workflow effectiveness
-
-### 2. Knowledge Base Synchronization  
-- **Update Documentation**: Refresh all docs/ files with insights and new knowledge from version development
-- **Document New Patterns**: Capture new development patterns, practices, and architectural insights discovered
-- **Refresh Component Guides**: Update component interaction documentation with actual usage patterns
-- **Preserve Historical Context**: Maintain version-specific insights while updating current documentation
-
-### 3. Repository Maintenance and Cleanup
-- **Remove Stale Information**: Identify and remove outdated documentation, obsolete references, and unused files
-- **Update File References**: Ensure all current platform documentation references point to current file locations and structures
-- **Archive Temporary Content**: Move experimental or version-specific content to appropriate archives
-- **Validate Documentation Links**: Verify all cross-references and ensure documentation consistency
-
-### 4. Strategic Analysis and Operational Reporting
-- **Execute Audit Metrics Analysis**: Run `claude/wow/automation/audit-metrics-analyzer.js` on version audit logs
-- **Generate Operational Reports**: Create detailed operational reports in `claude/project/docs/` with complete technical analytics
-- **Analyze Component Interactions**: Document which components were frequently modified together
-- **Identify Process Improvements**: Extract insights about workflow effectiveness and development patterns
-- **Create Strategic Summary**: Document version achievements, insights, and implications for future development
-- **Reference**: `docs/management/release-type-architecture.md`
-
-### 5. User-Facing Reports and Knowledge Base Updates
-- **Generate User-Facing Reports**: Create executive summaries in `docs/reports/` from operational data
-- **Component Interaction Guides**: Create detailed guides based on actual co-modification patterns from strategic analysis
-- **Workflow Effectiveness Documentation**: Document proven workflow patterns and process improvements
-- **Architecture Insights**: Capture architectural evolution and design patterns discovered during development
-- **Development Best Practices**: Extract and formalize successful development approaches and techniques
-- **Validate Dual Report Completeness**: Ensure both operational and user-facing versions exist
-- **Tools**: `claude/wow/automation/knowledge-base-updater.js`, `docs/management/docs-organization-strategy.md`
-
-### 6. Get Started Documentation (Onboarding-Focused)
-- **Prerequisites Analysis**: Update onboarding requirements based on actual development experience
-- **Quickstart Guides**: Create streamlined getting-started documentation for new team members
-- **Essential Workflows**: Document core workflows and processes needed for effective contribution
-- **Common Pitfalls**: Capture challenges and solutions discovered during version development
-- **Tool**: `claude/wow/automation/get-started-generator.js`
-
-### 7. Next Version Readiness Assessment
-- **Validate Audit Cleanup**: Verify `claude/project/audit/current/` is properly reset (done by Close Version Workflow)
-- **Validate Version References**: Scan current platform documentation for version reference consistency
-- **Validate Version Scope**: Confirm scope and priorities are defined (done by NEW_VERSION_PLANNING workflow)  
-- **Validate Knowledge Systems**: Verify tracking systems are initialized (done by Close Version Workflow)
-- **Generate Readiness Report**: Create comprehensive go/no-go assessment for next version development
-
-## Audit Log Processing Methodology
-
-### Knowledge Domain Analysis
+### 1. Execute Version Transition Script
 ```bash
-# Extract all knowledge domains from version audit logs
-grep -o 'domains:\[[^]]*\]' claude/project/audit/v{version}/*.log | 
-cut -d'[' -f2 | cut -d']' -f1 | 
-tr ',' '\n' | sort | uniq -c | sort -nr
+claude/wow/scripts/audit-log "VERSION_TRANSITION" "workflow_start" "version_transition" "" "Starting VERSION_TRANSITION workflow"
+
+# Execute comprehensive version transition processing
+claude/wow/scripts/version-transition-process
+
+claude/wow/scripts/audit-log "VERSION_TRANSITION" "workflow_complete" "version_transition" "" "Version transition completed successfully"
 ```
 
-### Component Interaction Mapping
-```bash
-# Extract file interaction patterns
-grep -o 'files:\[[^]]*\]' claude/project/audit/v{version}/*.log |
-cut -d'[' -f2 | cut -d']' -f1 |
-tr ',' '\n' | sort | uniq -c | sort -nr
-```
+## Script Integration
 
-### Development Pattern Recognition
-- **Workflow Frequency**: Identify most common workflow types and execution patterns
-- **Time Distribution**: Analyze time spent across different knowledge domains
-- **Component Hotspots**: Identify files and areas with highest modification frequency
-- **Cross-Domain Activities**: Map activities that span multiple knowledge domains
+The version transition process executes a comprehensive 7-step automation sequence:
+
+### Automated Processing Steps
+1. **Audit Log Analysis**: Process version audit data for knowledge extraction
+2. **Knowledge Base Sync**: Update documentation with development insights  
+3. **Repository Maintenance**: Clean outdated content and validate links
+4. **Strategic Analysis**: Generate operational reports and component interaction analysis
+5. **Knowledge Base Updates**: Create user-facing reports and best practices documentation
+6. **Onboarding Documentation**: Update get-started guides based on development experience
+7. **Readiness Assessment**: Validate next version preparation and generate readiness report
+
+### Automation Scripts Utilized
+- `claude/wow/scripts/audit-metrics-analyzer` - Audit log analysis and metrics
+- `claude/wow/scripts/knowledge-sync-engine` - Knowledge base synchronization
+- `claude/wow/scripts/repository-maintenance-analyzer` - Repository cleanup
+- `claude/wow/scripts/strategic-analysis-engine` - Strategic insights and reporting
+- `claude/wow/scripts/knowledge-base-updater` - Knowledge base documentation
+- `claude/wow/scripts/get-started-generator` - Onboarding documentation
+- `claude/wow/scripts/version-readiness-validator` - Readiness assessment
 
 ## Documentation Update Strategy
 

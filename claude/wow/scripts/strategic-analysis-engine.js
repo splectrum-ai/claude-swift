@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Strategic Analysis Engine
  * VERSION_TRANSITION Step 4: Comprehensive strategic analysis and metrics generation

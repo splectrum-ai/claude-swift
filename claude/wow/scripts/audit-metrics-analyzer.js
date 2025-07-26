@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Audit Log Metrics Analyzer
  * Analyzes audit logs for workflow statistics, durations, and categorization

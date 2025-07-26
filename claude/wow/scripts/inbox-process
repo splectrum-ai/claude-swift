@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+
+// Ensure directory exists
+function ensureDirectory(dirPath) {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+        console.log(`✓ Created directory: ${dirPath}`);
+    }
+}
+
+// Validate task filename format
+function isValidTaskFile(filename) {
+    // Format: YYYY-MM-DDTHH-MM-SS-sssZ_source_task-name.md
+    const pattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3}Z_.*_.*\.md$/;
+    return pattern.test(filename);
+}
+
+// Extract metadata from filename
+function parseFilename(filename) {
+    const parts = filename.split('_');
+    if (parts.length < 3) return null;
+    
+    return {
+        timestamp: parts[0],
+        source: parts[1],
+        taskSummary: parts.slice(2).join('_').replace('.md', '').replace(/-/g, ' ')
+    };
+}
+
+// Main function
+function main() {
+    console.log('📥 INBOX: Processing inbox tasks');
+    
+    // Ensure inbox directory exists
+    ensureDirectory('claude/inbox');
+    
+    // Find all task files in inbox
+    let inboxTasks = [];
+    try {
+        const files = fs.readdirSync('claude/inbox');
+        inboxTasks = files
+            .filter(file => file.endsWith('.md') && file !== 'README.md')
+            .map(file => path.join('claude/inbox', file))
+            .sort(); // Process in chronological order
+    } catch (error) {
+        console.error('Error reading inbox directory:', error.message);
+        process.exit(1);
+    }
+    
+    if (inboxTasks.length === 0) {
+        console.log('✅ No pending tasks in inbox');
+        console.log('Inbox directory: ' + path.resolve('claude/inbox'));
+        process.exit(0);
+    }
+    
+    const taskCount = inboxTasks.length;
+    console.log(`🔍 Found ${taskCount} pending tasks in inbox`);
+    console.log('Processing in chronological order...');
+    
+    let processedCount = 0;
+    let failedCount = 0;
+    
+    // Process each task file
+    for (const taskFile of inboxTasks) {
+        const taskName = path.basename(taskFile);
+        console.log(`\n📋 Processing: ${taskName}`);
+        
+        // Validate task file format
+        if (!isValidTaskFile(taskName)) {
+            console.log(`✗ Invalid task filename format: ${taskName}`);
+            console.log('  Expected: YYYY-MM-DDTHH-MM-SS-sssZ_source_task-name.md');
+            failedCount++;
+            continue;
+        }
+        
+        // Parse task metadata from filename
+        const metadata = parseFilename(taskName);
+        if (!metadata) {
+            console.log(`✗ Failed to parse filename: ${taskName}`);
+            failedCount++;
+            continue;
+        }
+        
+        console.log(`  Timestamp: ${metadata.timestamp}`);
+        console.log(`  Source: ${metadata.source}`);
+        console.log(`  Summary: ${metadata.taskSummary}`);
+        
+        // Validate task file is readable
+        if (!fs.existsSync(taskFile)) {
+            console.log(`✗ Task file not found: ${taskFile}`);
+            failedCount++;
+            continue;
+        }
+        
+        try {
+            // Create GitHub issue from task content using our create-issue script
+            const { execSync } = require('child_process');
+            
+            console.log('  🔄 Creating GitHub issue...');
+            execSync(`claude/wow/scripts/create-issue "${taskFile}"`, { 
+                stdio: 'inherit',
+                encoding: 'utf8' 
+            });
+            
+            console.log('✓ Converted to GitHub issue successfully');
+            
+            // Delete processed task file
+            try {
+                fs.unlinkSync(taskFile);
+                console.log('✓ Task file removed from inbox');
+                processedCount++;
+            } catch (error) {
+                console.log('✗ Warning: Failed to remove task file');
+                processedCount++; // Still count as processed since issue was created
+            }
+            
+        } catch (error) {
+            console.log('✗ Failed to create GitHub issue');
+            console.log(`  Error: ${error.message}`);
+            failedCount++;
+        }
+    }
+    
+    // Processing summary
+    console.log('\n=== INBOX PROCESSING COMPLETE ===');
+    console.log(`Tasks processed: ${processedCount}`);
+    console.log(`Tasks failed: ${failedCount}`);
+    console.log(`Total tasks: ${taskCount}`);
+    
+    if (processedCount > 0) {
+        console.log(`\n✓ Successfully converted ${processedCount} tasks to GitHub issues`);
+        console.log('✓ Task files removed from inbox');
+        console.log('\nNext steps:');
+        console.log('- Use `next sesame` to see recommended issues for execution');
+        console.log('- Check GitHub issues for task details and prioritization');
+    }
+    
+    if (failedCount > 0) {
+        console.log(`\n⚠ Warning: ${failedCount} tasks failed to process`);
+        console.log('Failed tasks remain in inbox for manual review');
+        console.log('Check task file format and GitHub authentication');
+    }
+    
+    // Check remaining tasks
+    const remainingTasks = fs.readdirSync('claude/inbox').filter(f => f.endsWith('.md') && f !== 'README.md').length;
+    console.log(`\nInbox status: ${remainingTasks} tasks remaining`);
+    
+    // Exit with appropriate code
+    process.exit(failedCount > 0 ? 1 : 0);
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

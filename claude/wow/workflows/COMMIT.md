@@ -38,30 +38,7 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 claude/wow/scripts/audit-log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
 ```
 
-### 2. Audit Log Validation
-```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "audit_validation" "" "Verifying recent work has corresponding audit entries"
-```
-
-**Actions:**
-1. Check `claude/project/audit/current/current.log` for recent entries
-2. Verify work items have corresponding `item_complete` entries
-3. Check for incomplete workflow logging patterns
-4. Validate audit log follows proper format and completion patterns
-5. Warn if recent work appears undocumented in audit log
-
-**Audit Validation Patterns:**
-- **Recent file changes** should have corresponding audit entries
-- **Completed work items** should have `item_complete` logging
-- **Workflow activities** should be properly documented
-- **File creation** should have `file_created` entries
-
-**Validation Outcomes:**
-- ✅ **Pass**: Recent work properly documented, proceed with commit
-- ⚠️ **Warning**: Some work may be undocumented, suggest adding audit entries
-- ❌ **Block**: Critical work undocumented, require audit completion before commit
-
-### 3. Change Assessment
+### 2. Change Assessment
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
 ```
@@ -72,7 +49,7 @@ claude/wow/scripts/audit-log "COMMIT" "step" "change_assessment" "" "Analyzing c
 3. Check for untracked files that should be included
 4. Validate changes represent a logical commit unit
 
-### 4. Issue Detection
+### 3. Issue Detection
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
 ```
@@ -83,7 +60,7 @@ claude/wow/scripts/audit-log "COMMIT" "step" "issue_detection" "" "Scanning chan
 3. Analyze changed files against open GitHub issues
 4. Identify issues that this work resolves
 
-### 5. Commit Message Generation
+### 4. Commit Message Generation
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
 ```
@@ -122,7 +99,7 @@ Session complete: [session summary]
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-### 6. Commit Execution
+### 5. Commit Execution
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
 ```
@@ -141,7 +118,7 @@ claude/wow/scripts/commit --message "Generated commit message"
 # - Error handling and recovery
 ```
 
-### 7. Issue Closure
+### 6. Issue Closure
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
 ```
@@ -159,42 +136,9 @@ The automated commit script handles issue closure automatically:
 claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
 ```
 
-### 8. Workflow Completion
+### 7. Workflow Completion
 ```bash
 claude/wow/scripts/audit-log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
-```
-
-## Interactive Prompts
-
-### Issue Resolution Confirmation
-When potential issue resolution is detected:
-```
-Detected potential issue resolution:
-- Issue #XX: "Remove references to old ways of doing across all workflows"
-- Changes: Modified auth.js, added error handling
-
-Does this commit resolve issue #XX? (yes/no):
-```
-
-### Commit Message Review
-```
-Generated commit message:
----
-Fix authentication flow bug
-
-- Updated token validation logic
-- Added proper error handling for expired tokens
-- Improved user feedback for auth failures
-
-Context: Resolves intermittent login failures reported by users
-Closes #XX
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
----
-
-Proceed with this commit? (yes/edit/cancel):
 ```
 
 ## Smart Detection Patterns
@@ -213,27 +157,10 @@ Proceed with this commit? (yes/edit/cancel):
 
 ## Error Handling
 
-### No Changes Detected
-```
-No changes detected for commit.
-Run 'claude/wow/scripts/git-status' to verify current state.
-```
-
-### Merge Conflicts
-```
-Merge conflicts detected. Resolve conflicts before committing:
-claude/wow/scripts/git-status  # See conflicted files
-# Resolve conflicts manually
-claude/wow/scripts/commit  # Retry automated commit
-```
-
-### Push Failures
-```
-Push failed. Syncing with remote:
-claude/wow/scripts/git-sync --force  # Sync with remote
-# Resolve any conflicts
-claude/wow/scripts/commit  # Retry automated commit
-```
+The `commit` script handles common scenarios automatically:
+- **No changes**: Exits gracefully with status message
+- **Merge conflicts**: Provides clear guidance on resolution steps
+- **Push failures**: Attempts sync and retry with recovery options
 
 ## Integration Points
 

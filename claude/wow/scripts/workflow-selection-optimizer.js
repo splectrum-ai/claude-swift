@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Workflow Selection Optimizer
  * Analyzes audit data to identify when documented workflows should have been chosen over undocumented ones

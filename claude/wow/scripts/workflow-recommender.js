@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+#!/usr/bin/env node
+
 /**
  * Workflow Recommendation Engine
  * Analyzes timelog patterns to recommend optimal workflows for new tasks
