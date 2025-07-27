@@ -35,23 +35,23 @@ Intelligent commit workflow that stages changes, creates descriptive commit mess
 # Automated audit logging - no manual sourcing required
 
 # Start workflow with explicit logging
-claude/wow/scripts/audit-log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
+claude/wow/scripts/audit-manage log "COMMIT" "workflow_start" "commit_sesame" "" "Initiated COMMIT workflow for session work completion"
 ```
 
 ### 2. Change Assessment
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
+claude/wow/scripts/audit-manage log "COMMIT" "step" "change_assessment" "" "Analyzing current changes and git status"
 ```
 
 **Actions:**
-1. Run `claude/wow/scripts/git-status` to get comprehensive repository status
+1. Run `claude/wow/scripts/git-manage status` to get comprehensive repository status
 2. Analyze changed files, staged/unstaged status, and scope of changes
 3. Check for untracked files that should be included
 4. Validate changes represent a logical commit unit
 
 ### 3. Issue Detection
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
+claude/wow/scripts/audit-manage log "COMMIT" "step" "issue_detection" "" "Scanning changes and context for resolved issues"
 ```
 
 **Actions:**
@@ -62,7 +62,7 @@ claude/wow/scripts/audit-log "COMMIT" "step" "issue_detection" "" "Scanning chan
 
 ### 4. Commit Message Generation
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
+claude/wow/scripts/audit-manage log "COMMIT" "step" "message_generation" "" "Generating descriptive commit message"
 ```
 
 **Format varies by context:**
@@ -101,13 +101,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### 5. Commit Execution
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
+claude/wow/scripts/audit-manage log "COMMIT" "step" "commit_execution" "" "Executing automated commit workflow"
 ```
 
 **Actions:**
 ```bash
 # Execute automated commit script with generated message
-claude/wow/scripts/commit --message "Generated commit message"
+claude/wow/scripts/git-manage commit --message "Generated commit message"
 
 # The commit script automatically handles:
 # - Staging all changes (git add .)
@@ -120,25 +120,25 @@ claude/wow/scripts/commit --message "Generated commit message"
 
 ### 6. Issue Closure
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
+claude/wow/scripts/audit-manage log "COMMIT" "step" "issue_closure" "" "Automated issue closure handled by commit script"
 ```
 
 **Actions:**
 The automated commit script handles issue closure automatically:
 1. **Issue Detection**: Scans commit context and recent audit logs for resolved issues
-2. **GitHub API Integration**: Uses `claude/wow/scripts/gh-issue` to close issues
+2. **GitHub API Integration**: Uses `claude/wow/scripts/issue-manage` to close issues
 3. **Cache-first closure**: Updates local cache, then syncs to GitHub
 4. **Audit logging**: Records all issue closures with commit references
 
 **Manual issue closure** (if needed):
 ```bash
 # Close specific issue with commit reference
-claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [commit-hash]"
+claude/wow/scripts/issue-manage close XX
 ```
 
 ### 7. Workflow Completion
 ```bash
-claude/wow/scripts/audit-log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
+claude/wow/scripts/audit-manage log "COMMIT" "workflow_complete" "commit_sesame" "" "COMMIT workflow completed successfully - changes committed and issues resolved"
 ```
 
 ## Smart Detection Patterns

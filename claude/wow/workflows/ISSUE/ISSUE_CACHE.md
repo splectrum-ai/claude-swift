@@ -14,18 +14,18 @@ Local cache management for GitHub issues and milestones to improve performance a
 
 ### 1. Execute Issue Cache Synchronization Script
 ```bash
-claude/wow/scripts/audit-log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow"
+claude/wow/scripts/audit-manage log "ISSUE_CACHE" "workflow_start" "cache_synchronization" "" "Starting ISSUE_CACHE workflow"
 
 # Execute simple GitHub-only cache synchronization
-claude/wow/scripts/issue-cache-sync
+claude/wow/scripts/issue-manage seed
 
-claude/wow/scripts/audit-log "ISSUE_CACHE" "workflow_complete" "cache_synchronization" "" "Issue cache synchronization completed successfully"
+claude/wow/scripts/audit-manage log "ISSUE_CACHE" "workflow_complete" "cache_synchronization" "" "Issue cache synchronization completed successfully"
 ```
 
 ## Script Integration
 
-The issue cache process delegates to `claude/wow/scripts/issue-cache-sync` which handles:
-- GitHub API issue and milestone fetching using existing `gh-issue` and `gh-api` scripts
+The issue cache process delegates to `claude/wow/scripts/issue-manage seed` which handles:
+- Local issue management using `issue-manage` scripts
 - Simple cache directory creation and JSON file management
 - Cache file updates with timestamps and metadata
 - Performance optimization through local storage of GitHub data

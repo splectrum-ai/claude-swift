@@ -21,22 +21,22 @@
 ### Daily Workflow
 ```bash
 # 1. Start session - sync with remote
-claude/wow/scripts/git-sync
+claude/wow/scripts/git-manage sync
 
 # 2. Make changes...
 
 # 3. Commit your work
-claude/wow/scripts/commit
+claude/wow/scripts/git-manage commit
 # Automatically handles: staging, commit message generation, push, issue closure
 ```
 
 ### Automated Commit Message Generation
 ```bash
 # Standard automated commit
-claude/wow/scripts/commit
+claude/wow/scripts/git-manage commit
 
 # Custom commit message
-claude/wow/scripts/commit --message "Brief summary of changes
+claude/wow/scripts/git-manage commit --message "Brief summary of changes
 
 - Detailed implementation points
 - Technical approach and reasoning
@@ -45,7 +45,7 @@ claude/wow/scripts/commit --message "Brief summary of changes
 Context: Business justification for the change"
 
 # Dry run to preview commit
-claude/wow/scripts/commit --dry-run
+claude/wow/scripts/git-manage commit --dry-run
 ```
 
 **Generated commit messages follow this format:**
@@ -68,8 +68,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### SESSION_START Git Check
 ```bash
 # Ensure repository is synced and check status
-claude/wow/scripts/git-sync  # Sync with remote
-claude/wow/scripts/git-status  # Comprehensive status check
+claude/wow/scripts/git-manage sync  # Sync with remote
+claude/wow/scripts/git-manage status  # Comprehensive status check
 ```
 
 ### SESSION_END Commit Pattern
@@ -78,7 +78,7 @@ claude/wow/scripts/git-status  # Comprehensive status check
 claude/wow/scripts/audit-manage archive-session
 
 # 2. Commit all work using automated script
-claude/wow/scripts/commit --message "Session complete: [summary of work done]"
+claude/wow/scripts/git-manage commit --message "Session complete: [summary of work done]"
 # Automatically handles staging, commit, push, and issue closure
 
 # Note: Fresh audit log is created automatically by audit-manage
@@ -94,11 +94,11 @@ When working on GitHub issues:
 # 3. Closes issues with commit references
 # 4. Updates local cache and GitHub
 
-claude/wow/scripts/commit
+claude/wow/scripts/git-manage commit
 # Automatically includes issue closure if detected
 
 # Manual issue closure if needed:
-claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [hash]"
+claude/wow/scripts/issue-manage close XX
 ```
 
 ## Version Release Workflow
@@ -109,7 +109,7 @@ claude/wow/scripts/gh-issue close #XX -c "Resolved in commit: [hash]"
 claude/wow/scripts/audit-manage archive-version v{VERSION}
 
 # 2. Create release using automated script
-claude/wow/scripts/git-release v{VERSION} --message "Release v{VERSION} with latest improvements"
+claude/wow/scripts/git-manage release v{VERSION} --message "Release v{VERSION} with latest improvements"
 # Automatically handles:
 # - Release commit creation
 # - Git tag creation and push

@@ -26,7 +26,7 @@ Interactive task creation workflow for cross-repository communication. Creates p
 
 ### 1. Collect Task Details Through Discussion
 ```bash
-claude/wow/scripts/audit-log "TASK_CREATE" "workflow_start" "task_creation" "" "Starting task creation workflow"
+claude/wow/scripts/audit-manage log "TASK_CREATE" "workflow_start" "task_creation" "" "Starting task creation workflow"
 ```
 
 **Claude collects task information conversationally:**
@@ -50,7 +50,7 @@ claude/wow/scripts/audit-log "TASK_CREATE" "workflow_start" "task_creation" "" "
 # Pipe completed task content to creation script
 echo "$TASK_CONTENT" | claude/wow/scripts/task-create
 
-claude/wow/scripts/audit-log "TASK_CREATE" "workflow_complete" "task_creation" "" "Task creation completed successfully"
+claude/wow/scripts/audit-manage log "TASK_CREATE" "workflow_complete" "task_creation" "" "Task creation completed successfully"
 ```
 
 ## Template-Based Approach

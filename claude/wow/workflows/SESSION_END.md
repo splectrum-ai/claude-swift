@@ -19,25 +19,17 @@
 
 ```bash
 # Start session end workflow
-claude/wow/scripts/audit-log "SESSION_END" "workflow_start" "session_termination" "" "Starting SESSION_END workflow for session closure"
+claude/wow/scripts/audit-manage log "SESSION_END" "workflow_start" "session_termination" "" "Starting SESSION_END workflow for session closure"
 ```
 
 ## Session Completion Steps
 
 ### **1. Outbox Distribution**
-```bash
-# Execute OUTBOX workflow
-outbox sesame
-```
+- Execute OUTBOX workflow (distribute pending tasks)
 
 ### **2. Complete Session Work**
-```bash
-# Execute COMMIT workflow - handles all git operations and issue closure
-commit sesame
-
-# Archive session and prepare for next session
-claude/wow/scripts/audit-manage archive-session
-claude/wow/scripts/audit-log "SESSION_END" "workflow_complete" "session_termination" "" "SESSION_END completed - session archived"
-```
+- Execute COMMIT workflow (handles all git operations and issue closure)
+- Archive session and prepare for next session
+- Log SESSION_END completion
 
 

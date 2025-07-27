@@ -10,12 +10,12 @@ Called from main ISSUE workflow when user requests issue closure.
 
 ### 1. Execute Issue Closure Script
 ```bash
-claude/wow/scripts/audit-log "CLOSE_ISSUE" "workflow_start" "issue_closure" "" "Starting CLOSE_ISSUE workflow"
+claude/wow/scripts/audit-manage log "CLOSE_ISSUE" "workflow_start" "issue_closure" "" "Starting CLOSE_ISSUE workflow"
 
 # Execute issue closure with comment and logging
 claude/wow/scripts/close-issue [ISSUE_NUMBER] "[CLOSURE_COMMENT]"
 
-claude/wow/scripts/audit-log "CLOSE_ISSUE" "workflow_complete" "issue_closure" "" "Issue closure completed successfully"
+claude/wow/scripts/audit-manage log "CLOSE_ISSUE" "workflow_complete" "issue_closure" "" "Issue closure completed successfully"
 ```
 
 ## Script Integration

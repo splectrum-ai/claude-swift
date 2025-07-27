@@ -29,12 +29,12 @@ Cross-repository task distribution workflow that collects tasks from registered 
 
 ### 1. Execute Task Distribution Script
 ```bash
-claude/wow/scripts/audit-log "OUTBOX" "workflow_start" "task_distribution" "" "Starting cross-repository task distribution workflow"
+claude/wow/scripts/audit-manage log "OUTBOX" "workflow_start" "task_distribution" "" "Starting cross-repository task distribution workflow"
 
 # Execute task distribution script
 claude/wow/scripts/outbox-process
 
-claude/wow/scripts/audit-log "OUTBOX" "workflow_complete" "task_distribution" "" "OUTBOX workflow completed"
+claude/wow/scripts/audit-manage log "OUTBOX" "workflow_complete" "task_distribution" "" "OUTBOX workflow completed"
 ```
 
 ## Script Integration

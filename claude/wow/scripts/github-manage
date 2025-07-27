@@ -1,0 +1,136 @@
+#!/usr/bin/env node
+
+/**
+ * GitHub Management Script - Centralized GitHub operations
+ * 
+ * Dispatches to GitHub subcommands and provides unified GitHub functionality:
+ * - issue: GitHub issue operations (create, close, list)
+ * - release: GitHub release management (create, list, view, upload)
+ * - api: General GitHub API operations
+ * 
+ * Usage:
+ *   github-manage issue create <title> <body>
+ *   github-manage issue close <number> [comment]
+ *   github-manage issue list [--milestone] [--label]
+ *   github-manage release create <version> --title "Title" [--notes-file file]
+ *   github-manage release list
+ *   github-manage api <endpoint> [--method GET|POST|PUT] [--data "json"]
+ */
+
+import { execSync } from 'child_process';
+import path from 'path';
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const command = args[0];
+        
+        if (!command) {
+            console.log('GitHub Management Script - Available commands:');
+            console.log('  issue <action> [args]      - GitHub issue operations');
+            console.log('  release <action> [args]    - GitHub release management');
+            console.log('  api <endpoint> [args]      - GitHub API operations');
+            console.log('');
+            console.log('Examples:');
+            console.log('  github-manage issue create "Bug fix" "Description of bug"');
+            console.log('  github-manage issue close 42 "Fixed the issue"');
+            console.log('  github-manage issue list --milestone "v1.2.0"');
+            console.log('  github-manage release create v1.2.0 --title "Release v1.2.0"');
+            console.log('  github-manage release list');
+            console.log('  github-manage api repos/:owner/:repo/milestones');
+            return;
+        }
+        
+        const scriptsDir = path.dirname(process.argv[1]);
+        const githubDir = path.join(scriptsDir, 'github');
+        
+        switch (command) {
+            case 'issue':
+                // Dispatch to GitHub issue operations
+                const issueAction = args[1];
+                const issueArgs = args.slice(2);
+                
+                if (!issueAction) {
+                    console.log('Available issue actions: create, close, list');
+                    console.log('  github-manage issue create <title> <body>');
+                    console.log('  github-manage issue close <number> [comment]');
+                    console.log('  github-manage issue list [--milestone] [--label]');
+                    return;
+                }
+                
+                let issueScript;
+                let issueCommand;
+                
+                switch (issueAction) {
+                    case 'create':
+                        issueScript = path.join(githubDir, 'create-issue-interactive');
+                        issueCommand = `"${issueScript}"`;
+                        break;
+                    case 'close':
+                        issueScript = path.join(githubDir, 'close-issue');
+                        issueCommand = `"${issueScript}" ${issueArgs.join(' ')}`;
+                        break;
+                    case 'list':
+                    default:
+                        issueScript = path.join(githubDir, 'gh-issue');
+                        issueCommand = `"${issueScript}" ${issueAction} ${issueArgs.join(' ')}`;
+                        break;
+                }
+                
+                execSync(issueCommand, { stdio: 'inherit' });
+                break;
+                
+            case 'release':
+                // Dispatch to GitHub release operations
+                const releaseAction = args[1];
+                const releaseArgs = args.slice(2);
+                
+                if (!releaseAction) {
+                    console.log('Available release actions: create, list, view, upload');
+                    console.log('  github-manage release create <version> --title "Title"');
+                    console.log('  github-manage release list');
+                    console.log('  github-manage release view <version>');
+                    console.log('  github-manage release upload <version> <file>');
+                    return;
+                }
+                
+                const releaseScript = path.join(githubDir, 'gh-release');
+                const releaseCommand = `"${releaseScript}" ${releaseAction} ${releaseArgs.join(' ')}`;
+                execSync(releaseCommand, { stdio: 'inherit' });
+                break;
+                
+            case 'api':
+                // Dispatch to GitHub API operations
+                const apiArgs = args.slice(1);
+                
+                if (apiArgs.length === 0) {
+                    console.log('GitHub API usage:');
+                    console.log('  github-manage api <endpoint> [--method GET|POST|PUT] [--data "json"]');
+                    console.log('  github-manage api repos/:owner/:repo/milestones');
+                    console.log('  github-manage api repos/:owner/:repo/issues --method POST --data "{\\"title\\": \\"Test\\"}"');
+                    return;
+                }
+                
+                const apiScript = path.join(githubDir, 'gh-api');
+                const apiCommand = `"${apiScript}" ${apiArgs.join(' ')}`;
+                execSync(apiCommand, { stdio: 'inherit' });
+                break;
+                
+            default:
+                console.log(`Unknown command: ${command}`);
+                console.log('Available commands: issue, release, api');
+                process.exit(1);
+        }
+    } catch (error) {
+        console.error(`❌ GitHub management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+main().catch(error => {
+    console.error(`❌ GitHub management failed: ${error.message}`);
+    process.exit(1);
+});

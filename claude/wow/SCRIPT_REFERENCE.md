@@ -26,12 +26,20 @@ audit-log "COMMIT" "step" "change_assessment" "" "Analyzing current changes"
 **Usage**: `audit-manage <command> [options]`  
 **Commands**: `archive-session`, `cleanup`, `validate`
 
-#### `commit`
-**Purpose**: Intelligent commit workflow with automatic issue detection  
-**Usage**: `commit [--message "text"] [--no-push] [--dry-run]`  
-**Features**: Auto-staging, message generation, issue closure, push to main
+**Note**: Commit operations are now available through `git-manage commit` (see Git Operations section)
 
 ### Git Operations
+
+#### `git-manage`
+**Purpose**: Unified git operations management  
+**Usage**: `git-manage <command> [options]`  
+**Commands**: 
+- `status` - Enhanced git status with workflow output
+- `sync` - Repository synchronization with remote
+- `clean` - Safe workspace cleanup operations  
+- `info` - Repository information and metadata
+- `release` - Git tag and release creation
+- `commit` - Intelligent commit workflow with issue detection
 
 #### `git-status`
 **Purpose**: Enhanced git status with workflow-friendly output  
@@ -95,47 +103,32 @@ gh-issue close 123 --comment "Fixed in latest commit"
 
 ### Analysis and Optimization Tools
 
-#### `audit-metrics-analyzer.js`
+#### `audit-manage metrics`
 **Purpose**: Analyze audit logs for workflow performance metrics  
-**Usage**: `audit-metrics-analyzer [--period days] [--format json|report]`  
+**Usage**: `audit-manage metrics [--period days] [--format json|report]`  
 **Output**: Workflow timing, frequency analysis, performance insights
 
-#### `workflow-recommender.js`
-**Purpose**: Suggest optimal workflows based on current context  
-**Usage**: `workflow-recommender [--context "description"]`  
-**Features**: Context analysis, workflow matching, priority ranking
-
-#### `repository-maintenance-analyzer.js`
-**Purpose**: Analyze repository health and maintenance needs  
-**Usage**: `repository-maintenance-analyzer [--deep-scan]`  
-**Checks**: File structure, dependency health, cleanup opportunities
-
-#### `strategic-analysis-engine.js`
-**Purpose**: High-level strategic analysis of project progress  
-**Usage**: `strategic-analysis-engine [--timeframe months]`  
-**Output**: Project velocity, milestone tracking, strategic insights
-
-#### `version-readiness-validator.js`
-**Purpose**: Validate repository readiness for version releases  
-**Usage**: `version-readiness-validator <version> [--strict]`  
-**Checks**: Code quality, documentation, test coverage, changelog
+#### `transition-manage`
+**Purpose**: Unified transition and version management operations  
+**Usage**: `transition-manage <command> [options]`  
+**Commands**: 
+- `maintenance-analysis` - Analyze repository health and maintenance needs  
+- `strategic-analysis` - High-level strategic analysis of project progress  
+- `readiness-validation` - Validate repository readiness for version releases  
+- `version-transition` - Execute full version transition process  
+- `new-version-planning` - Plan next version development  
+- `patch-release` - Execute patch release workflow  
+- `knowledge-sync` - Synchronize knowledge base  
+- `knowledge-update` - Update knowledge base documentation
+- `get-started` - Generate onboarding documentation from development experience
 
 ### Knowledge Management
 
-#### `knowledge-base-updater.js`
-**Purpose**: Update project knowledge base from workflow activities  
-**Usage**: `knowledge-base-updater [--source audit|git|issues]`  
-**Features**: Pattern extraction, documentation generation, insight capture
+**Note**: Knowledge management operations are now available through `transition-manage`:
+- `transition-manage knowledge-update` - Update project knowledge base
+- `transition-manage knowledge-sync` - Synchronize knowledge across components
 
-#### `knowledge-sync-engine.js`
-**Purpose**: Synchronize knowledge across repository components  
-**Usage**: `knowledge-sync-engine [--target docs|workflows|readme]`  
-**Features**: Cross-reference updates, consistency checking
-
-#### `get-started-generator.js`
-**Purpose**: Generate getting-started documentation from current state  
-**Usage**: `get-started-generator [--audience developer|user]`  
-**Output**: Setup guides, usage examples, onboarding documentation
+**Note**: Onboarding documentation generation is now available through `transition-manage get-started`
 
 ### Archive and Cleanup
 
@@ -150,11 +143,6 @@ gh-issue close 123 --comment "Fixed in latest commit"
 **Purpose**: Repository debugging and diagnostic information  
 **Usage**: `debug-repo [--verbose] [--check-all]`  
 **Output**: System state, configuration issues, dependency problems
-
-#### `sesame-menu`
-**Purpose**: Interactive menu for workflow selection  
-**Usage**: `sesame-menu [--compact]`  
-**Features**: Guided workflow selection, parameter prompting
 
 ### Legacy Scripts
 
@@ -172,9 +160,9 @@ gh-issue close 123 --comment "Fixed in latest commit"
 ### Workflow Usage
 ```bash
 # In workflow files
-claude/wow/scripts/audit-log "WORKFLOW" "start" "init" "" "Starting workflow"
-claude/wow/scripts/git-status --porcelain
-claude/wow/scripts/commit --message "Auto-generated commit"
+claude/wow/scripts/audit-manage log "WORKFLOW" "start" "init" "" "Starting workflow"
+claude/wow/scripts/git-manage status --porcelain
+claude/wow/scripts/git-manage commit --message "Auto-generated commit"
 ```
 
 ### Error Handling

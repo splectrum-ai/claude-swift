@@ -1,0 +1,214 @@
+#!/usr/bin/env node
+
+/**
+ * GitHub API CLI - Drop-in replacement for `gh api` commands
+ * 
+ * Provides identical command-line interface to GitHub CLI but uses
+ * native fetch() implementation for zero dependencies
+ * 
+ * Usage:
+ *   gh-api <endpoint> [--method GET|POST|PUT|DELETE] [--input file] [--jq query]
+ *   gh-api repos/:owner/:repo/milestones
+ *   gh-api repos/:owner/:repo/issues --method POST --input issue.json
+ */
+
+import { createGitHubAPI } from './lib-github-api.js';
+import { promises as fs } from 'fs';
+
+/**
+ * Parse command line arguments into structured options
+ */
+function parseArgs(args) {
+    const options = {
+        endpoint: args[0],
+        flags: {},
+        positional: []
+    };
+    
+    let i = 0;
+    while (i < args.length) {
+        const arg = args[i];
+        
+        if (arg.startsWith('--')) {
+            const flagName = arg.substring(2);
+            const nextArg = args[i + 1];
+            
+            if (nextArg && !nextArg.startsWith('-')) {
+                options.flags[flagName] = nextArg;
+                i += 2;
+            } else {
+                options.flags[flagName] = true;
+                i += 1;
+            }
+        } else if (arg.startsWith('-')) {
+            const flagName = arg.substring(1);
+            const nextArg = args[i + 1];
+            
+            if (nextArg && !nextArg.startsWith('-')) {
+                options.flags[flagName] = nextArg;
+                i += 2;
+            } else {
+                options.flags[flagName] = true;
+                i += 1;
+            }
+        } else {
+            options.positional.push(arg);
+            i += 1;
+        }
+    }
+    
+    return options;
+}
+
+/**
+ * Apply jq-style filtering to JSON data
+ * Simple implementation of common jq patterns
+ */
+function applyJqFilter(data, filter) {
+    if (!filter) return data;
+    
+    try {
+        // Handle array access like .[0]
+        if (filter.match(/^\.\[(\d+)\]$/)) {
+            const index = parseInt(filter.match(/^\.\[(\d+)\]$/)[1]);
+            return Array.isArray(data) ? data[index] : null;
+        }
+        
+        // Handle property access like .property
+        if (filter.match(/^\.([a-zA-Z_][a-zA-Z0-9_]*)$/)) {
+            const property = filter.match(/^\.([a-zA-Z_][a-zA-Z0-9_]*)$/)[1];
+            return data && typeof data === 'object' ? data[property] : null;
+        }
+        
+        // Handle array iteration like .[]
+        if (filter === '.[]') {
+            return Array.isArray(data) ? data : [data];
+        }
+        
+        // Handle complex property access like .milestone.title
+        if (filter.match(/^\.([a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*)$/)) {
+            const path = filter.substring(1).split('.');
+            let result = data;
+            for (const prop of path) {
+                if (result && typeof result === 'object') {
+                    result = result[prop];
+                } else {
+                    return null;
+                }
+            }
+            return result;
+        }
+        
+        // Handle array operations like .[0].number // 0 (default value)
+        if (filter.includes('//')) {
+            const [query, defaultValue] = filter.split('//').map(s => s.trim());
+            const result = applyJqFilter(data, query);
+            return result !== null && result !== undefined ? result : parseInt(defaultValue) || defaultValue;
+        }
+        
+        // Return original data if filter not recognized
+        return data;
+    } catch (error) {
+        console.error(`jq filter error: ${error.message}`);
+        return data;
+    }
+}
+
+/**
+ * Resolve endpoint template variables
+ */
+function resolveEndpoint(endpoint, github) {
+    return endpoint
+        .replace(':owner', github.owner)
+        .replace(':repo', github.repo);
+}
+
+/**
+ * Main CLI function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const options = parseArgs(args);
+        
+        if (!options.endpoint) {
+            console.log('GitHub API CLI - Usage:');
+            console.log('  gh-api <endpoint> [--method GET|POST|PUT|DELETE] [--input file] [--jq query]');
+            console.log('');
+            console.log('Examples:');
+            console.log('  gh-api repos/:owner/:repo/milestones');
+            console.log('  gh-api repos/:owner/:repo/issues --method POST --input issue.json');
+            console.log('  gh-api repos/:owner/:repo/issues --jq ".[0].number // 0"');
+            console.log('');
+            console.log('Environment variables:');
+            console.log('  GITHUB_TOKEN - GitHub personal access token (required)');
+            return;
+        }
+        
+        // Initialize GitHub API client
+        const github = createGitHubAPI();
+        
+        // Resolve endpoint template variables
+        const resolvedEndpoint = resolveEndpoint(options.endpoint, github);
+        
+        // Prepare request options
+        const requestOptions = {
+            method: options.flags.method || 'GET'
+        };
+        
+        // Handle input data
+        if (options.flags.input) {
+            const inputFile = options.flags.input;
+            let inputData;
+            
+            if (inputFile === '-') {
+                // Read from stdin
+                inputData = await readStdin();
+            } else {
+                // Read from file
+                inputData = await fs.readFile(inputFile, 'utf8');
+            }
+            
+            try {
+                requestOptions.body = JSON.parse(inputData);
+            } catch (error) {
+                // If not valid JSON, pass as string
+                requestOptions.body = inputData;
+            }
+        }
+        
+        // Make API request
+        const response = await github.request(resolvedEndpoint, requestOptions);
+        
+        // Apply jq filter if provided
+        let output = response;
+        if (options.flags.jq) {
+            output = applyJqFilter(response, options.flags.jq);
+        }
+        
+        // Output result
+        if (typeof output === 'string') {
+            console.log(output);
+        } else if (output !== undefined) {
+            console.log(JSON.stringify(output, null, 2));
+        }
+        
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+/**
+ * Read from stdin
+ */
+async function readStdin() {
+    const chunks = [];
+    for await (const chunk of process.stdin) {
+        chunks.push(chunk);
+    }
+    return Buffer.concat(chunks).toString('utf8');
+}
+
+// Run CLI
+main();

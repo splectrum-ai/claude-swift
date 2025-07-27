@@ -22,12 +22,12 @@ Manual issue creation workflow with standardized metadata structure to ensure co
 ### 2. Create Issue with Standardized Template
 **Claude creates issue using collected information:**
 ```bash
-claude/wow/scripts/audit-log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow"
+claude/wow/scripts/audit-manage log "CREATE_ISSUE" "workflow_start" "issue_creation" "" "Starting CREATE_ISSUE workflow"
 
 # Create issue with standardized metadata template
 claude/wow/scripts/create-issue-interactive
 
-claude/wow/scripts/audit-log "CREATE_ISSUE" "workflow_complete" "issue_creation" "" "Issue creation completed successfully"
+claude/wow/scripts/audit-manage log "CREATE_ISSUE" "workflow_complete" "issue_creation" "" "Issue creation completed successfully"
 ```
 
 ## Script Integration

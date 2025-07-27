@@ -19,12 +19,12 @@ Systematic transition workflow to process development knowledge and prepare for 
 
 ### 1. Execute Version Transition Script
 ```bash
-claude/wow/scripts/audit-log "VERSION_TRANSITION" "workflow_start" "version_transition" "" "Starting VERSION_TRANSITION workflow"
+claude/wow/scripts/audit-manage log "VERSION_TRANSITION" "workflow_start" "version_transition" "" "Starting VERSION_TRANSITION workflow"
 
 # Execute comprehensive version transition processing
-claude/wow/scripts/version-transition-process
+claude/wow/scripts/transition-manage version-transition
 
-claude/wow/scripts/audit-log "VERSION_TRANSITION" "workflow_complete" "version_transition" "" "Version transition completed successfully"
+claude/wow/scripts/audit-manage log "VERSION_TRANSITION" "workflow_complete" "version_transition" "" "Version transition completed successfully"
 ```
 
 ## Script Integration
@@ -41,13 +41,13 @@ The version transition process executes a comprehensive 7-step automation sequen
 7. **Readiness Assessment**: Validate next version preparation and generate readiness report
 
 ### Automation Scripts Utilized
-- `claude/wow/scripts/audit-metrics-analyzer` - Audit log analysis and metrics
-- `claude/wow/scripts/knowledge-sync-engine` - Knowledge base synchronization
-- `claude/wow/scripts/repository-maintenance-analyzer` - Repository cleanup
-- `claude/wow/scripts/strategic-analysis-engine` - Strategic insights and reporting
-- `claude/wow/scripts/knowledge-base-updater` - Knowledge base documentation
-- `claude/wow/scripts/get-started-generator` - Onboarding documentation
-- `claude/wow/scripts/version-readiness-validator` - Readiness assessment
+- `claude/wow/scripts/audit-manage metrics` - Audit log analysis and metrics
+- `claude/wow/scripts/transition-manage knowledge-sync` - Knowledge base synchronization
+- `claude/wow/scripts/transition-manage maintenance-analysis` - Repository cleanup
+- `claude/wow/scripts/transition-manage strategic-analysis` - Strategic insights and reporting
+- `claude/wow/scripts/transition-manage knowledge-update` - Knowledge base documentation
+- `claude/wow/scripts/transition-manage get-started` - Onboarding documentation
+- `claude/wow/scripts/transition-manage readiness-validation` - Readiness assessment
 
 ## Documentation Update Strategy
 
@@ -161,12 +161,12 @@ The version transition process executes a comprehensive 7-step automation sequen
 
 ### Automation Implementation Status
 - ✅ **Step 1 Complete**: Automated audit metrics analysis (`claude/wow/automation/audit-metrics-analyzer.js`)
-- ✅ **Step 2 Complete**: Knowledge base synchronization engine (`claude/wow/automation/knowledge-sync-engine.js`) 
-- ✅ **Step 3 Complete**: Repository maintenance analyzer (`claude/wow/automation/repository-maintenance-analyzer.js`)
-- ✅ **Step 4 Complete**: Strategic analysis engine (`claude/wow/automation/strategic-analysis-engine.js`)
-- ✅ **Step 5 Basic**: Knowledge base updater (`claude/wow/automation/knowledge-base-updater.js`) - Foundational implementation
-- ✅ **Step 6 Basic**: Get started generator (`claude/wow/automation/get-started-generator.js`) - Basic onboarding documentation
-- ✅ **Step 7 Complete**: Version readiness validator with intelligent folder filtering (`claude/wow/automation/version-readiness-validator.js`)
+- ✅ **Step 2 Complete**: Knowledge base synchronization engine (`claude/wow/scripts/transition-manage knowledge-sync`) 
+- ✅ **Step 3 Complete**: Repository maintenance analyzer (`claude/wow/scripts/transition-manage maintenance-analysis`)
+- ✅ **Step 4 Complete**: Strategic analysis engine (`claude/wow/scripts/transition-manage strategic-analysis`)
+- ✅ **Step 5 Basic**: Knowledge base updater (`claude/wow/scripts/transition-manage knowledge-update`) - Foundational implementation
+- ✅ **Step 6 Basic**: Get started generator (`claude/wow/scripts/transition-manage get-started`) - Basic onboarding documentation
+- ✅ **Step 7 Complete**: Version readiness validator with intelligent folder filtering (`claude/wow/scripts/transition-manage readiness-validation`)
 - ✅ **Full Workflow**: Complete 7-step VERSION_TRANSITION automation with foundational tooling
 - ✅ **Validation Enhancement**: Smart folder filtering eliminates false positives from architectural examples
 - ✅ **Implementation Status**: Comprehensive operational guidance in `claude/project/docs/version-transition-implementation-status.md`

@@ -1,0 +1,115 @@
+#!/usr/bin/env node
+
+/**
+ * Git Management Script - Centralized git operations
+ * 
+ * Dispatches to git subcommands and provides unified git functionality:
+ * - status: Comprehensive repository status 
+ * - sync: Repository synchronization with remote
+ * - clean: Safe workspace cleanup operations
+ * - info: Repository information and metadata
+ * - release: Git tag and release creation
+ * - commit: Intelligent commit workflow (main commit script)
+ * 
+ * Usage:
+ *   git-manage status [--short] [--detailed] [--json]
+ *   git-manage sync [--force] [--dry-run]
+ *   git-manage clean [--force] [--dry-run] [--stash] [--reset]
+ *   git-manage info [--json] [--verbose]
+ *   git-manage release <version> [--message "text"] [--draft] [--prerelease]
+ *   git-manage commit [--message "text"] [--no-push] [--dry-run]
+ */
+
+import { execSync } from 'child_process';
+import path from 'path';
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const command = args[0];
+        
+        if (!command) {
+            console.log('Git Management Script - Available commands:');
+            console.log('  status [args]              - Comprehensive repository status');
+            console.log('  sync [args]                - Repository synchronization');
+            console.log('  clean [args]               - Safe workspace cleanup');
+            console.log('  info [args]                - Repository information');
+            console.log('  release <version> [args]   - Git tag and release creation');
+            console.log('  commit [args]              - Intelligent commit workflow');
+            console.log('');
+            console.log('Examples:');
+            console.log('  git-manage status --detailed');
+            console.log('  git-manage sync --dry-run');
+            console.log('  git-manage clean --stash');
+            console.log('  git-manage info --json');
+            console.log('  git-manage release v1.2.0 --message "Release notes"');
+            console.log('  git-manage commit --message "Fix bug #123"');
+            return;
+        }
+        
+        const scriptsDir = path.dirname(process.argv[1]);
+        const gitDir = path.join(scriptsDir, 'git');
+        const actionArgs = args.slice(1);
+        
+        let scriptPath;
+        let scriptCommand;
+        
+        switch (command) {
+            case 'status':
+                scriptPath = path.join(gitDir, 'git-status');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'sync':
+                scriptPath = path.join(gitDir, 'git-sync');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'clean':
+                scriptPath = path.join(gitDir, 'git-clean');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'info':
+                scriptPath = path.join(gitDir, 'git-info');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'release':
+                if (actionArgs.length === 0) {
+                    console.log('Usage: git-manage release <version> [--message "text"] [--draft] [--prerelease]');
+                    console.log('Examples:');
+                    console.log('  git-manage release v1.2.0');
+                    console.log('  git-manage release v2.0.0 --message "Major update"');
+                    return;
+                }
+                scriptPath = path.join(gitDir, 'git-release');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'commit':
+                scriptPath = path.join(gitDir, 'commit');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            default:
+                console.log(`Unknown command: ${command}`);
+                console.log('Available commands: status, sync, clean, info, release, commit');
+                process.exit(1);
+        }
+        
+        execSync(scriptCommand, { stdio: 'inherit' });
+        
+    } catch (error) {
+        console.error(`❌ Git management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+main().catch(error => {
+    console.error(`❌ Git management failed: ${error.message}`);
+    process.exit(1);
+});

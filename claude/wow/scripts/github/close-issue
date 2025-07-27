@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+
+const { execSync } = require('child_process');
+
+// Parse command line arguments
+function parseArgs() {
+    const args = process.argv.slice(2);
+    
+    if (args.length < 1) {
+        console.error('Usage: close-issue <issue-number> [comment]');
+        console.error('Example: close-issue 42 "Fixed the bug"');
+        process.exit(1);
+    }
+    
+    const issueNumber = parseInt(args[0]);
+    const comment = args[1] || '';
+    
+    if (isNaN(issueNumber)) {
+        console.error('Error: Issue number must be a valid number');
+        process.exit(1);
+    }
+    
+    return { issueNumber, comment };
+}
+
+// Close issue with optional comment
+function closeIssue(issueNumber, comment) {
+    try {
+        console.log(`🔒 Closing issue #${issueNumber}...`);
+        
+        // Build close command
+        let cmd = `claude/wow/scripts/gh-issue close ${issueNumber}`;
+        if (comment) {
+            cmd += ` -c "${comment.replace(/"/g, '\\"')}"`;
+            console.log(`📝 Comment: "${comment}"`);
+        }
+        
+        // Execute close command
+        const result = execSync(cmd, { encoding: 'utf8', stdio: 'pipe' });
+        
+        console.log(`✓ Issue #${issueNumber} closed successfully`);
+        
+        // Log closure in audit
+        const auditComment = comment ? `with comment: ${comment}` : 'without comment';
+        execSync(`claude/wow/scripts/audit-log "CLOSE_ISSUE" "action" "issue_closed" "${issueNumber}" "Issue #${issueNumber} closed ${auditComment}"`, { stdio: 'inherit' });
+        
+        return true;
+    } catch (error) {
+        console.error(`✗ Failed to close issue #${issueNumber}: ${error.message}`);
+        return false;
+    }
+}
+
+// Main function
+function main() {
+    const { issueNumber, comment } = parseArgs();
+    
+    console.log(`🎯 CLOSE ISSUE: Processing issue #${issueNumber}`);
+    
+    if (closeIssue(issueNumber, comment)) {
+        console.log('🎉 Issue closure completed successfully');
+        process.exit(0);
+    } else {
+        console.error('❌ Issue closure failed');
+        process.exit(1);
+    }
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

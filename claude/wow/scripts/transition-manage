@@ -1,0 +1,132 @@
+#!/usr/bin/env node
+
+/**
+ * Transition Management Script - Centralized version transition operations
+ * 
+ * Dispatches to transition subcommands and provides unified transition functionality:
+ * - version-transition: Execute full version transition process  
+ * - new-version-planning: Plan next version development
+ * - patch-release: Execute patch release workflow
+ * - knowledge-sync: Synchronize knowledge base
+ * - knowledge-update: Update knowledge base documentation
+ * - maintenance-analysis: Analyze repository maintenance needs
+ * - strategic-analysis: Generate strategic insights
+ * - readiness-validation: Validate version readiness
+ * - get-started: Generate onboarding documentation from development experience
+ * 
+ * Usage:
+ *   transition-manage version-transition
+ *   transition-manage new-version-planning  
+ *   transition-manage patch-release [version]
+ *   transition-manage knowledge-sync [args]
+ *   transition-manage knowledge-update [args]
+ *   transition-manage maintenance-analysis [args]
+ *   transition-manage strategic-analysis [args]
+ *   transition-manage readiness-validation [args]
+ */
+
+import { execSync } from 'child_process';
+import path from 'path';
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const command = args[0];
+        
+        if (!command) {
+            console.log('Transition Management Script - Available commands:');
+            console.log('  version-transition         - Execute full version transition process');
+            console.log('  new-version-planning       - Plan next version development');
+            console.log('  patch-release [version]    - Execute patch release workflow');
+            console.log('  knowledge-sync [args]      - Synchronize knowledge base');
+            console.log('  knowledge-update [args]    - Update knowledge base documentation');
+            console.log('  maintenance-analysis [args] - Analyze repository maintenance needs');
+            console.log('  strategic-analysis [args]  - Generate strategic insights');
+            console.log('  readiness-validation [args] - Validate version readiness');
+            console.log('  get-started [args]         - Generate onboarding documentation');
+            console.log('');
+            console.log('Examples:');
+            console.log('  transition-manage version-transition');
+            console.log('  transition-manage new-version-planning');
+            console.log('  transition-manage patch-release v1.2.1');
+            console.log('  transition-manage knowledge-sync --target docs');
+            console.log('  transition-manage maintenance-analysis --deep-scan');
+            return;
+        }
+        
+        const scriptsDir = path.dirname(process.argv[1]);
+        const transitionDir = path.join(scriptsDir, 'transition');
+        const actionArgs = args.slice(1);
+        
+        let scriptPath;
+        let scriptCommand;
+        
+        switch (command) {
+            case 'version-transition':
+                scriptPath = path.join(transitionDir, 'version-transition-process.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'new-version-planning':
+                scriptPath = path.join(transitionDir, 'new-version-planning-process.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'patch-release':
+                scriptPath = path.join(transitionDir, 'patch-release-process.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'knowledge-sync':
+                scriptPath = path.join(transitionDir, 'knowledge-sync-engine.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'knowledge-update':
+                scriptPath = path.join(transitionDir, 'knowledge-base-updater.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'maintenance-analysis':
+                scriptPath = path.join(transitionDir, 'repository-maintenance-analyzer.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'strategic-analysis':
+                scriptPath = path.join(transitionDir, 'strategic-analysis-engine.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'readiness-validation':
+                scriptPath = path.join(transitionDir, 'version-readiness-validator.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            case 'get-started':
+                scriptPath = path.join(transitionDir, 'get-started-generator.cjs');
+                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
+                break;
+                
+            default:
+                console.log(`Unknown command: ${command}`);
+                console.log('Available commands: version-transition, new-version-planning, patch-release,');
+                console.log('                    knowledge-sync, knowledge-update, maintenance-analysis,');
+                console.log('                    strategic-analysis, readiness-validation, get-started');
+                process.exit(1);
+        }
+        
+        execSync(scriptCommand, { stdio: 'inherit' });
+        
+    } catch (error) {
+        console.error(`❌ Transition management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+main().catch(error => {
+    console.error(`❌ Transition management failed: ${error.message}`);
+    process.exit(1);
+});

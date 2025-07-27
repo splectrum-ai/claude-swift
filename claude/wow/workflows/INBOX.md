@@ -26,12 +26,12 @@ Task ingestion workflow that processes inbox tasks by converting them to GitHub 
 
 ### 1. Execute Inbox Processing Script
 ```bash
-claude/wow/scripts/audit-log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"
+claude/wow/scripts/audit-manage log "INBOX" "workflow_start" "task_ingestion" "" "Starting INBOX workflow to process inbox tasks"
 
 # Execute inbox processing script
 claude/wow/scripts/inbox-process
 
-claude/wow/scripts/audit-log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow completed"
+claude/wow/scripts/audit-manage log "INBOX" "workflow_complete" "task_ingestion" "" "INBOX workflow completed"
 ```
 
 ## Script Integration

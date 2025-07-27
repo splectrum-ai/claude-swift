@@ -26,7 +26,7 @@ Patch release process for current version including release artifact creation an
 ### 3. Commit Preparation
 ```bash
 # Commit any final changes for patch release
-claude/wow/scripts/commit --message "Prepare for patch release v{VERSION}"
+claude/wow/scripts/git-manage commit --message "Prepare for patch release v{VERSION}"
 ```
 
 ### 4. Project-Specific Release Process
@@ -44,10 +44,10 @@ fi
 ### 5. GitHub Release Creation
 ```bash
 # Create and push version tag
-claude/wow/scripts/git-release v{VERSION}
+claude/wow/scripts/git-manage release v{VERSION}
 
 # Create GitHub release
-claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release_notes.md
+claude/wow/scripts/github-manage release create v{VERSION} --title "{PROJECT_NAME} v{VERSION}" --notes-file release_notes.md
 ```
 
 ## Release Workflow Execution
@@ -55,12 +55,12 @@ claude/wow/scripts/gh-release create v{VERSION} --title "{PROJECT_NAME} v{VERSIO
 ### Workflow Execution Script
 ```bash
 # Execute patch release workflow with audit logging
-claude/wow/scripts/audit-log "PATCH_RELEASE" "workflow_start" "patch_release" "" "Starting PATCH_RELEASE workflow"
+claude/wow/scripts/audit-manage log "PATCH_RELEASE" "workflow_start" "patch_release" "" "Starting PATCH_RELEASE workflow"
 
 # Execute patch release script (contains all above steps with logging)
-claude/wow/scripts/patch-release-process
+claude/wow/scripts/transition-manage patch-release
 
-claude/wow/scripts/audit-log "PATCH_RELEASE" "workflow_complete" "patch_release" "" "Patch release v{VERSION} completed successfully"
+claude/wow/scripts/audit-manage log "PATCH_RELEASE" "workflow_complete" "patch_release" "" "Patch release v{VERSION} completed successfully"
 ```
 
 ## Version Strategy

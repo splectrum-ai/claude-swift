@@ -1,0 +1,253 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+// Parse issue metadata from body text
+function parseIssueMetadata(body) {
+    const metadata = {
+        priority: 'MEDIUM',
+        effort: 'M',
+        blocks: 0,
+        blockedBy: 0,
+        workArea: 'General'
+    };
+    
+    if (!body) return metadata;
+    
+    // Extract priority
+    const priorityMatch = body.match(/##\s*Priority:\s*(HIGH|MEDIUM|LOW)/i);
+    if (priorityMatch) metadata.priority = priorityMatch[1].toUpperCase();
+    
+    // Extract effort
+    const effortMatch = body.match(/##\s*Effort:\s*(S|M|L|XL)/i);
+    if (effortMatch) metadata.effort = effortMatch[1].toUpperCase();
+    
+    // Extract work area
+    const workAreaMatch = body.match(/##\s*Work Area:\s*([^\n]+)/i);
+    if (workAreaMatch) metadata.workArea = workAreaMatch[1].trim();
+    
+    // Count blocking relationships
+    const blocksMatch = body.match(/\*\*Blocks:\*\*\s*([^\n]+)/i);
+    if (blocksMatch && !blocksMatch[1].includes('None')) {
+        metadata.blocks = blocksMatch[1].split(',').length;
+    }
+    
+    const blockedByMatch = body.match(/\*\*Blocked by:\*\*\s*([^\n]+)/i);
+    if (blockedByMatch && !blockedByMatch[1].includes('None')) {
+        metadata.blockedBy = blockedByMatch[1].split(',').length;
+    }
+    
+    return metadata;
+}
+
+// Calculate issue score
+function calculateScore(issue, metadata) {
+    // Priority weights: HIGH=3, MEDIUM=2, LOW=1
+    const priorityWeights = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+    const priorityWeight = priorityWeights[metadata.priority] || 2;
+    
+    // Impact factor: blocks count + 1
+    const impactFactor = metadata.blocks + 1;
+    
+    // Readiness: 1 if no blockers, 0.5 if some blockers, 0 if fully blocked
+    const readiness = metadata.blockedBy === 0 ? 1 : 0.5;
+    
+    // Effort factor: S=1, M=2, L=3, XL=4
+    const effortFactors = { S: 1, M: 2, L: 3, XL: 4 };
+    const effortFactor = effortFactors[metadata.effort] || 2;
+    
+    // Score = (Priority Weight × Impact Factor × Readiness) / Effort Factor
+    const score = (priorityWeight * impactFactor * readiness) / effortFactor;
+    
+    return {
+        score: parseFloat(score.toFixed(2)),
+        breakdown: {
+            priorityWeight,
+            impactFactor,
+            readiness,
+            effortFactor
+        }
+    };
+}
+
+// Get rationale for selection
+function getSelectionRationale(issue, metadata, scoreData) {
+    const rationales = [];
+    
+    // Priority reasoning
+    if (metadata.priority === 'HIGH') {
+        rationales.push('critical priority');
+    } else if (metadata.priority === 'MEDIUM') {
+        rationales.push('important work');
+    }
+    
+    // Impact reasoning
+    if (metadata.blocks > 0) {
+        rationales.push(`unblocks ${metadata.blocks} issue${metadata.blocks > 1 ? 's' : ''}`);
+    }
+    
+    // Readiness reasoning
+    if (metadata.blockedBy === 0) {
+        rationales.push('ready to start');
+    } else {
+        rationales.push('partially blocked');
+    }
+    
+    // Effort reasoning
+    if (metadata.effort === 'S') {
+        rationales.push('quick win');
+    } else if (metadata.effort === 'XL') {
+        rationales.push('large scope');
+    }
+    
+    // Work area
+    if (metadata.workArea !== 'General') {
+        rationales.push(`${metadata.workArea} feature`);
+    }
+    
+    return rationales.join(', ');
+}
+
+// Fetch and score issues
+function fetchAndScoreIssues() {
+    try {
+        console.log('🔍 Fetching issues from GitHub...');
+        
+        // Get open issues with body content
+        const result = execSync('claude/wow/scripts/gh-issue list --state open --limit 50 --json number,title,body,labels,milestone', { 
+            encoding: 'utf8' 
+        });
+        
+        const issues = JSON.parse(result);
+        console.log(`📊 Analyzing ${issues.length} open issues`);
+        console.log('');
+        
+        // Score each issue
+        const scoredIssues = issues.map(issue => {
+            const metadata = parseIssueMetadata(issue.body);
+            const scoreData = calculateScore(issue, metadata);
+            const rationale = getSelectionRationale(issue, metadata, scoreData);
+            
+            return {
+                ...issue,
+                metadata,
+                score: scoreData.score,
+                scoreBreakdown: scoreData.breakdown,
+                rationale
+            };
+        });
+        
+        // Sort by score descending
+        scoredIssues.sort((a, b) => b.score - a.score);
+        
+        return scoredIssues;
+    } catch (error) {
+        console.error(`❌ Failed to fetch and score issues: ${error.message}`);
+        return [];
+    }
+}
+
+// Display recommendations
+function displayRecommendations(scoredIssues, limit = 6) {
+    console.log('🎯 ISSUE RECOMMENDATIONS (Top-ranked by score):');
+    console.log('');
+    
+    const topIssues = scoredIssues.slice(0, limit);
+    
+    topIssues.forEach((issue, index) => {
+        const milestone = issue.milestone ? issue.milestone.title : 'no milestone';
+        const labels = issue.labels.map(l => l.name).join(', ') || 'no labels';
+        
+        console.log(`#${issue.number} [${issue.score}] ${issue.metadata.priority} ${issue.title}`);
+        console.log(`${issue.rationale} - ${milestone} - ${labels}`);
+        console.log('');
+    });
+    
+    if (scoredIssues.length > limit) {
+        console.log(`... and ${scoredIssues.length - limit} more issues available`);
+        console.log('');
+    }
+    
+    return topIssues;
+}
+
+// Get current milestone focus
+function getCurrentMilestoneFocus() {
+    try {
+        if (fs.existsSync('claude/project/version-config.md')) {
+            const content = fs.readFileSync('claude/project/version-config.md', 'utf8');
+            const match = content.match(/TARGET_VERSION.*:\s*(v[0-9.]+)/);
+            if (match) {
+                console.log(`🎯 Current milestone focus: ${match[1]}`);
+                return match[1];
+            }
+        }
+    } catch (e) {
+        // No milestone focus configured
+    }
+    
+    console.log('🎯 No specific milestone focus configured');
+    return null;
+}
+
+// Main function
+function main() {
+    console.log('🎯 NEXT ISSUE RECOMMEND: Finding the best issue to work on next');
+    console.log('');
+    
+    // Log workflow start
+    execSync('claude/wow/scripts/audit-log "NEXT_ISSUE" "workflow_start" "issue_recommendation" "" "Starting next issue recommendation"', { stdio: 'inherit' });
+    
+    try {
+        // Show current milestone focus
+        const currentMilestone = getCurrentMilestoneFocus();
+        console.log('');
+        
+        // Fetch and score issues
+        const scoredIssues = fetchAndScoreIssues();
+        
+        if (scoredIssues.length === 0) {
+            console.log('📭 No open issues found for recommendation');
+            process.exit(0);
+        }
+        
+        // Display recommendations
+        const recommendations = displayRecommendations(scoredIssues);
+        
+        // Summary
+        console.log('📋 RECOMMENDATION SUMMARY:');
+        console.log(`✓ Analyzed ${scoredIssues.length} open issues`);
+        console.log(`🎯 Top recommendation: #${recommendations[0].number} (score: ${recommendations[0].score})`);
+        console.log(`🔥 Priority distribution: ${getDistributionSummary(scoredIssues, 'priority')}`);
+        console.log(`⚡ Effort distribution: ${getDistributionSummary(scoredIssues, 'effort')}`);
+        
+        // Log completion
+        execSync(`claude/wow/scripts/audit-log "NEXT_ISSUE" "workflow_complete" "issue_recommendation" "${recommendations[0].number}" "Recommended issue #${recommendations[0].number}: ${recommendations[0].title}"`, { stdio: 'inherit' });
+        
+        console.log('');
+        console.log('🎉 Issue recommendation completed successfully');
+        
+    } catch (error) {
+        console.error(`❌ Issue recommendation error: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Get distribution summary
+function getDistributionSummary(issues, field) {
+    const counts = {};
+    issues.forEach(issue => {
+        const value = issue.metadata[field];
+        counts[value] = (counts[value] || 0) + 1;
+    });
+    
+    return Object.entries(counts)
+        .map(([key, count]) => `${key}:${count}`)
+        .join(', ');
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

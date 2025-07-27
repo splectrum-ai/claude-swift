@@ -1,0 +1,246 @@
+#!/usr/bin/env node
+
+/**
+ * GitHub Releases CLI - Drop-in replacement for `gh release` commands
+ * 
+ * Provides identical command-line interface to GitHub CLI but uses
+ * native fetch() implementation for zero dependencies
+ * 
+ * Usage:
+ *   gh-release list
+ *   gh-release view <tag-name>
+ *   gh-release create <tag-name> --title "Title" [--notes "Notes"] [--notes-file file]
+ *   gh-release upload <tag-name> <file-path>
+ */
+
+import { createGitHubReleases } from './lib-github-releases.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+/**
+ * Parse command line arguments into structured options
+ */
+function parseArgs(args) {
+    const options = {
+        command: args[0],
+        subcommand: args[1],
+        flags: {},
+        positional: []
+    };
+    
+    let i = 0;
+    while (i < args.length) {
+        const arg = args[i];
+        
+        if (arg.startsWith('--')) {
+            const flagName = arg.substring(2);
+            const nextArg = args[i + 1];
+            
+            if (nextArg && !nextArg.startsWith('-')) {
+                options.flags[flagName] = nextArg;
+                i += 2;
+            } else {
+                options.flags[flagName] = true;
+                i += 1;
+            }
+        } else if (arg.startsWith('-')) {
+            const flagName = arg.substring(1);
+            const nextArg = args[i + 1];
+            
+            if (nextArg && !nextArg.startsWith('-')) {
+                options.flags[flagName] = nextArg;
+                i += 2;
+            } else {
+                options.flags[flagName] = true;
+                i += 1;
+            }
+        } else {
+            options.positional.push(arg);
+            i += 1;
+        }
+    }
+    
+    return options;
+}
+
+/**
+ * Format output to match gh CLI JSON format
+ */
+function formatOutput(data, options = {}) {
+    if (options.flags && options.flags.json) {
+        // Output raw JSON for --json flag
+        const fields = options.flags.json === true ? null : options.flags.json.split(',');
+        
+        if (fields && Array.isArray(data)) {
+            // Filter fields for array output
+            const filteredData = data.map(item => {
+                const filtered = {};
+                fields.forEach(field => {
+                    if (item.hasOwnProperty(field)) {
+                        filtered[field] = item[field];
+                    }
+                });
+                return filtered;
+            });
+            return JSON.stringify(filteredData, null, 2);
+        } else if (fields && typeof data === 'object') {
+            // Filter fields for object output
+            const filtered = {};
+            fields.forEach(field => {
+                if (data.hasOwnProperty(field)) {
+                    filtered[field] = data[field];
+                }
+            });
+            return JSON.stringify(filtered, null, 2);
+        }
+    }
+    
+    // Default JSON output
+    return JSON.stringify(data, null, 2);
+}
+
+/**
+ * Main CLI function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const options = parseArgs(args);
+        
+        // Initialize GitHub API client with current working directory
+        const github = createGitHubReleases({ workingDirectory: process.cwd() });
+        
+        // Handle different commands
+        switch (options.positional[0]) {
+            case 'list':
+                const releases = await github.listReleases();
+                console.log(formatOutput(releases, options));
+                break;
+                
+            case 'view':
+                const tagName = options.positional[1];
+                if (!tagName) {
+                    throw new Error('Tag name is required for view command');
+                }
+                
+                const release = await github.getRelease(tagName);
+                console.log(formatOutput(release, options));
+                break;
+                
+            case 'create':
+                const createTag = options.positional[1];
+                if (!createTag) {
+                    throw new Error('Tag name is required for create command');
+                }
+                
+                let releaseNotes = options.flags.notes || '';
+                
+                // Handle --notes-file flag
+                if (options.flags['notes-file']) {
+                    const notesFile = options.flags['notes-file'];
+                    if (notesFile === '-') {
+                        // Read from stdin
+                        releaseNotes = await readStdin();
+                    } else {
+                        // Read from file
+                        releaseNotes = await fs.readFile(notesFile, 'utf8');
+                    }
+                }
+                
+                const createData = {
+                    tagName: createTag,
+                    name: options.flags.title || createTag,
+                    body: releaseNotes,
+                    draft: options.flags.draft || false,
+                    prerelease: options.flags.prerelease || false,
+                    targetCommitish: options.flags['target-commitish'] || 'main'
+                };
+                
+                const newRelease = await github.createRelease(createData);
+                
+                // Handle asset uploads if provided as additional arguments
+                const assetPaths = options.positional.slice(2);
+                if (assetPaths.length > 0) {
+                    console.log(`✓ Release created: ${newRelease.url}`);
+                    
+                    for (const assetPath of assetPaths) {
+                        try {
+                            const asset = await github.uploadReleaseAsset(createTag, assetPath);
+                            console.log(`✓ Uploaded asset: ${asset.name}`);
+                        } catch (error) {
+                            console.error(`✗ Failed to upload ${assetPath}: ${error.message}`);
+                        }
+                    }
+                } else {
+                    // Output URL for compatibility with gh CLI
+                    console.log(newRelease.url);
+                }
+                break;
+                
+            case 'upload':
+                const uploadTag = options.positional[1];
+                const uploadFile = options.positional[2];
+                
+                if (!uploadTag) {
+                    throw new Error('Tag name is required for upload command');
+                }
+                
+                if (!uploadFile) {
+                    throw new Error('File path is required for upload command');
+                }
+                
+                const asset = await github.uploadReleaseAsset(uploadTag, uploadFile);
+                console.log(`✓ Uploaded: ${asset.name} (${asset.size} bytes)`);
+                console.log(`Download URL: ${asset.browserDownloadUrl}`);
+                break;
+                
+            case 'latest':
+                const latestRelease = await github.getLatestRelease();
+                console.log(formatOutput(latestRelease, options));
+                break;
+                
+            case 'delete':
+                const deleteTag = options.positional[1];
+                if (!deleteTag) {
+                    throw new Error('Tag name is required for delete command');
+                }
+                
+                await github.deleteRelease(deleteTag);
+                console.log(`✓ Release ${deleteTag} deleted`);
+                break;
+                
+            default:
+                console.log('GitHub Releases CLI - Available commands:');
+                console.log('  list - List all releases');
+                console.log('  view <tag-name> - View release details');
+                console.log('  create <tag-name> --title "Title" [--notes "Notes"] [--notes-file file] [--draft] [--prerelease] [asset-files...]');
+                console.log('  upload <tag-name> <file-path> - Upload asset to existing release');
+                console.log('  latest - Get latest release');
+                console.log('  delete <tag-name> - Delete release');
+                console.log('');
+                console.log('Global flags:');
+                console.log('  --json [fields] - Output in JSON format');
+                console.log('');
+                console.log('Environment variables:');
+                console.log('  GITHUB_TOKEN - GitHub personal access token (required)');
+                break;
+        }
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+/**
+ * Read from stdin
+ */
+async function readStdin() {
+    const chunks = [];
+    for await (const chunk of process.stdin) {
+        chunks.push(chunk);
+    }
+    return Buffer.concat(chunks).toString('utf8');
+}
+
+// Run CLI
+main();

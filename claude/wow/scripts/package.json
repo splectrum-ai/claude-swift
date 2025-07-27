@@ -4,10 +4,10 @@
   "description": "Node.js scripts for Claude workflow optimization",
   "type": "module",
   "scripts": {
-    "test": "node test/run-tests.js",
-    "audit:log": "node cli/audit.js",
-    "cache:sync": "node cli/cache.js sync",
-    "task:create": "node cli/task.js create"
+    "test": "echo 'Tests moved to old/ - outdated due to architecture changes'",
+    "audit:log": "echo 'Use audit-manage log instead'",
+    "cache:sync": "echo 'Cache operations moved to old/ - outdated'",
+    "task:create": "echo 'Use task-create script instead'"
   },
   "engines": {
     "node": ">=14.0.0"

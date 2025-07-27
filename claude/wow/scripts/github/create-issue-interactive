@@ -1,0 +1,174 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+// Get target milestone from version config
+function getTargetMilestone() {
+    try {
+        if (fs.existsSync('claude/project/version-config.md')) {
+            const content = fs.readFileSync('claude/project/version-config.md', 'utf8');
+            const match = content.match(/TARGET_VERSION.*:\s*(v[0-9.]+)/);
+            if (match) return match[1];
+        }
+    } catch (e) {
+        // Fall back to no milestone
+    }
+    return null;
+}
+
+// Load general issue template
+function loadIssueTemplate() {
+    const templatePath = 'claude/wow/templates/issue-template.md';
+    
+    if (fs.existsSync(templatePath)) {
+        return fs.readFileSync(templatePath, 'utf8');
+    }
+    
+    // Default template if file doesn't exist
+    return `## Description
+{{DESCRIPTION}}
+
+## Priority: {{PRIORITY}}
+**Justification:** {{PRIORITY_JUSTIFICATION}}
+
+## Dependencies
+**Blocks:** {{BLOCKS}}
+**Blocked by:** {{BLOCKED_BY}}
+**Related:** {{RELATED}}
+
+## Effort: {{EFFORT}}
+**Estimate:** {{EFFORT_JUSTIFICATION}}
+
+## Test Criteria
+**How to verify completion:**
+{{TEST_CRITERIA}}
+
+## Work Area: {{WORK_AREA}}
+**Context:** {{WORK_CONTEXT}}
+
+🤖 Generated with [Claude Code](https://claude.ai/code)`;
+}
+
+// Fill template with collected information
+function fillTemplate(template, issueData) {
+    let filledTemplate = template;
+    
+    // Replace placeholders with actual values
+    Object.keys(issueData).forEach(key => {
+        const placeholder = `{{${key.toUpperCase()}}}`;
+        filledTemplate = filledTemplate.replace(new RegExp(placeholder, 'g'), issueData[key] || 'Not specified');
+    });
+    
+    return filledTemplate;
+}
+
+// Create GitHub issue
+function createGitHubIssue(title, body, milestone = null) {
+    try {
+        console.log('📝 Creating GitHub issue...');
+        
+        // Write body to temp file to handle multiline content
+        const tempFile = `/tmp/issue-body-${Date.now()}.md`;
+        fs.writeFileSync(tempFile, body);
+        
+        // Build create command
+        let cmd = `claude/wow/scripts/gh-issue create --title "${title.replace(/"/g, '\\"')}" --body-file "${tempFile}"`;
+        
+        // Add milestone if specified
+        if (milestone) {
+            cmd += ` --milestone "${milestone}"`;
+        }
+        
+        // Execute create command
+        const result = execSync(cmd, { encoding: 'utf8' });
+        
+        // Clean up temp file
+        fs.unlinkSync(tempFile);
+        
+        // Extract issue URL from output
+        const issueUrl = result.trim();
+        const issueMatch = issueUrl.match(/\/(\d+)$/);
+        const issueNumber = issueMatch ? issueMatch[1] : 'unknown';
+        
+        return { success: true, url: issueUrl, number: issueNumber };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+// Main function - expects Claude to provide issue data through discussion
+function main() {
+    console.log('🎯 CREATE ISSUE INTERACTIVE: Starting issue creation');
+    console.log('ℹ️  This script expects Claude to collect issue information through discussion');
+    console.log('ℹ️  and then call this script with the collected data as environment variables');
+    console.log('');
+    
+    // Collect issue information from environment variables (set by Claude)
+    const issueData = {
+        title: process.env.ISSUE_TITLE || '',
+        description: process.env.ISSUE_DESCRIPTION || '',
+        priority: process.env.ISSUE_PRIORITY || 'MEDIUM',
+        priority_justification: process.env.ISSUE_PRIORITY_JUSTIFICATION || '',
+        effort: process.env.ISSUE_EFFORT || 'M',
+        effort_justification: process.env.ISSUE_EFFORT_JUSTIFICATION || '',
+        blocks: process.env.ISSUE_BLOCKS || 'None',
+        blocked_by: process.env.ISSUE_BLOCKED_BY || 'None',
+        related: process.env.ISSUE_RELATED || 'None',
+        work_area: process.env.ISSUE_WORK_AREA || 'General',
+        work_context: process.env.ISSUE_WORK_CONTEXT || '',
+        test_criteria: process.env.ISSUE_TEST_CRITERIA || '- [ ] Implementation completed\n- [ ] Manual testing passed'
+    };
+    
+    // Validate required fields
+    if (!issueData.title) {
+        console.error('❌ Error: ISSUE_TITLE environment variable is required');
+        console.error('Example usage:');
+        console.error('  ISSUE_TITLE="Fix bug in parser" ISSUE_DESCRIPTION="The parser fails on edge case" ./create-issue-interactive');
+        process.exit(1);
+    }
+    
+    console.log(`📋 Title: ${issueData.title}`);
+    console.log(`🔥 Priority: ${issueData.priority}`);
+    console.log(`⚡ Effort: ${issueData.effort}`);
+    console.log(`🏷️  Work Area: ${issueData.work_area}`);
+    console.log('');
+    
+    try {
+        // Load and fill template
+        const template = loadIssueTemplate();
+        const body = fillTemplate(template, issueData);
+        
+        // Get target milestone
+        const milestone = getTargetMilestone();
+        if (milestone) {
+            console.log(`🎯 Using milestone: ${milestone}`);
+        }
+        
+        // Create GitHub issue
+        const result = createGitHubIssue(issueData.title, body, milestone);
+        
+        if (result.success) {
+            console.log(`✓ Issue created successfully: ${result.url}`);
+            console.log(`📝 Issue #${result.number}: ${issueData.title}`);
+            
+            // Log creation in audit
+            execSync(`claude/wow/scripts/audit-log "CREATE_ISSUE" "action" "issue_created" "${result.number}" "Issue #${result.number} created: ${issueData.title}"`, { stdio: 'inherit' });
+            
+            console.log('🎉 Issue creation completed successfully');
+            process.exit(0);
+        } else {
+            console.error(`✗ Failed to create issue: ${result.error}`);
+            process.exit(1);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Error creating issue: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run the script
+if (require.main === module) {
+    main();
+}

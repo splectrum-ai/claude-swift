@@ -13,17 +13,17 @@ Automated workflow for selecting the next GitHub issue to work on, combining rec
 
 ### 1. Execute Issue Recommendation Script
 ```bash
-claude/wow/scripts/audit-log "NEXT_ISSUE" "workflow_start" "issue_recommendation" "" "Starting NEXT_ISSUE workflow"
+claude/wow/scripts/audit-manage log "NEXT_ISSUE" "workflow_start" "issue_recommendation" "" "Starting NEXT_ISSUE workflow"
 
 # Execute GitHub-based issue recommendation with scoring
-claude/wow/scripts/next-issue-recommend
+claude/wow/scripts/issue-manage list
 
-claude/wow/scripts/audit-log "NEXT_ISSUE" "workflow_complete" "issue_recommendation" "" "Issue recommendation completed successfully"
+claude/wow/scripts/audit-manage log "NEXT_ISSUE" "workflow_complete" "issue_recommendation" "" "Issue recommendation completed successfully"
 ```
 
 ## Script Integration
 
-The issue recommendation process delegates to `claude/wow/scripts/next-issue-recommend` which handles:
+The issue recommendation process delegates to `claude/wow/scripts/issue-manage list` which handles:
 - GitHub issue fetching with body content for metadata parsing
 - Priority/effort/dependency extraction from issue body text
 - Score calculation using formula: `(Priority Weight × Impact Factor × Readiness) / Effort Factor`

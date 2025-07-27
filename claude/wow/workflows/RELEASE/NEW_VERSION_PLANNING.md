@@ -19,12 +19,12 @@ Systematic planning workflow to establish scope, priorities, and work organizati
 
 ### 1. Execute New Version Planning Script
 ```bash
-claude/wow/scripts/audit-log "NEW_VERSION_PLANNING" "workflow_start" "version_planning" "" "Starting NEW_VERSION_PLANNING workflow"
+claude/wow/scripts/audit-manage log "NEW_VERSION_PLANNING" "workflow_start" "version_planning" "" "Starting NEW_VERSION_PLANNING workflow"
 
 # Execute comprehensive version planning process
-claude/wow/scripts/new-version-planning-process
+claude/wow/scripts/transition-manage new-version-planning
 
-claude/wow/scripts/audit-log "NEW_VERSION_PLANNING" "workflow_complete" "version_planning" "" "New version planning completed successfully"
+claude/wow/scripts/audit-manage log "NEW_VERSION_PLANNING" "workflow_complete" "version_planning" "" "New version planning completed successfully"
 ```
 
 ## Script Integration
@@ -59,9 +59,9 @@ The new version planning process executes a comprehensive 5-step planning sequen
 - **Minimal Overhead**: Focus on essential categorization only
 
 ### Filtering Patterns
-- **Version Work**: `claude/wow/scripts/gh-issue list --milestone "v1.3.0"`
-- **Feature Work**: `claude/wow/scripts/gh-issue list --label "feature-name"`
-- **Version + Feature**: `claude/wow/scripts/gh-issue list --milestone "v1.3.0" --label "feature-name"`
+- **Version Work**: `claude/wow/scripts/issue-manage list v1.3.0`
+- **Feature Work**: `claude/wow/scripts/issue-manage list feature-name`
+- **Version + Feature**: `claude/wow/scripts/issue-manage list v1.3.0 feature-name`
 - **Dependencies**: Track in issue descriptions and comments
 
 ## Work Breakdown Methodology

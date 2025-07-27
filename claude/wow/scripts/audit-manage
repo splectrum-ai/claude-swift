@@ -1,23 +1,28 @@
 #!/usr/bin/env node
 
 /**
- * Audit Management Script - Automated audit log operations
+ * Audit Management Script - Centralized audit operations
  * 
- * Handles common audit log operations without user prompts:
- * - Archive current log (for session end)
- * - Create fresh log with marker
- * - Archive for version releases
- * - Clean up old logs
+ * Dispatches to audit subcommands and provides unified audit functionality:
+ * - log: Basic audit logging (replaces audit-log)
+ * - archive-session: Archive current log for session end
+ * - archive-version: Archive for version releases
+ * - fresh-log: Create fresh log with marker
+ * - cleanup: Clean up old logs
+ * - metrics: Run audit metrics analysis
  * 
  * Usage:
+ *   audit-manage log <workflow> <action> <step> <details> <description>
  *   audit-manage archive-session
  *   audit-manage archive-version <version>
  *   audit-manage fresh-log
  *   audit-manage cleanup [--days 30]
+ *   audit-manage metrics
  */
 
 import { promises as fs, existsSync, mkdirSync } from 'fs';
-import { createRepoConfig } from './lib/repo-config.js';
+import { createRepoConfig } from './audit/lib-repo-config.js';
+import { execSync } from 'child_process';
 import path from 'path';
 
 /**
@@ -198,20 +203,47 @@ async function main() {
         
         if (!command) {
             console.log('Audit Management Script - Available commands:');
+            console.log('  log <workflow> <action> <step> <details> <description> - Basic audit logging');
             console.log('  archive-session - Archive current log for session end');
             console.log('  archive-version <version> - Archive logs for version release');
             console.log('  fresh-log - Create fresh audit log with marker');
             console.log('  cleanup [--days N] - Clean up old logs (default 30 days)');
+            console.log('  metrics - Run audit metrics analysis');
             console.log('');
             console.log('Examples:');
+            console.log('  audit-manage log SESSION_START workflow_start session_init');
             console.log('  audit-manage archive-session');
             console.log('  audit-manage archive-version v1.2.3');
             console.log('  audit-manage fresh-log');
             console.log('  audit-manage cleanup --days 60');
+            console.log('  audit-manage metrics');
             return;
         }
         
         switch (command) {
+            case 'log':
+                // Handle basic audit logging (replaces audit-log)
+                const workflow = args[1];
+                const action = args[2] || 'step';
+                const step = args[3] || '';
+                const details = args[4] || '';
+                const description = args[5] || '';
+                
+                if (!workflow) {
+                    console.error('Usage: audit-manage log <workflow> <action> <step> <details> <description>');
+                    process.exit(1);
+                }
+                
+                auditLog(workflow, step, details, action, description);
+                break;
+                
+            case 'metrics':
+                // Dispatch to metrics analyzer
+                const scriptsDir = path.dirname(process.argv[1]);
+                const metricsScript = path.join(scriptsDir, 'audit', 'metrics-analyzer.cjs');
+                execSync(`"${metricsScript}"`, { stdio: 'inherit' });
+                break;
+                
             case 'archive-session':
                 await archiveSession();
                 break;

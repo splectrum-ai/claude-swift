@@ -395,6 +395,178 @@ async function seedFromGitHub(options = {}) {
     }
 }
 
+// Close issue or milestone (delete if unassigned, move to closed/ if in milestone)
+function closeIssue(identifier) {
+    const issuesDir = 'claude/issues';
+    
+    // Check if it's a milestone name (folder exists)
+    const milestonePath = path.join(issuesDir, identifier);
+    if (fs.existsSync(milestonePath) && fs.statSync(milestonePath).isDirectory() && 
+        !['unassigned', 'templates'].includes(identifier)) {
+        
+        // Close entire milestone
+        const files = fs.readdirSync(milestonePath, { withFileTypes: true })
+            .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))
+            .map(dirent => dirent.name);
+        
+        if (files.length === 0) {
+            console.log(`✓ Milestone '${identifier}' already empty`);
+            return;
+        }
+        
+        // Create closed directory
+        const closedDir = path.join(milestonePath, 'closed');
+        if (!fs.existsSync(closedDir)) {
+            fs.mkdirSync(closedDir, { recursive: true });
+        }
+        
+        // Move all issue files to closed/
+        let movedCount = 0;
+        for (const file of files) {
+            const sourcePath = path.join(milestonePath, file);
+            const targetPath = path.join(closedDir, file);
+            
+            fs.renameSync(sourcePath, targetPath);
+            movedCount++;
+        }
+        
+        console.log(`✓ Milestone '${identifier}' closed: ${movedCount} issues moved to closed/`);
+        return;
+    }
+    
+    // Handle as individual issue
+    const id = identifier.padStart(3, '0');
+    let foundPath = null;
+    let isUnassigned = false;
+    
+    // Check unassigned folder
+    const unassignedDir = path.join(issuesDir, 'unassigned');
+    if (fs.existsSync(unassignedDir)) {
+        const files = fs.readdirSync(unassignedDir);
+        const unassignedFile = files.find(f => f.startsWith(id + '-'));
+        if (unassignedFile) {
+            foundPath = path.join(unassignedDir, unassignedFile);
+            isUnassigned = true;
+        }
+    }
+    
+    // Check milestone folders if not found in unassigned
+    if (!foundPath && fs.existsSync(issuesDir)) {
+        const folders = fs.readdirSync(issuesDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory() && !['unassigned', 'templates'].includes(dirent.name))
+            .map(dirent => dirent.name);
+            
+        for (const folder of folders) {
+            const folderPath = path.join(issuesDir, folder);
+            const files = fs.readdirSync(folderPath);
+            const issueFile = files.find(f => f.startsWith(id + '-'));
+            if (issueFile) {
+                foundPath = path.join(folderPath, issueFile);
+                break;
+            }
+        }
+    }
+    
+    if (!foundPath) {
+        throw new Error(`Issue ${id} not found`);
+    }
+    
+    if (isUnassigned) {
+        // Delete unassigned issues
+        fs.unlinkSync(foundPath);
+        console.log(`✓ Issue ${id} deleted (was unassigned)`);
+    } else {
+        // Move milestone issues to closed subfolder
+        const issueDir = path.dirname(foundPath);
+        const fileName = path.basename(foundPath);
+        const closedDir = path.join(issueDir, 'closed');
+        
+        // Create closed directory if it doesn't exist
+        if (!fs.existsSync(closedDir)) {
+            fs.mkdirSync(closedDir, { recursive: true });
+        }
+        
+        const newPath = path.join(closedDir, fileName);
+        fs.renameSync(foundPath, newPath);
+        
+        const milestone = path.basename(issueDir);
+        console.log(`✓ Issue ${id} closed (moved to ${milestone}/closed/)`);
+    }
+}
+
+// Housekeeping - remove closed milestones that aren't the target version
+function housekeeping() {
+    const issuesDir = 'claude/issues';
+    
+    if (!fs.existsSync(issuesDir)) {
+        console.log('❌ No issues directory found');
+        return;
+    }
+    
+    // Get all milestone directories (exclude special folders)
+    const milestones = fs.readdirSync(issuesDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory() && !['unassigned', 'templates'].includes(dirent.name))
+        .map(dirent => dirent.name);
+    
+    if (milestones.length === 0) {
+        console.log('✅ No milestones found');
+        return;
+    }
+    
+    // Find the latest version milestone (assumed to be target)
+    const versionMilestones = milestones.filter(m => m.match(/^v\d+\.\d+\.\d+$/));
+    const latestVersion = versionMilestones.sort((a, b) => {
+        const aVersions = a.substring(1).split('.').map(Number);
+        const bVersions = b.substring(1).split('.').map(Number);
+        
+        for (let i = 0; i < 3; i++) {
+            if (aVersions[i] !== bVersions[i]) {
+                return bVersions[i] - aVersions[i]; // Descending order
+            }
+        }
+        return 0;
+    })[0];
+    
+    console.log(`🎯 Target version: ${latestVersion || 'none detected'}`);
+    console.log('🧹 Checking milestones for housekeeping...\n');
+    
+    let removedCount = 0;
+    
+    for (const milestone of milestones) {
+        if (milestone === latestVersion) {
+            console.log(`⏭ Skipping target milestone: ${milestone}`);
+            continue;
+        }
+        
+        const milestonePath = path.join(issuesDir, milestone);
+        
+        // Check if all issues are in closed/ subfolder
+        const files = fs.readdirSync(milestonePath, { withFileTypes: true });
+        const issueFiles = files.filter(f => f.isFile() && f.name.endsWith('.md'));
+        const closedDir = path.join(milestonePath, 'closed');
+        const hasClosedDir = fs.existsSync(closedDir);
+        
+        if (issueFiles.length === 0 && hasClosedDir) {
+            // All issues are closed, safe to remove
+            console.log(`🗑 Removing closed milestone: ${milestone}`);
+            
+            // Remove the entire milestone directory
+            fs.rmSync(milestonePath, { recursive: true, force: true });
+            removedCount++;
+        } else if (issueFiles.length > 0) {
+            console.log(`⏭ Skipping milestone with open issues: ${milestone} (${issueFiles.length} open)`);
+        } else {
+            console.log(`⏭ Skipping empty milestone: ${milestone}`);
+        }
+    }
+    
+    console.log(`\n✅ Housekeeping complete: ${removedCount} closed milestones removed`);
+    
+    if (removedCount === 0) {
+        console.log('💡 No cleanup needed - all milestones are either active or have open issues');
+    }
+}
+
 // Main CLI
 async function main() {
     const args = process.argv.slice(2);
@@ -427,6 +599,18 @@ async function main() {
                 triageIssues();
                 break;
                 
+            case 'housekeeping':
+                housekeeping();
+                break;
+                
+            case 'close':
+                if (!args[1]) {
+                    console.log('Usage: issue-manage close <issue-id>');
+                    process.exit(1);
+                }
+                closeIssue(args[1]);
+                break;
+                
             case 'seed':
                 const seedOptions = {};
                 if (args.includes('--dry-run')) seedOptions.dryRun = true;
@@ -441,7 +625,9 @@ async function main() {
                 console.log('  create <type> <title>  - Create new issue');
                 console.log('  list [location]        - List issues (all/unassigned/v1.0/etc)');
                 console.log('  show <id>              - Show issue details');
+                console.log('  close <id|milestone>   - Close issue or milestone (delete if unassigned, archive if milestone)');
                 console.log('  triage                 - Review unassigned issues');
+                console.log('  housekeeping           - Remove closed milestones (except target version)');
                 console.log('  seed [--dry-run] [--state=open|closed] - Import from GitHub');
         }
     } catch (error) {
