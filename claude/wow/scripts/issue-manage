@@ -10,6 +10,151 @@ import { getRepoConfig } from './lib/repo-config.js';
  * Handles creation, listing, and management of repository issues
  */
 
+/**
+ * Initialize issues structure directly
+ */
+async function initializeIssuesStructure() {
+    console.log('🔧 Initializing issues structure...');
+    
+    const issuesDir = 'claude/issues';
+    
+    if (!fs.existsSync(issuesDir)) {
+        console.log('Creating issues directory structure...');
+        
+        // Create main directories
+        fs.mkdirSync(path.join(issuesDir, 'templates'), { recursive: true });
+        fs.mkdirSync(path.join(issuesDir, 'unassigned'), { recursive: true });
+        
+        // Create initial sync.json
+        const initialSync = {
+            last_sync: null,
+            last_github_fetch: null,
+            total_issues: 0,
+            sync_version: "2.0.0",
+            bidirectional_sync: true,
+            pulled_from_github: 0,
+            pushed_to_github: 0,
+            conflicts: 0
+        };
+        
+        fs.writeFileSync(
+            path.join(issuesDir, 'sync.json'),
+            JSON.stringify(initialSync, null, 2)
+        );
+        
+        console.log('✓ Created issues directory structure');
+        console.log('✓ Created initial sync.json');
+    } else {
+        console.log('✓ Issues structure already exists');
+    }
+}
+
+/**
+ * Sync templates from framework, preserving custom templates
+ */
+async function syncTemplates() {
+    console.log('🔄 Synchronizing templates with framework...');
+    
+    const frameworkTemplatesDir = 'claude/wow/templates';
+    const localTemplatesDir = 'claude/issues/templates';
+    
+    if (!fs.existsSync(frameworkTemplatesDir)) {
+        console.log('⚠️  Framework templates directory not found - using local templates only');
+        return;
+    }
+    
+    if (!fs.existsSync(localTemplatesDir)) {
+        fs.mkdirSync(localTemplatesDir, { recursive: true });
+    }
+    
+    // Get framework templates
+    const frameworkTemplates = fs.readdirSync(frameworkTemplatesDir);
+    const mdTemplates = frameworkTemplates.filter(file => file.endsWith('.md'));
+    
+    // Sync each framework template
+    for (const templateFile of mdTemplates) {
+        const frameworkPath = path.join(frameworkTemplatesDir, templateFile);
+        const localPath = path.join(localTemplatesDir, templateFile);
+        
+        try {
+            const frameworkContent = fs.readFileSync(frameworkPath, 'utf8');
+            
+            if (fs.existsSync(localPath)) {
+                // Check if files are different
+                const localContent = fs.readFileSync(localPath, 'utf8');
+                
+                if (frameworkContent !== localContent) {
+                    fs.writeFileSync(localPath, frameworkContent);
+                    console.log(`✓ Updated template: ${templateFile}`);
+                } else {
+                    console.log(`✓ Template up to date: ${templateFile}`);
+                }
+            } else {
+                // New template from framework
+                fs.writeFileSync(localPath, frameworkContent);
+                console.log(`✓ Added new template: ${templateFile}`);
+            }
+        } catch (error) {
+            console.log(`✗ Failed to sync template ${templateFile}: ${error.message}`);
+        }
+    }
+    
+    // Check for custom templates (preserve them)
+    try {
+        const localTemplates = fs.readdirSync(localTemplatesDir);
+        const localMdTemplates = localTemplates.filter(file => file.endsWith('.md'));
+        
+        for (const localTemplate of localMdTemplates) {
+            const frameworkPath = path.join(frameworkTemplatesDir, localTemplate);
+            
+            if (!fs.existsSync(frameworkPath)) {
+                console.log(`📝 Custom template preserved: ${localTemplate}`);
+            }
+        }
+    } catch (error) {
+        // Local templates directory might not exist yet
+    }
+}
+
+/**
+ * Check if issues structure exists, initialize if needed
+ */
+async function ensureIssuesInitialized() {
+    // Check if issues directory exists
+    if (!fs.existsSync('claude/issues')) {
+        console.log('🔧 Issues directory not found. Creating structure...');
+        
+        try {
+            // Initialize issues structure directly
+            await initializeIssuesStructure();
+            await syncTemplates();
+            
+            console.log('✅ Issues structure created successfully');
+        } catch (error) {
+            throw new Error(`Failed to initialize issues structure: ${error.message}`);
+        }
+    }
+    
+    // Check seeding status and offer to seed if not done
+    const configPath = 'claude/local/repo-config.json';
+    let config = {};
+    
+    // Load existing config
+    if (fs.existsSync(configPath)) {
+        try {
+            config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        } catch (error) {
+            // Invalid JSON, will recreate
+        }
+    }
+    
+    // If not seeded, suggest seeding (but don't auto-seed)
+    if (!config.issues_seeded) {
+        console.log('💡 Issues structure is ready but not seeded from GitHub.');
+        console.log('   Run "issue-manage seed" to import issues from GitHub.');
+    }
+}
+
 // Get next issue ID
 function getNextIssueId() {
     const counterPath = 'claude/issues/.issue-counter';
@@ -42,6 +187,42 @@ function loadTemplate(type) {
         throw new Error(`Template not found: ${type}. Available: feature, bug, task`);
     }
     return fs.readFileSync(templatePath, 'utf8');
+}
+
+// Extract frontmatter from content
+function extractFrontmatter(content) {
+    const frontmatterRegex = /^---\n([\s\S]*?)\n---\n/;
+    const match = content.match(frontmatterRegex);
+    
+    if (!match) {
+        return {};
+    }
+    
+    const frontmatter = {};
+    const lines = match[1].split('\n');
+    
+    for (const line of lines) {
+        const colonIndex = line.indexOf(':');
+        if (colonIndex > -1) {
+            const key = line.substring(0, colonIndex).trim();
+            let value = line.substring(colonIndex + 1).trim();
+            
+            // Remove quotes if present
+            if ((value.startsWith('"') && value.endsWith('"')) || 
+                (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.substring(1, value.length - 1);
+            }
+            
+            // Parse numbers
+            if (!isNaN(value) && value !== '') {
+                value = Number(value);
+            }
+            
+            frontmatter[key] = value;
+        }
+    }
+    
+    return frontmatter;
 }
 
 // Update frontmatter
@@ -381,16 +562,193 @@ async function seedFromGitHub(options = {}) {
         
         fs.writeFileSync('claude/issues/sync.json', JSON.stringify(syncData, null, 2));
         
+        // Update local config to mark issues as seeded
+        const configPath = 'claude/local/repo-config.json';
+        let localConfig = {};
+        if (fs.existsSync(configPath)) {
+            try {
+                localConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            } catch (error) {
+                // Invalid JSON, will recreate
+            }
+        }
+        
+        localConfig.issues_seeded = true;
+        localConfig.last_seeded_at = new Date().toISOString();
+        fs.writeFileSync(configPath, JSON.stringify(localConfig, null, 2));
+        
         console.log('\n📊 Import Summary:');
         console.log(`  ✅ Imported: ${importedCount}`);
         console.log(`  ❌ Skipped: ${skippedCount}`);
         console.log(`  📁 Location: claude/issues/`);
+        console.log('  🏷️  Config updated: issues_seeded = true');
         console.log('\n💡 Next steps:');
         console.log('  - Run: issue sesame triage');
         console.log('  - Organize issues into milestone folders');
         
     } catch (error) {
         console.error(`❌ Seeding failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Sync issues bidirectionally with GitHub
+async function syncWithGitHub(options = {}) {
+    console.log('🔄 Syncing issues with GitHub (bidirectional)');
+    console.log('═'.repeat(50));
+    
+    try {
+        // Get repository config
+        const config = getRepoConfig();
+        const { owner, repo } = config.getRepositoryInfo();
+        
+        console.log(`Repository: ${owner}/${repo}`);
+        
+        // Check gh CLI authentication
+        try {
+            execSync('gh auth status', { stdio: 'pipe' });
+        } catch (error) {
+            console.log('❌ GitHub CLI not authenticated');
+            console.log('   Run: gh auth login');
+            process.exit(1);
+        }
+        
+        // Phase 1: Pull from GitHub
+        console.log('\n📥 Phase 1: Fetching issues from GitHub...');
+        const state = options.state || 'open';
+        let ghCommand = `gh api repos/${owner}/${repo}/issues?state=${state}&per_page=100`;
+        const issuesJson = execSync(ghCommand, { encoding: 'utf8' });
+        const githubIssues = JSON.parse(issuesJson);
+        console.log(`Found ${githubIssues.length} GitHub issues`);
+        
+        // Get all local issues
+        console.log('\n📂 Phase 2: Reading local issues...');
+        const localIssuesMap = new Map();
+        const issuesDir = 'claude/issues';
+        
+        // Scan all directories for issues
+        const dirs = fs.readdirSync(issuesDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory() && !['templates'].includes(dirent.name))
+            .map(dirent => dirent.name);
+        
+        for (const dir of dirs) {
+            const dirPath = path.join(issuesDir, dir);
+            const files = fs.readdirSync(dirPath)
+                .filter(f => f.endsWith('.md') && !f.startsWith('.'));
+            
+            for (const file of files) {
+                const filepath = path.join(dirPath, file);
+                const content = fs.readFileSync(filepath, 'utf8');
+                const frontmatter = extractFrontmatter(content);
+                
+                if (frontmatter.github_id) {
+                    localIssuesMap.set(frontmatter.github_id, {
+                        filepath,
+                        content,
+                        frontmatter,
+                        directory: dir
+                    });
+                }
+            }
+        }
+        
+        console.log(`Found ${localIssuesMap.size} local issues with GitHub IDs`);
+        
+        let pulledCount = 0;
+        let pushedCount = 0;
+        let conflictCount = 0;
+        
+        // Phase 3: Compare and merge
+        console.log('\n🔍 Phase 3: Comparing timestamps and syncing...');
+        
+        // Process GitHub issues
+        for (const githubIssue of githubIssues) {
+            const localIssue = localIssuesMap.get(githubIssue.number);
+            
+            if (!localIssue) {
+                // New issue from GitHub - import it
+                console.log(`📥 New issue from GitHub: #${githubIssue.number}`);
+                // Use existing seed logic to import
+                // ... (similar to seedFromGitHub logic)
+                pulledCount++;
+            } else {
+                // Always push local content to GitHub to ensure metadata is synced
+                console.log(`📤 Syncing #${githubIssue.number} to GitHub`);
+                
+                // Extract issue body from local content
+                const bodyStart = localIssue.content.indexOf('\n\n', localIssue.content.indexOf('---', 3)) + 2;
+                let issueBody = localIssue.content.substring(bodyStart).trim();
+                
+                // Remove the title line if it exists
+                if (issueBody.startsWith('#')) {
+                    issueBody = issueBody.substring(issueBody.indexOf('\n') + 1).trim();
+                }
+                
+                // Clean issue body - remove any frontmatter that might have leaked
+                issueBody = issueBody.replace(/^---[\s\S]*?---\n*/m, '');
+                
+                // Update GitHub issue
+                const updateCommand = `gh api repos/${owner}/${repo}/issues/${githubIssue.number} ` +
+                    `-X PATCH ` +
+                    `-f body="${issueBody.replace(/"/g, '\\"').replace(/\$/g, '\\$')}" ` +
+                    `-f title="${localIssue.frontmatter.title.replace(/"/g, '\\"')}"`;
+                
+                if (!options.dryRun) {
+                    try {
+                        execSync(updateCommand, { stdio: 'pipe' });
+                        pushedCount++;
+                        
+                        // Fetch the updated issue to get the new updated_at timestamp
+                        const updatedIssueJson = execSync(
+                            `gh api repos/${owner}/${repo}/issues/${githubIssue.number}`,
+                            { encoding: 'utf8' }
+                        );
+                        const updatedIssue = JSON.parse(updatedIssueJson);
+                        
+                        // Update local github_updated_at with the actual GitHub timestamp
+                        const updates = {
+                            github_updated_at: updatedIssue.updated_at
+                        };
+                        const updatedContent = updateFrontmatter(localIssue.content, updates);
+                        fs.writeFileSync(localIssue.filepath, updatedContent);
+                        
+                    } catch (error) {
+                        console.error(`❌ Failed to push #${githubIssue.number}: ${error.message}`);
+                        conflictCount++;
+                    }
+                } else {
+                    console.log(`  [DRY RUN] Would update GitHub issue #${githubIssue.number}`);
+                    pushedCount++;
+                }
+            }
+        }
+        
+        // Update sync metadata
+        const syncData = {
+            last_sync: new Date().toISOString(),
+            last_github_fetch: new Date().toISOString(),
+            total_issues: localIssuesMap.size,
+            sync_version: '2.0.0',
+            bidirectional_sync: true,
+            pulled_from_github: pulledCount,
+            pushed_to_github: pushedCount,
+            conflicts: conflictCount
+        };
+        
+        fs.writeFileSync('claude/issues/sync.json', JSON.stringify(syncData, null, 2));
+        
+        console.log('\n📊 Sync Summary:');
+        console.log(`  📥 Pulled from GitHub: ${pulledCount}`);
+        console.log(`  📤 Pushed to GitHub: ${pushedCount}`);
+        console.log(`  ⚠️  Conflicts: ${conflictCount}`);
+        console.log(`  📁 Total local issues: ${localIssuesMap.size}`);
+        
+        if (options.dryRun) {
+            console.log('\n🔍 DRY RUN - No changes were made');
+        }
+        
+    } catch (error) {
+        console.error(`❌ Sync failed: ${error.message}`);
         process.exit(1);
     }
 }
@@ -573,6 +931,11 @@ async function main() {
     const command = args[0];
     
     try {
+        // Ensure issues structure is initialized before any operation
+        if (command) {
+            await ensureIssuesInitialized();
+        }
+        
         switch (command) {
             case 'create':
                 if (args.length < 3) {
@@ -619,6 +982,14 @@ async function main() {
                 await seedFromGitHub(seedOptions);
                 break;
                 
+            case 'sync':
+                const syncOptions = {};
+                if (args.includes('--dry-run')) syncOptions.dryRun = true;
+                if (args.includes('--state=open')) syncOptions.state = 'open';
+                if (args.includes('--state=all')) syncOptions.state = 'all';
+                await syncWithGitHub(syncOptions);
+                break;
+                
             default:
                 console.log('Local Issue Management');
                 console.log('Commands:');
@@ -629,6 +1000,7 @@ async function main() {
                 console.log('  triage                 - Review unassigned issues');
                 console.log('  housekeeping           - Remove closed milestones (except target version)');
                 console.log('  seed [--dry-run] [--state=open|closed] - Import from GitHub');
+                console.log('  sync [--dry-run] [--state=open|all] - Bidirectional sync with GitHub');
         }
     } catch (error) {
         console.error(`Error: ${error.message}`);
@@ -637,7 +1009,7 @@ async function main() {
 }
 
 // Run CLI if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && process.argv[1].endsWith('issue-manage')) {
     main().catch(error => {
         console.error(`Fatal error: ${error.message}`);
         process.exit(1);

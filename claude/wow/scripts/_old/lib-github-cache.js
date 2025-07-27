@@ -12,8 +12,8 @@
  * Replaces heavy GitHub CLI usage with efficient caching
  */
 
-import { GitHubIssues } from './github-issues.js';
-import { GitHubReleases } from './github-releases.js';
+import { GitHubAPI } from './lib-github-api.js';
+import { GitHubReleases } from './lib-github-releases.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,7 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 /**
  * GitHub Cache Management
  */
-export class GitHubCache extends GitHubIssues {
+export class GitHubCache extends GitHubAPI {
     constructor(options = {}) {
         super(options);
         this.cacheDir = options.cacheDir || 'claude/project/cache';

@@ -33,7 +33,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export class GitHubAPI {
     constructor(options = {}) {
         this.baseURL = 'https://api.github.com';
-        this.token = options.token || process.env.GITHUB_TOKEN;
+        this.token = options.token || process.env.GITHUB_TOKEN || this.getGhToken();
         this.userAgent = options.userAgent || 'claude-swift-github-api/1.0.0';
         this.workingDirectory = options.workingDirectory || process.cwd();
         
@@ -52,11 +52,23 @@ export class GitHubAPI {
         this.retryDelay = 1000; // 1 second base delay
         
         if (!this.token) {
-            throw new Error('GitHub token is required. Set GITHUB_TOKEN environment variable or pass token in options.');
+            throw new Error('GitHub token is required. Set GITHUB_TOKEN environment variable, use "gh auth login", or pass token in options.');
         }
         
         if (!this.owner || !this.repo) {
             throw new Error('Repository owner and name are required. Ensure you are in a git repository or provide owner/repo options.');
+        }
+    }
+
+    /**
+     * Get GitHub token from gh CLI
+     */
+    getGhToken() {
+        try {
+            return execSync('gh auth token', { encoding: 'utf8' }).trim();
+        } catch (error) {
+            // gh CLI not available or not authenticated
+            return null;
         }
     }
 
@@ -296,7 +308,130 @@ export class GitHubAPI {
         return await this.request(`/repos/${this.owner}/${this.repo}`);
     }
 
-    // Issue Management Methods (implemented in next sections)
+    /**
+     * List repository issues
+     * 
+     * @param {Object} options - Query options
+     * @param {string} options.state - Issue state (open, closed, all)
+     * @param {number} options.per_page - Number of results per page
+     * @param {string} options.milestone - Milestone title
+     * @param {string} options.labels - Comma-separated list of labels
+     * @returns {Promise<Array>} Array of issues
+     */
+    async listIssues(options = {}) {
+        const params = new URLSearchParams();
+        
+        if (options.state) params.append('state', options.state);
+        if (options.per_page) params.append('per_page', options.per_page.toString());
+        if (options.milestone) params.append('milestone', options.milestone);
+        if (options.labels) params.append('labels', options.labels);
+        
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues?${params.toString()}`;
+        return await this.request(endpoint);
+    }
+
+    /**
+     * List repository milestones
+     * 
+     * @param {Object} options - Query options
+     * @param {string} options.state - Milestone state (open, closed, all)
+     * @param {number} options.per_page - Number of results per page
+     * @returns {Promise<Array>} Array of milestones
+     */
+    async listMilestones(options = {}) {
+        const params = new URLSearchParams();
+        
+        if (options.state) params.append('state', options.state);
+        if (options.per_page) params.append('per_page', options.per_page.toString());
+        
+        const endpoint = `/repos/${this.owner}/${this.repo}/milestones?${params.toString()}`;
+        return await this.request(endpoint);
+    }
+
+    /**
+     * Get a specific issue
+     * 
+     * @param {number} issueNumber - Issue number
+     * @returns {Promise<Object>} Issue data
+     */
+    async getIssue(issueNumber) {
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues/${issueNumber}`;
+        return await this.request(endpoint);
+    }
+
+    /**
+     * Create a new issue
+     * 
+     * @param {Object} data - Issue data
+     * @param {string} data.title - Issue title
+     * @param {string} data.body - Issue body
+     * @param {Array} data.labels - Issue labels
+     * @param {string} data.milestone - Milestone title
+     * @returns {Promise<Object>} Created issue data
+     */
+    async createIssue(data) {
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues`;
+        return await this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    /**
+     * Update an existing issue
+     * 
+     * @param {number} issueNumber - Issue number
+     * @param {Object} data - Updated issue data
+     * @returns {Promise<Object>} Updated issue data
+     */
+    async updateIssue(issueNumber, data) {
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues/${issueNumber}`;
+        return await this.request(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify(data)
+        });
+    }
+
+    /**
+     * Add labels to an issue
+     * 
+     * @param {number} issueNumber - Issue number
+     * @param {Array} labels - Array of label names
+     * @returns {Promise<Object>} Updated issue data
+     */
+    async addLabelsToIssue(issueNumber, labels) {
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues/${issueNumber}/labels`;
+        return await this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ labels })
+        });
+    }
+
+    /**
+     * Close an issue
+     * 
+     * @param {number} issueNumber - Issue number
+     * @param {string} comment - Optional closing comment
+     * @returns {Promise<Object>} Closed issue data
+     */
+    async closeIssue(issueNumber, comment) {
+        // Add comment if provided
+        if (comment) {
+            const commentEndpoint = `/repos/${this.owner}/${this.repo}/issues/${issueNumber}/comments`;
+            await this.request(commentEndpoint, {
+                method: 'POST',
+                body: JSON.stringify({ body: comment })
+            });
+        }
+
+        // Close the issue
+        const endpoint = `/repos/${this.owner}/${this.repo}/issues/${issueNumber}`;
+        return await this.request(endpoint, {
+            method: 'PATCH',
+            body: JSON.stringify({ state: 'closed' })
+        });
+    }
+
     // Release Management Methods (implemented in next sections)
     // Cache Management Methods (implemented in next sections)
 }

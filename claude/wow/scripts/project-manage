@@ -1,0 +1,235 @@
+#!/usr/bin/env node
+
+/**
+ * Project Management Script - Initialize and sync project structures
+ * 
+ * Dispatches to project management subcommands:
+ * - init-issues: Initialize local issues structure
+ * - sync-templates: Sync templates from framework (preserves custom templates)
+ * - validate: Validate project structure
+ * - setup: Complete project setup (init + sync + validate)
+ * 
+ * Usage:
+ *   project-manage init-issues
+ *   project-manage sync-templates  
+ *   project-manage validate
+ *   project-manage setup
+ */
+
+import { promises as fs, existsSync } from 'fs';
+import path from 'path';
+
+/**
+ * Initialize local issues structure if not present
+ */
+async function initializeIssuesStructure() {
+    console.log('🔧 Initializing issues structure...');
+    
+    const issuesDir = 'claude/issues';
+    
+    if (!existsSync(issuesDir)) {
+        console.log('Creating issues directory structure...');
+        
+        // Create main directories
+        await fs.mkdir(path.join(issuesDir, 'templates'), { recursive: true });
+        await fs.mkdir(path.join(issuesDir, 'unassigned'), { recursive: true });
+        
+        // Create initial sync.json
+        const initialSync = {
+            last_sync: null,
+            last_github_fetch: null,
+            total_issues: 0,
+            sync_version: "2.0.0",
+            bidirectional_sync: true,
+            pulled_from_github: 0,
+            pushed_to_github: 0,
+            conflicts: 0
+        };
+        
+        await fs.writeFile(
+            path.join(issuesDir, 'sync.json'),
+            JSON.stringify(initialSync, null, 2)
+        );
+        
+        console.log('✓ Created issues directory structure');
+        console.log('✓ Created initial sync.json');
+    } else {
+        console.log('✓ Issues structure already exists');
+    }
+}
+
+/**
+ * Sync templates from framework, preserving custom templates
+ */
+async function syncTemplates() {
+    console.log('🔄 Synchronizing templates with framework...');
+    
+    const frameworkTemplatesDir = 'claude/wow/templates';
+    const localTemplatesDir = 'claude/issues/templates';
+    
+    if (!existsSync(frameworkTemplatesDir)) {
+        console.log('⚠️  Framework templates directory not found - using local templates only');
+        return;
+    }
+    
+    if (!existsSync(localTemplatesDir)) {
+        await fs.mkdir(localTemplatesDir, { recursive: true });
+    }
+    
+    // Get framework templates
+    const frameworkTemplates = await fs.readdir(frameworkTemplatesDir);
+    const mdTemplates = frameworkTemplates.filter(file => file.endsWith('.md'));
+    
+    // Sync each framework template
+    for (const templateFile of mdTemplates) {
+        const frameworkPath = path.join(frameworkTemplatesDir, templateFile);
+        const localPath = path.join(localTemplatesDir, templateFile);
+        
+        try {
+            const frameworkContent = await fs.readFile(frameworkPath, 'utf8');
+            
+            if (existsSync(localPath)) {
+                // Check if files are different
+                const localContent = await fs.readFile(localPath, 'utf8');
+                
+                if (frameworkContent !== localContent) {
+                    await fs.writeFile(localPath, frameworkContent);
+                    console.log(`✓ Updated template: ${templateFile}`);
+                } else {
+                    console.log(`✓ Template up to date: ${templateFile}`);
+                }
+            } else {
+                // New template from framework
+                await fs.writeFile(localPath, frameworkContent);
+                console.log(`✓ Added new template: ${templateFile}`);
+            }
+        } catch (error) {
+            console.log(`✗ Failed to sync template ${templateFile}: ${error.message}`);
+        }
+    }
+    
+    // Check for custom templates (preserve them)
+    try {
+        const localTemplates = await fs.readdir(localTemplatesDir);
+        const localMdTemplates = localTemplates.filter(file => file.endsWith('.md'));
+        
+        for (const localTemplate of localMdTemplates) {
+            const frameworkPath = path.join(frameworkTemplatesDir, localTemplate);
+            
+            if (!existsSync(frameworkPath)) {
+                console.log(`📝 Custom template preserved: ${localTemplate}`);
+            }
+        }
+    } catch (error) {
+        // Local templates directory might not exist yet
+    }
+}
+
+/**
+ * Validate project structure
+ */
+async function validateStructure() {
+    console.log('✅ Validating project structure...');
+    
+    const requiredDirs = [
+        'claude/project',
+        'claude/inbox', 
+        'claude/outbox',
+        'claude/local',
+        'claude/issues',
+        'claude/issues/templates',
+        'claude/issues/unassigned'
+    ];
+    
+    const requiredFiles = [
+        'claude/inbox/README.md',
+        'claude/outbox/README.md', 
+        'claude/local/README.md',
+        'claude/issues/sync.json'
+    ];
+    
+    let errors = 0;
+    
+    // Check directories
+    for (const dir of requiredDirs) {
+        if (existsSync(dir)) {
+            console.log(`✓ ${dir} directory exists`);
+        } else {
+            console.log(`✗ ${dir} directory missing`);
+            errors++;
+        }
+    }
+    
+    // Check files
+    for (const file of requiredFiles) {
+        if (existsSync(file)) {
+            console.log(`✓ ${file} exists`);
+        } else {
+            console.log(`✗ ${file} missing`);
+            errors++;
+        }
+    }
+    
+    return errors === 0;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const command = process.argv[2];
+        
+        if (!command) {
+            console.log('Project Management Script');
+            console.log('Commands:');
+            console.log('  init-issues       - Initialize local issues structure');
+            console.log('  sync-templates    - Sync templates from framework (preserves custom)');
+            console.log('  validate          - Validate project structure');
+            console.log('  setup             - Complete project setup (init + sync + validate)');
+            return;
+        }
+        
+        switch (command) {
+            case 'init-issues':
+                await initializeIssuesStructure();
+                break;
+                
+            case 'sync-templates':
+                await syncTemplates();
+                break;
+                
+            case 'validate':
+                const isValid = await validateStructure();
+                process.exit(isValid ? 0 : 1);
+                break;
+                
+            case 'setup':
+                await initializeIssuesStructure();
+                await syncTemplates();
+                const valid = await validateStructure();
+                if (!valid) {
+                    console.log('❌ Project setup validation failed');
+                    process.exit(1);
+                }
+                console.log('✅ Project setup completed successfully');
+                break;
+                
+            default:
+                console.error(`Unknown command: ${command}`);
+                console.log('Run project-manage without arguments to see available commands');
+                process.exit(1);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Project management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main();
+}
+
+export { initializeIssuesStructure, syncTemplates, validateStructure };

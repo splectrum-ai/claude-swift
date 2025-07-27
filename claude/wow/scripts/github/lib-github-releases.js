@@ -12,7 +12,7 @@
  * Maintains compatibility with RELEASE_PROCESS workflow
  */
 
-import { GitHubAPI } from './github-api.js';
+import { GitHubAPI } from './lib-github-api.js';
 import { promises as fs } from 'fs';
 import { createReadStream, statSync } from 'fs';
 import path from 'path';

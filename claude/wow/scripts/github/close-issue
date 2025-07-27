@@ -42,7 +42,7 @@ function closeIssue(issueNumber, comment) {
         
         // Log closure in audit
         const auditComment = comment ? `with comment: ${comment}` : 'without comment';
-        execSync(`claude/wow/scripts/audit-log "CLOSE_ISSUE" "action" "issue_closed" "${issueNumber}" "Issue #${issueNumber} closed ${auditComment}"`, { stdio: 'inherit' });
+        execSync(`claude/wow/scripts/audit-manage log "CLOSE_ISSUE" "action" "issue_closed" "${issueNumber}" "Issue #${issueNumber} closed ${auditComment}"`, { stdio: 'inherit' });
         
         return true;
     } catch (error) {

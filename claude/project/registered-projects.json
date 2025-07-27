@@ -1,24 +1,9 @@
 {
   "registered_projects": [
     {
-      "repository": "jules-tenbos/splectrum",
-      "path": "/home/herma/sesameh/claude-swift/projects/jules-tenbos/splectrum",
-      "registered_at": "2025-07-13T20:26:40Z"
-    },
-    {
-      "repository": "carambah/carambah",
-      "path": "/home/herma/sesameh/claude-swift/projects/carambah/carambah",
-      "registered_at": "2025-07-14T18:57:12Z"
-    },
-    {
       "repository": "infometish/InfoMetis",
       "path": "/home/herma/sesameh/claude-swift/projects/infometish/InfoMetis",
-      "registered_at": "2025-07-14T18:57:12Z"
-    },
-    {
-      "repository": "splectrum/spl1",
-      "path": "/home/herma/sesameh/claude-swift/projects/splectrum/spl1",
-      "registered_at": "2025-07-14T18:57:12Z"
+      "registered_at": "2025-07-27T17:26:43.257Z"
     }
   ]
 }

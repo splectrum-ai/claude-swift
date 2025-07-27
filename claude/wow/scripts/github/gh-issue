@@ -14,7 +14,7 @@
  *   gh-issue close <issue-number> [-c "Comment"]
  */
 
-import { createGitHubCache } from './lib-github-cache.js';
+import { createGitHubAPI } from './lib-github-api.js';
 import { promises as fs } from 'fs';
 
 /**
@@ -108,7 +108,7 @@ async function main() {
         const options = parseArgs(args);
         
         // Initialize GitHub API client with current working directory
-        const github = createGitHubCache({ workingDirectory: process.cwd() });
+        const github = createGitHubAPI({ workingDirectory: process.cwd() });
         
         // Handle different commands
         switch (options.positional[0]) {
@@ -117,10 +117,10 @@ async function main() {
                     state: options.flags.state || 'open',
                     milestone: options.flags.milestone,
                     labels: options.flags.label,
-                    limit: options.flags.limit ? parseInt(options.flags.limit) : undefined
+                    per_page: options.flags.limit ? parseInt(options.flags.limit) : 30
                 };
                 
-                const issues = await github.getCachedIssues(listOptions);
+                const issues = await github.listIssues(listOptions);
                 console.log(formatOutput(issues, options));
                 break;
                 

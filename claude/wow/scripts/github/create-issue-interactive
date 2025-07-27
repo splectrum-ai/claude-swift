@@ -153,7 +153,7 @@ function main() {
             console.log(`📝 Issue #${result.number}: ${issueData.title}`);
             
             // Log creation in audit
-            execSync(`claude/wow/scripts/audit-log "CREATE_ISSUE" "action" "issue_created" "${result.number}" "Issue #${result.number} created: ${issueData.title}"`, { stdio: 'inherit' });
+            execSync(`claude/wow/scripts/audit-manage log "CREATE_ISSUE" "action" "issue_created" "${result.number}" "Issue #${result.number} created: ${issueData.title}"`, { stdio: 'inherit' });
             
             console.log('🎉 Issue creation completed successfully');
             process.exit(0);

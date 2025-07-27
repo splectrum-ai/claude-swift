@@ -1,20 +1,27 @@
 # PROJECT_REGISTER
 
 ## Overview
-Automated project registration that creates symlinks to the base project's claude-swift framework, enabling shared operational machinery across multiple projects.
+Unified project registration system that handles workspace initialization and project management through a single interface.
 
 ## Trigger
-**User-Friendly**: `register [org/repo] sesame` or `register sesame` (interactive)
+**User-Friendly**: 
+- `register sesame init` - Initialize workspace (INITIALISE workflow)
+- `register sesame add [org/repo]` - Register specific project
+- `register sesame remove [org/repo]` - Unregister project  
+- `register sesame list` - Show registered projects
+- `register sesame status` - Show workspace status
+- `register sesame` - Help/interactive mode
 **Technical**: `PROJECT_REGISTER`
 
 ## Purpose
-- Register sub-projects with the claude-swift framework
-- Create CLAUDE.md and claude/wow symlinks to base project
+- Initialize workspace for multi-project management
+- Register/unregister projects with the claude-swift framework
+- Create and manage CLAUDE.md and claude/wow symlinks
 - Track registered projects in a central registry
-- Validate project existence and structure
+- Provide complete project lifecycle management
 
 ## Scope
-**Orchestrator-Only**: This workflow is ONLY available in the claude-swift orchestrator repository. It is NOT available in registered/orchestrated projects.
+**Provider-Only**: This workflow is ONLY available in the claude-swift provider repository. It is NOT available in registered projects.
 
 ## Prerequisites
 - INITIALISE workflow completed (projects/ symlink exists)
@@ -22,7 +29,52 @@ Automated project registration that creates symlinks to the base project's claud
 - GitHub CLI (`gh`) authenticated for repository access
 - Target repository exists locally or is accessible on GitHub
 
-## Workflow Steps
+## Implementation
+
+This workflow is implemented by the `register-manage` script which handles all registration operations through a unified interface.
+
+### Script Location
+`claude/wow/scripts/register-manage`
+
+### Available Commands
+
+#### `register sesame init`
+Initializes the workspace by:
+- Detecting workspace root as `../..` from claude-swift
+- Creating `projects/` symlink to workspace root
+- Updating `.gitignore` to exclude `projects/`
+- Storing configuration in `claude/project/project-info.md`
+- Listing available projects in workspace
+
+#### `register sesame add [org/repo]`
+Registers a specific project by:
+- Validating repository format and organization restrictions
+- Cloning from GitHub if not available locally
+- Creating framework symlinks (`CLAUDE.md`, `claude/wow`)
+- Setting up project structure (directories, templates, configs)
+- Updating `.gitignore` for symlinks and local configs
+- Adding to registry with timestamp
+
+#### `register sesame remove [org/repo]`
+Unregisters a project by:
+- Removing framework symlinks from project
+- Removing from registry
+- Preserving project files (user can manually delete)
+
+#### `register sesame list`
+Shows all registered projects with:
+- Repository name and path
+- Registration date
+- Availability status (exists/missing)
+
+#### `register sesame status`
+Displays workspace overview:
+- Workspace initialization status
+- Projects directory accessibility
+- Registry statistics (total, available, missing)
+- Next steps recommendations
+
+## Legacy Workflow Steps (for reference)
 
 ### 1. Repository Input and Validation
 ```
@@ -47,15 +99,15 @@ Enter repository in format 'org/repo':
 # Extract organization from repository input
 ORG_NAME=$(echo "$REPOSITORY" | cut -d'/' -f1)
 
-# Prevent registration of sesameh org repositories (orchestrator repos)
+# Prevent registration of sesameh org repositories (provider repos)
 if [ "$ORG_NAME" = "sesameh" ]; then
     echo "Error: Cannot register sesameh organization repositories"
-    echo "sesameh org contains orchestrator/base projects, not sub-projects"
+    echo "sesameh org contains provider/framework projects, not sub-projects"
     echo "Repository '$REPOSITORY' should not be registered"
     echo ""
     echo "Valid patterns:"
     echo "  ✓ org/repo (where org != sesameh)"
-    echo "  ✗ sesameh/repo (orchestrator repositories)"
+    echo "  ✗ sesameh/repo (provider repositories)"
     exit 1
 fi
 
@@ -215,20 +267,38 @@ echo "✓ Ensured claude/inbox and claude/outbox directories exist with document
 # Create local config directory for machine-specific settings
 mkdir -p claude/local
 
-# Create .gitignore if it doesn't exist to exclude local configs
+# Create .gitignore if it doesn't exist to exclude local configs and symlinks
 if [ ! -f .gitignore ]; then
     cat > .gitignore << 'EOF'
+# Framework symlinks (local setup only)
+CLAUDE.md
+claude/wow
+
 # Local machine-specific configurations
 claude/local/
 EOF
-    echo "✓ Created .gitignore with claude/local/ exclusion"
-elif ! grep -q "claude/local/" .gitignore; then
-    echo "" >> .gitignore
-    echo "# Local machine-specific configurations" >> .gitignore
-    echo "claude/local/" >> .gitignore
-    echo "✓ Added claude/local/ to existing .gitignore"
+    echo "✓ Created .gitignore with symlinks and claude/local/ exclusion"
 else
-    echo "✓ .gitignore already excludes claude/local/"
+    # Check and add framework symlinks
+    if ! grep -q "CLAUDE.md" .gitignore; then
+        echo "" >> .gitignore
+        echo "# Framework symlinks (local setup only)" >> .gitignore
+        echo "CLAUDE.md" >> .gitignore
+        echo "claude/wow" >> .gitignore
+        echo "✓ Added framework symlinks to existing .gitignore"
+    else
+        echo "✓ .gitignore already excludes framework symlinks"
+    fi
+    
+    # Check and add local configs
+    if ! grep -q "claude/local/" .gitignore; then
+        echo "" >> .gitignore
+        echo "# Local machine-specific configurations" >> .gitignore
+        echo "claude/local/" >> .gitignore
+        echo "✓ Added claude/local/ to existing .gitignore"
+    else
+        echo "✓ .gitignore already excludes claude/local/"
+    fi
 fi
 
 # Create local config README
@@ -248,6 +318,9 @@ EOF
 
 echo "✓ Created claude/local/ directory with documentation"
 ```
+
+### Project Structure Setup
+Project structure is handled automatically by the `register-manage` script. Issues structure will be initialized automatically when `issue-manage` is first used in the registered project.
 
 **Cleanup Rationale:**
 - `claude/project/todo.md` should only exist in the base template
@@ -323,7 +396,7 @@ fi
 
 # 2. Required Directory Structure
 echo "Checking directory structure..."
-REQUIRED_DIRS=("claude/project" "claude/inbox" "claude/outbox" "claude/local")
+REQUIRED_DIRS=("claude/project" "claude/inbox" "claude/outbox" "claude/local" "claude/issues" "claude/issues/templates" "claude/issues/unassigned")
 for dir in "${REQUIRED_DIRS[@]}"; do
     if [ -d "$dir" ]; then
         echo "✓ $dir directory exists"
@@ -335,7 +408,7 @@ done
 
 # 3. Required Files
 echo "Checking required files..."
-REQUIRED_FILES=("claude/inbox/README.md" "claude/outbox/README.md" "claude/local/README.md")
+REQUIRED_FILES=("claude/inbox/README.md" "claude/outbox/README.md" "claude/local/README.md" "claude/issues/sync.json" "claude/issues/templates/bug.md" "claude/issues/templates/feature.md" "claude/issues/templates/task.md")
 for file in "${REQUIRED_FILES[@]}"; do
     if [ -f "$file" ]; then
         echo "✓ $file exists"
@@ -363,7 +436,28 @@ else
     echo "✓ Template files properly cleaned"
 fi
 
-# 6. Registry Verification
+# 6. Git Ignore Verification
+echo "Verifying .gitignore entries..."
+if [ -f .gitignore ]; then
+    if grep -q "CLAUDE.md" .gitignore && grep -q "claude/wow" .gitignore; then
+        echo "✓ Framework symlinks properly gitignored"
+    else
+        echo "✗ Framework symlinks not properly gitignored"
+        VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+    fi
+    
+    if grep -q "claude/local/" .gitignore; then
+        echo "✓ Local configs properly gitignored"
+    else
+        echo "✗ Local configs not properly gitignored"
+        VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+    fi
+else
+    echo "✗ .gitignore file missing"
+    VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
+fi
+
+# 7. Registry Verification
 echo "Verifying registry entry..."
 if grep -q "\"repository\": \"$REPOSITORY\"" "$REGISTRY_FILE"; then
     echo "✓ Project found in registry"
@@ -372,7 +466,7 @@ else
     VALIDATION_ERRORS=$((VALIDATION_ERRORS + 1))
 fi
 
-# 7. Validation Summary
+# 8. Validation Summary
 echo ""
 if [ $VALIDATION_ERRORS -eq 0 ]; then
     echo "✅ All validation checks passed!"
@@ -383,7 +477,7 @@ else
 fi
 ```
 
-### 8. Registration Summary
+### 9. Registration Summary
 ```
 PROJECT_REGISTER|step|completion_summary||Provide registration completion summary
 ```
@@ -445,7 +539,7 @@ with open('$REGISTRY_FILE', 'w') as f:
 
 **Repository Validation Failures:**
 - **Cause**: Attempting to register sesameh org repositories (e.g., sesameh/claude-swift)
-- **Solution**: Only register external organization repositories as sub-projects. sesameh repos are orchestrators.
+- **Solution**: Only register external organization repositories as sub-projects. sesameh repos are framework providers.
 
 **Symlink Creation Failures:**
 - **Cause**: File permissions, existing files, or invalid relative paths
