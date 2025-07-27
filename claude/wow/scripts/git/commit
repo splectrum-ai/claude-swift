@@ -211,14 +211,23 @@ Co-Authored-By: Claude <noreply@anthropic.com>`;
 /**
  * Execute commit and push
  */
-function executeCommit(message, noPush = false) {
+async function executeCommit(message, noPush = false) {
     auditLog('commit_execution', '', 'step', 'Staging, committing, and pushing changes');
     
     // Stage all changes
     gitCommand('git add .', 'staging changes');
     
-    // Commit with message
-    gitCommand(`git commit -m "${message.replace(/"/g, '\\"')}"`, 'committing changes');
+    // Commit with message using temporary file for multi-line support
+    const tempMsgFile = `.commit-msg-${Date.now()}.tmp`;
+    try {
+        await fs.writeFile(tempMsgFile, message, 'utf8');
+        gitCommand(`git commit -F "${tempMsgFile}"`, 'committing changes');
+        await fs.unlink(tempMsgFile); // Clean up temp file
+    } catch (error) {
+        // Clean up temp file if it exists
+        try { await fs.unlink(tempMsgFile); } catch {}
+        throw error;
+    }
     
     // Get commit hash
     const commitHash = gitCommand('git rev-parse --short HEAD', 'getting commit hash');
@@ -309,7 +318,7 @@ async function main() {
         
         // 4. Execute commit
         console.log('💾 Committing and pushing changes...');
-        const commitHash = executeCommit(message, noPush);
+        const commitHash = await executeCommit(message, noPush);
         console.log(`✓ Committed as ${commitHash}${noPush ? ' (not pushed)' : ' and pushed'}`);
         
         // 5. Close resolved issues
