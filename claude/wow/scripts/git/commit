@@ -16,7 +16,6 @@
 
 import { execSync } from 'child_process';
 import { promises as fs } from 'fs';
-import { createGitHubCache } from './lib/github-cache.js';
 import path from 'path';
 
 /**
@@ -101,27 +100,28 @@ async function detectResolvedIssues(changedFiles) {
             }
         }
         
-        // Check if we have GitHub access to validate issues
-        try {
-            const github = createGitHubCache({ workingDirectory: process.cwd() });
-            
-            for (const issueNumber of foundIssues) {
-                try {
-                    const issue = await github.getIssue(issueNumber);
-                    if (issue && issue.state === 'OPEN') {
-                        resolvedIssues.push({
-                            number: issueNumber,
-                            title: issue.title,
-                            confidence: 'medium' // Found in recent audit entries
-                        });
-                    }
-                } catch (error) {
-                    // Issue might not exist or be accessible
-                    console.warn(`Could not verify issue #${issueNumber}: ${error.message}`);
+        // Use issue-manage to validate issues instead of direct GitHub access
+        for (const issueNumber of foundIssues) {
+            try {
+                // Use issue-manage to check if issue exists and is open
+                const checkCommand = `../issue-manage status ${issueNumber}`;
+                const result = execSync(checkCommand, { 
+                    stdio: 'pipe', 
+                    encoding: 'utf8',
+                    cwd: path.dirname(process.argv[1])
+                });
+                
+                if (result.includes('open') || result.includes('OPEN')) {
+                    resolvedIssues.push({
+                        number: issueNumber,
+                        title: `Issue #${issueNumber}`, // issue-manage would need to be enhanced to return title
+                        confidence: 'medium' // Found in recent audit entries
+                    });
                 }
+            } catch (error) {
+                // Issue might not exist or be accessible
+                console.warn(`Could not verify issue #${issueNumber}: ${error.message}`);
             }
-        } catch (error) {
-            console.warn('GitHub access unavailable for issue detection');
         }
         
     } catch (error) {
@@ -235,28 +235,24 @@ function executeCommit(message, noPush = false) {
 }
 
 /**
- * Close resolved issues
+ * Close resolved issues using issue-manage
  */
 async function closeResolvedIssues(resolvedIssues, commitHash) {
     if (resolvedIssues.length === 0) return;
     
-    auditLog('issue_closure', '', 'step', 'Closing resolved GitHub issues');
+    auditLog('issue_closure', '', 'step', 'Closing resolved GitHub issues via issue-manage');
     
-    try {
-        const github = createGitHubCache({ workingDirectory: process.cwd() });
-        
-        for (const issue of resolvedIssues) {
-            try {
-                const comment = `Resolved in commit: ${commitHash}`;
-                await github.closeIssue(issue.number, comment);
-                auditLog('issue_closure', issue.number.toString(), 'step', `Closed issue #${issue.number} via commit resolution`);
-                console.log(`✓ Closed issue #${issue.number}: ${issue.title}`);
-            } catch (error) {
-                console.error(`✗ Failed to close issue #${issue.number}: ${error.message}`);
-            }
+    for (const issue of resolvedIssues) {
+        try {
+            // Use issue-manage close command instead of direct GitHub access
+            const closeCommand = `../issue-manage close ${issue.number}`;
+            execSync(closeCommand, { stdio: 'pipe', cwd: path.dirname(process.argv[1]) });
+            
+            auditLog('issue_closure', issue.number.toString(), 'step', `Closed issue #${issue.number} via commit resolution`);
+            console.log(`✓ Closed issue #${issue.number}: ${issue.title}`);
+        } catch (error) {
+            console.error(`✗ Failed to close issue #${issue.number}: ${error.message}`);
         }
-    } catch (error) {
-        console.warn(`Issue closure unavailable: ${error.message}`);
     }
 }
 
