@@ -1,88 +1,67 @@
-# ISSUE Workflow - Unified Issue Management
+# ISSUE Workflow - Local Issue Management
 
 ## Trigger
-**User-Friendly**: `issue sesame` + natural language request
-**Technical**: `ISSUE`
+**User-Friendly**: `issue sesame` + command
 
 ## Purpose
-Unified workflow for all GitHub issue operations using natural language parsing.
+Local file-based issue management system with milestone organization.
 
 ## Supported Operations
 
-### Issue Closure
-**Examples:**
-- `issue sesame, can you close #456?`
-- `issue sesame, close issue 123 as completed`
-- `issue sesame, mark #789 as resolved`
-
-**Sub-workflow**: [CLOSE_ISSUE.md](./ISSUE/CLOSE_ISSUE.md)
-
-### Next Issue Recommendation  
-**Examples:**
-- `issue sesame, what's next?`
-- `issue sesame, show me recommended issues`
-- `issue sesame, what should I work on?`
-
-**Sub-workflow**: [NEXT_ISSUE.md](./ISSUE/NEXT_ISSUE.md)
-
-### Issue Cache Management
-**Examples:**
-- `issue sesame, sync the cache`
-- `issue sesame, refresh issue data`
-- `issue sesame, update issue cache`
-
-**Sub-workflow**: [ISSUE_CACHE.md](./ISSUE/ISSUE_CACHE.md)
-
 ### Issue Creation
 **Examples:**
-- `issue sesame, create issue for bug fix`
-- `issue sesame, new issue: implement feature X`
-- `issue sesame, add issue about documentation`
+- `issue sesame create feature "User authentication system"`
+- `issue sesame create bug "Login validation error"`
+- `issue sesame create task "Update documentation"`
 
-**Sub-workflow**: [CREATE_ISSUE.md](./ISSUE/CREATE_ISSUE.md)
+### Issue Listing
+**Examples:**
+- `issue sesame list` - All issues
+- `issue sesame list unassigned` - Unassigned issues only
+- `issue sesame list v1.0` - Issues in v1.0 milestone
 
-## Workflow Process
+### Issue Details
+**Examples:**
+- `issue sesame show 001` - Show specific issue
 
-### 1. Intent Recognition
-Parse natural language to determine operation:
-- **Close keywords**: close, mark as, resolve, complete
-- **Next keywords**: next, recommend, what should, suggest
-- **Cache keywords**: sync, refresh, update, cache
-- **Create keywords**: create, new, add, make
+### Issue Triage
+**Examples:**
+- `issue sesame triage` - Review unassigned issues for milestone assignment
 
-### 2. Parameter Extraction
-Extract relevant details:
-- Issue numbers (#123, 456)
-- Descriptions and context
-- Labels or metadata
+## Workflow Execution
 
-### 3. Sub-workflow Delegation
-Route to appropriate sub-workflow with extracted parameters.
-
-### 4. Result Reporting
-Provide clear feedback on operation completion.
-
-## Examples
-
+### **1. Issue Triage**
+Review and organize unassigned issues:
+```bash
+# Review unassigned issues for milestone assignment
+claude/wow/scripts/issue-manage triage
 ```
-User: issue sesame, can you close #456 as completed?
-→ Routes to CLOSE_ISSUE.md with issue=456, reason="completed"
 
-User: issue sesame, what's next?  
-→ Routes to NEXT_ISSUE.md
+### **2. Issue Management**
+Core issue operations:
+```bash
+# Create new issue
+claude/wow/scripts/issue-manage create feature "Feature name"
+claude/wow/scripts/issue-manage create bug "Bug description" 
+claude/wow/scripts/issue-manage create task "Task description"
 
-User: issue sesame, sync the cache
-→ Routes to ISSUE_CACHE.md
+# List issues
+claude/wow/scripts/issue-manage list              # All issues
+claude/wow/scripts/issue-manage list unassigned   # Unassigned only
+claude/wow/scripts/issue-manage list open         # Open issues
 
-User: issue sesame, create issue for fixing the login bug
-→ Routes to CREATE_ISSUE.md with description="fixing the login bug"
+# Show issue details
+claude/wow/scripts/issue-manage show 001
 ```
+
+## File Structure
+- **claude/issues/v1.0/** - v1.0 milestone issues
+- **claude/issues/v1.0/closed/** - Completed v1.0 issues
+- **claude/issues/unassigned/** - New issues awaiting triage
+- **claude/issues/templates/** - Issue templates (feature, bug, task)
 
 ## Benefits
-- **Natural language interface** - No need to memorize specific triggers
-- **Single entry point** - All issue operations through one workflow
-- **Flexible requests** - Claude can parse various phrasings
-- **Modular implementation** - Each operation has dedicated sub-workflow
-
----
-*This workflow replaces the separate `close sesame`, `next sesame`, and individual issue triggers with a unified natural language interface.*
+- **Repository-first** - Issues stored with code
+- **Milestone-centric** - Clear delivery organization
+- **Template-driven** - Consistent issue structure
+- **Local workflow** - No external dependencies

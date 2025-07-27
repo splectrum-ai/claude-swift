@@ -40,6 +40,7 @@ Use natural language with "sesame" suffix:
 
 **Core Platform**:
 - `claude/wow/` - Ways of Working framework
+- `claude/local/repo-config.json` - Local repository-specific configuration for scripts and workflows (instance-specific settings only)
 
 **Development Strategy**:
 - `claude/wow/docs/phase-based-development-strategy.md` - Roadmap execution approach

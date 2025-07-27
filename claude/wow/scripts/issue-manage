@@ -1,0 +1,461 @@
+#!/usr/bin/env node
+
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { getRepoConfig } from './lib/repo-config.js';
+
+/**
+ * Local Issue Management System
+ * Handles creation, listing, and management of repository issues
+ */
+
+// Get next issue ID
+function getNextIssueId() {
+    const counterPath = 'claude/issues/.issue-counter';
+    let nextId = 1;
+    
+    if (fs.existsSync(counterPath)) {
+        nextId = parseInt(fs.readFileSync(counterPath, 'utf8').trim());
+    }
+    
+    // Update counter
+    fs.writeFileSync(counterPath, (nextId + 1).toString());
+    
+    return nextId.toString().padStart(3, '0');
+}
+
+// Create slug from title
+function createSlug(title) {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
+// Load template
+function loadTemplate(type) {
+    const templatePath = `claude/issues/templates/${type}.md`;
+    if (!fs.existsSync(templatePath)) {
+        throw new Error(`Template not found: ${type}. Available: feature, bug, task`);
+    }
+    return fs.readFileSync(templatePath, 'utf8');
+}
+
+// Update frontmatter
+function updateFrontmatter(content, updates) {
+    const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
+    const match = content.match(frontmatterRegex);
+    
+    if (!match) {
+        throw new Error('Invalid frontmatter format');
+    }
+    
+    const frontmatter = match[1];
+    const body = match[2];
+    
+    // Parse and update frontmatter
+    let updatedFrontmatter = frontmatter;
+    for (const [key, value] of Object.entries(updates)) {
+        const keyRegex = new RegExp(`^${key}:.*$`, 'm');
+        const newLine = `${key}: ${typeof value === 'string' ? `"${value}"` : value}`;
+        
+        if (keyRegex.test(updatedFrontmatter)) {
+            updatedFrontmatter = updatedFrontmatter.replace(keyRegex, newLine);
+        } else {
+            updatedFrontmatter += `\n${newLine}`;
+        }
+    }
+    
+    return `---\n${updatedFrontmatter}\n---\n${body}`;
+}
+
+// Create new issue
+function createIssue(type, title, options = {}) {
+    const issueId = getNextIssueId();
+    const slug = createSlug(title);
+    const filename = `${issueId}-${slug}.md`;
+    const filepath = path.join('claude/issues/unassigned', filename);
+    
+    // Load template
+    let content = loadTemplate(type);
+    
+    // Update frontmatter
+    const updates = {
+        title: title,
+        local_updated_at: new Date().toISOString(),
+        ...options
+    };
+    
+    content = updateFrontmatter(content, updates);
+    
+    // Replace title placeholder in body
+    content = content.replace(/\[Feature Name\]/g, title)
+                    .replace(/\[Bug Summary\]/g, title)  
+                    .replace(/\[Task Name\]/g, title);
+    
+    // Write file
+    fs.writeFileSync(filepath, content);
+    
+    console.log(`✓ Created issue ${issueId}: ${title}`);
+    console.log(`  File: ${filepath}`);
+    console.log(`  Type: ${type}`);
+    
+    return { issueId, filepath, filename };
+}
+
+// List issues
+function listIssues(location = 'all') {
+    if (location === 'all') {
+        // List all milestone folders plus unassigned
+        const issuesDir = 'claude/issues';
+        const allDirs = fs.readdirSync(issuesDir, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+            .filter(name => !['templates'].includes(name));
+        return listIssues(allDirs);
+    }
+    
+    const locations = Array.isArray(location) ? location : [location];
+    
+    let totalCount = 0;
+    
+    for (const loc of locations) {
+        const dirPath = `claude/issues/${loc}`;
+        if (!fs.existsSync(dirPath)) continue;
+        
+        const files = fs.readdirSync(dirPath)
+            .filter(f => f.endsWith('.md'))
+            .sort();
+        
+        if (files.length > 0) {
+            console.log(`\n📁 ${loc.toUpperCase()} (${files.length})`);
+            console.log('─'.repeat(50));
+            
+            files.forEach(file => {
+                const content = fs.readFileSync(path.join(dirPath, file), 'utf8');
+                const titleMatch = content.match(/title: "(.*)"/);
+                const title = titleMatch ? titleMatch[1] : 'No title';
+                const id = file.split('-')[0];
+                
+                console.log(`  ${id}: ${title}`);
+            });
+        }
+        
+        totalCount += files.length;
+    }
+    
+    console.log(`\n📊 Total issues: ${totalCount}`);
+}
+
+// Show issue details  
+function showIssue(issueId) {
+    // Find issue file in all milestone folders and unassigned
+    const issuesDir = 'claude/issues';
+    const locations = fs.readdirSync(issuesDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name)
+        .filter(name => !['templates'].includes(name));
+    
+    let found = false;
+    
+    for (const loc of locations) {
+        const dirPath = `claude/issues/${loc}`;
+        if (!fs.existsSync(dirPath)) continue;
+        
+        const files = fs.readdirSync(dirPath)
+            .filter(f => f.startsWith(issueId.padStart(3, '0')));
+        
+        if (files.length > 0) {
+            const filepath = path.join(dirPath, files[0]);
+            const content = fs.readFileSync(filepath, 'utf8');
+            
+            console.log(`📄 Issue ${issueId} (${loc})`);
+            console.log('═'.repeat(50));
+            console.log(content);
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found) {
+        console.log(`❌ Issue ${issueId} not found`);
+        process.exit(1);
+    }
+}
+
+// Basic triage - just list unassigned for now
+function triageIssues() {
+    console.log('📋 Issue Triage - Unassigned Issues');
+    console.log('═'.repeat(50));
+    
+    const unassignedPath = 'claude/issues/unassigned';
+    if (!fs.existsSync(unassignedPath)) {
+        console.log('✅ No unassigned issues');
+        return;
+    }
+    
+    const files = fs.readdirSync(unassignedPath)
+        .filter(f => f.endsWith('.md'))
+        .sort();
+    
+    if (files.length === 0) {
+        console.log('✅ No unassigned issues');
+        return;
+    }
+    
+    console.log(`Found ${files.length} unassigned issues:`);
+    files.forEach(file => {
+        const content = fs.readFileSync(path.join(unassignedPath, file), 'utf8');
+        const titleMatch = content.match(/title: "(.*)"/);
+        const typeMatch = content.match(/type: (.*)/);
+        const title = titleMatch ? titleMatch[1] : 'No title';
+        const type = typeMatch ? typeMatch[1] : 'unknown';
+        const id = file.split('-')[0];
+        
+        console.log(`  ${id}: [${type}] ${title}`);
+    });
+    
+    console.log('\n💡 Manual triage: Move issues to milestone folders as needed');
+    console.log('   Future: Automated assignment based on keywords/patterns');
+}
+
+// Version milestone validation - must have version prefix
+function isVersionMilestone(milestoneTitle) {
+    // Must start with 'v' followed by numbers/dots: v1.0, v2.1.3, etc.
+    return /^v\d+(\.\d+)*$/i.test(milestoneTitle);
+}
+
+// Classify GitHub issue into local template type
+function classifyIssueType(githubIssue) {
+    const title = githubIssue.title.toLowerCase();
+    const labels = githubIssue.labels.map(l => l.name.toLowerCase());
+    
+    // Check labels first (most reliable)
+    if (labels.includes('bug') || labels.includes('fix')) return 'bug';
+    if (labels.includes('feature') || labels.includes('enhancement')) return 'feature';
+    if (labels.includes('task') || labels.includes('chore')) return 'task';
+    
+    // Check title keywords
+    if (title.includes('bug') || title.includes('fix') || title.includes('error')) return 'bug';
+    if (title.includes('feature') || title.includes('add') || title.includes('implement')) return 'feature';
+    
+    // Default to task for general work
+    return 'task';
+}
+
+// Seed from GitHub issues
+async function seedFromGitHub(options = {}) {
+    console.log('🌱 Seeding local issues from GitHub');
+    console.log('═'.repeat(50));
+    
+    try {
+        // Get repository config
+        const config = getRepoConfig();
+        const { owner, repo } = config.getRepositoryInfo();
+        
+        console.log(`Repository: ${owner}/${repo}`);
+        
+        // Check gh CLI authentication
+        try {
+            execSync('gh auth status', { stdio: 'pipe' });
+        } catch (error) {
+            console.log('❌ GitHub CLI not authenticated');
+            console.log('   Run: gh auth login');
+            process.exit(1);
+        }
+        
+        // Fetch GitHub issues using gh CLI
+        const state = options.state || 'all';
+        console.log(`\n🔍 Fetching ${state} issues from GitHub...`);
+        
+        let ghCommand = `gh api repos/${owner}/${repo}/issues?state=${state}&per_page=100`;
+        const issuesJson = execSync(ghCommand, { encoding: 'utf8' });
+        const githubIssues = JSON.parse(issuesJson);
+        
+        console.log(`📥 Found ${githubIssues.length} GitHub issues`);
+        
+        if (githubIssues.length === 0) {
+            console.log('✅ No issues to import');
+            return;
+        }
+        
+        if (options.dryRun) {
+            console.log('\n🔍 DRY RUN - Preview of issues to import:');
+            githubIssues.forEach(issue => {
+                const type = classifyIssueType(issue);
+                const status = issue.state === 'closed' ? 'closed' : 'open';
+                console.log(`  #${issue.number}: [${type}] ${issue.title} (${status})`);
+            });
+            return;
+        }
+        
+        // Import issues
+        let importedCount = 0;
+        let skippedCount = 0;
+        
+        for (const githubIssue of githubIssues) {
+            try {
+                // Skip closed issues entirely
+                if (githubIssue.state === 'closed') {
+                    console.log(`⏭ Skipping closed issue #${githubIssue.number} (closed issues not seeded)`);
+                    skippedCount++;
+                    continue;
+                }
+                
+                const type = classifyIssueType(githubIssue);
+                const localId = getNextIssueId();
+                const slug = createSlug(githubIssue.title);
+                const filename = `${localId}-${slug}.md`;
+                
+                // Determine target directory based on milestone
+                let targetDir = 'unassigned';
+                let milestoneNote = null;
+                
+                if (githubIssue.milestone) {
+                    if (isVersionMilestone(githubIssue.milestone.title)) {
+                        // Valid version milestone - create/use folder
+                        targetDir = githubIssue.milestone.title;
+                        fs.mkdirSync(`claude/issues/${targetDir}`, { recursive: true });
+                    } else {
+                        // Non-version milestone - note it but keep in unassigned
+                        milestoneNote = githubIssue.milestone.title;
+                    }
+                }
+                
+                const filepath = path.join(`claude/issues/${targetDir}`, filename);
+                
+                // Load template and populate
+                let content = loadTemplate(type);
+                
+                const updates = {
+                    title: githubIssue.title,
+                    github_id: githubIssue.number,
+                    state: githubIssue.state,
+                    milestone: githubIssue.milestone ? githubIssue.milestone.title : 'unassigned',
+                    labels: JSON.stringify(githubIssue.labels.map(l => l.name)),
+                    github_updated_at: githubIssue.updated_at,
+                    local_updated_at: new Date().toISOString()
+                };
+                
+                // Add milestone note if non-version milestone
+                if (milestoneNote) {
+                    updates.github_milestone = milestoneNote;
+                }
+                
+                content = updateFrontmatter(content, updates);
+                
+                // Replace title in body and add GitHub context
+                content = content.replace(/\[Feature Name\]/g, githubIssue.title)
+                                .replace(/\[Bug Summary\]/g, githubIssue.title)
+                                .replace(/\[Task Name\]/g, githubIssue.title);
+                
+                // Add GitHub issue body if present
+                if (githubIssue.body) {
+                    const problemSection = /## (Problem Statement|Description|Objective)/;
+                    content = content.replace(problemSection, `$1\n${githubIssue.body}\n\n## Original GitHub Context`);
+                }
+                
+                // Write file
+                fs.writeFileSync(filepath, content);
+                
+                console.log(`✓ Imported #${githubIssue.number}: ${githubIssue.title} → ${localId}`);
+                importedCount++;
+                
+            } catch (error) {
+                console.log(`✗ Failed to import #${githubIssue.number}: ${error.message}`);
+                skippedCount++;
+            }
+        }
+        
+        // Update sync metadata
+        const syncData = {
+            last_sync: new Date().toISOString(),
+            last_github_fetch: new Date().toISOString(),
+            total_issues: importedCount,
+            sync_version: '1.0.0',
+            imported_from_github: true
+        };
+        
+        fs.writeFileSync('claude/issues/sync.json', JSON.stringify(syncData, null, 2));
+        
+        console.log('\n📊 Import Summary:');
+        console.log(`  ✅ Imported: ${importedCount}`);
+        console.log(`  ❌ Skipped: ${skippedCount}`);
+        console.log(`  📁 Location: claude/issues/`);
+        console.log('\n💡 Next steps:');
+        console.log('  - Run: issue sesame triage');
+        console.log('  - Organize issues into milestone folders');
+        
+    } catch (error) {
+        console.error(`❌ Seeding failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Main CLI
+async function main() {
+    const args = process.argv.slice(2);
+    const command = args[0];
+    
+    try {
+        switch (command) {
+            case 'create':
+                if (args.length < 3) {
+                    console.log('Usage: issue-manage create <type> <title>');
+                    console.log('Types: feature, bug, task');
+                    process.exit(1);
+                }
+                createIssue(args[1], args.slice(2).join(' '));
+                break;
+                
+            case 'list':
+                listIssues(args[1]);
+                break;
+                
+            case 'show':
+                if (!args[1]) {
+                    console.log('Usage: issue-manage show <issue-id>');
+                    process.exit(1);
+                }
+                showIssue(args[1]);
+                break;
+                
+            case 'triage':
+                triageIssues();
+                break;
+                
+            case 'seed':
+                const seedOptions = {};
+                if (args.includes('--dry-run')) seedOptions.dryRun = true;
+                if (args.includes('--state=open')) seedOptions.state = 'open';
+                if (args.includes('--state=closed')) seedOptions.state = 'closed';
+                await seedFromGitHub(seedOptions);
+                break;
+                
+            default:
+                console.log('Local Issue Management');
+                console.log('Commands:');
+                console.log('  create <type> <title>  - Create new issue');
+                console.log('  list [location]        - List issues (all/unassigned/v1.0/etc)');
+                console.log('  show <id>              - Show issue details');
+                console.log('  triage                 - Review unassigned issues');
+                console.log('  seed [--dry-run] [--state=open|closed] - Import from GitHub');
+        }
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run CLI if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+    main().catch(error => {
+        console.error(`Fatal error: ${error.message}`);
+        process.exit(1);
+    });
+}
+
+export { createIssue, listIssues, showIssue, triageIssues, getNextIssueId };

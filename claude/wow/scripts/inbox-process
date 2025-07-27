@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 // Ensure directory exists
 function ensureDirectory(dirPath) {
@@ -97,7 +98,6 @@ function main() {
         
         try {
             // Create GitHub issue from task content using our create-issue script
-            const { execSync } = require('child_process');
             
             console.log('  🔄 Creating GitHub issue...');
             execSync(`claude/wow/scripts/create-issue "${taskFile}"`, { 
@@ -153,6 +153,6 @@ function main() {
 }
 
 // Run the script
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
