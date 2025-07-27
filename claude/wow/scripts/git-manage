@@ -20,7 +20,7 @@
  *   git-manage commit [--message "text"] [--no-push] [--dry-run]
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import path from 'path';
 
 /**
@@ -60,22 +60,18 @@ async function main() {
         switch (command) {
             case 'status':
                 scriptPath = path.join(gitDir, 'git-status');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             case 'sync':
                 scriptPath = path.join(gitDir, 'git-sync');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             case 'clean':
                 scriptPath = path.join(gitDir, 'git-clean');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             case 'info':
                 scriptPath = path.join(gitDir, 'git-info');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             case 'release':
@@ -87,12 +83,10 @@ async function main() {
                     return;
                 }
                 scriptPath = path.join(gitDir, 'git-release');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             case 'commit':
                 scriptPath = path.join(gitDir, 'commit');
-                scriptCommand = `"${scriptPath}" ${actionArgs.join(' ')}`;
                 break;
                 
             default:
@@ -101,7 +95,20 @@ async function main() {
                 process.exit(1);
         }
         
-        execSync(scriptCommand, { stdio: 'inherit' });
+        // Execute script with proper argument handling using spawn
+        const child = spawn(scriptPath, actionArgs, { stdio: 'inherit' });
+        
+        // Wait for the process to complete
+        await new Promise((resolve, reject) => {
+            child.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                } else {
+                    reject(new Error(`Script exited with code ${code}`));
+                }
+            });
+            child.on('error', reject);
+        });
         
     } catch (error) {
         console.error(`❌ Git management failed: ${error.message}`);
