@@ -9,151 +9,100 @@ All scripts use Node.js with shebang execution (`#!/usr/bin/env node`) and can b
 claude/wow/scripts/script-name [options]
 ```
 
-## Script Categories
+**Only the main script files in `claude/wow/scripts/` directory can be executed directly. Subdirectory scripts are internal/support files.**
 
-### Core Workflow Scripts
+## Available Scripts
 
-#### `audit-log`
-**Purpose**: Centralized audit logging for all workflow activities  
-**Usage**: `audit-log <workflow> <action> <step> <details> <description>`  
-**Example**: 
-```bash
-audit-log "COMMIT" "step" "change_assessment" "" "Analyzing current changes"
-```
+### Core Management Scripts
 
 #### `audit-manage`
-**Purpose**: Audit log management and archiving operations  
-**Usage**: `audit-manage <command> [options]`  
-**Commands**: `archive-session`, `cleanup`, `validate`
+**Purpose**: Centralized audit operations and management  
+**Available Commands**: 
+- `log <workflow> <action> <step> <details> <description>` - Basic audit logging
+- `archive-session` - Archive current log for session end
+- `archive-version <version>` - Archive logs for version release
+- `fresh-log` - Create fresh audit log with marker
+- `cleanup [--days N]` - Clean up old logs (default 30 days)
+- `metrics` - Run audit metrics analysis
 
-**Note**: Commit operations are now available through `git-manage commit` (see Git Operations section)
-
-### Git Operations
+**Examples**:
+```bash
+audit-manage log SESSION_START workflow_start session_init
+audit-manage archive-session
+audit-manage archive-version v1.2.3
+```
 
 #### `git-manage`
 **Purpose**: Unified git operations management  
-**Usage**: `git-manage <command> [options]`  
-**Commands**: 
+**Available Commands**: 
 - `status` - Enhanced git status with workflow output
 - `sync` - Repository synchronization with remote
-- `clean` - Safe workspace cleanup operations  
+- `clean` - Safe workspace cleanup operations
 - `info` - Repository information and metadata
 - `release` - Git tag and release creation
 - `commit` - Intelligent commit workflow with issue detection
 
-#### `git-status`
-**Purpose**: Enhanced git status with workflow-friendly output  
-**Usage**: `git-status [--porcelain] [--verbose]`  
-**Output**: Structured status information for workflow consumption
+#### `github-manage`
+**Purpose**: Unified GitHub operations management  
+**Available Commands**: 
+- `issue` - Issue management operations
+- `release` - Release management operations
+- `api` - Generic GitHub API operations
 
-#### `git-sync`
-**Purpose**: Synchronize repository with remote, handle conflicts  
-**Usage**: `git-sync [--force] [--dry-run]`  
-**Features**: Auto-pull, conflict detection, branch synchronization
+#### `issue-manage`
+**Purpose**: Local issue management operations  
+**Available Commands**: 
+- `create <type> <title>` - Create new issue
+- `import <file>` - Import issue from task file
+- `list [location]` - List issues (all/unassigned/v1.0/etc)
+- `show <id>` - Show issue details
+- `close <id|milestone>` - Close issue or milestone
+- `triage` - Review unassigned issues
+- `housekeeping` - Remove closed milestones
+- `seed [--dry-run] [--state=open|closed]` - Import from GitHub
+- `sync [--dry-run] [--state=open|all]` - Bidirectional sync with GitHub
 
-#### `git-clean`
-**Purpose**: Clean repository state, remove untracked files  
-**Usage**: `git-clean [--dry-run] [--force]`  
-**Safety**: Dry-run mode for preview before execution
-
-#### `git-info`
-**Purpose**: Extract repository information and metadata  
-**Usage**: `git-info [--format json|text]`  
-**Output**: Branch, commit info, remote URLs, repository state
-
-#### `git-release`
-**Purpose**: Git operations for release creation and tagging  
-**Usage**: `git-release <version> [--notes "text"]`  
-**Features**: Tag creation, release branch management
-
-### GitHub Integration
-
-#### `gh-api`
-**Purpose**: Generic GitHub API operations with authentication  
-**Usage**: `gh-api <endpoint> [--method GET|POST|PUT] [--data "json"]`  
-**Features**: Rate limiting, error handling, response formatting
-
-#### `gh-issue`
-**Purpose**: GitHub issue management operations  
-**Usage**: `gh-issue <action> [options]`  
-**Actions**: `create`, `close`, `list`, `update`, `comment`  
-**Example**:
-```bash
-gh-issue create --title "Bug fix" --body "Description" --labels "bug,priority"
-gh-issue close 123 --comment "Fixed in latest commit"
-```
-
-#### `gh-release`
-**Purpose**: GitHub release creation and management  
-**Usage**: `gh-release <action> <version> [options]`  
-**Actions**: `create`, `update`, `delete`, `list`  
-**Features**: Asset uploads, release notes, draft releases
-
-### File and Directory Operations
-
-#### `ensure-directory`
-**Purpose**: Create directory structure with proper permissions  
-**Usage**: `ensure-directory <path> [--mode 755]`  
-**Features**: Recursive creation, permission setting, existence checking
-
-#### `move-file`
-**Purpose**: Safe file movement with backup and rollback  
-**Usage**: `move-file <source> <destination> [--backup]`  
-**Safety**: Atomic operations, backup creation, error recovery
-
-### Analysis and Optimization Tools
-
-#### `audit-manage metrics`
-**Purpose**: Analyze audit logs for workflow performance metrics  
-**Usage**: `audit-manage metrics [--period days] [--format json|report]`  
-**Output**: Workflow timing, frequency analysis, performance insights
+#### `project-manage`
+**Purpose**: Project-level management operations  
+**Available Commands**: 
+- `init-issues` - Initialize local issues structure
+- `sync-templates` - Sync templates from framework (preserves custom)
+- `validate` - Validate project structure
+- `setup` - Complete project setup (init + sync + validate)
 
 #### `transition-manage`
 **Purpose**: Unified transition and version management operations  
-**Usage**: `transition-manage <command> [options]`  
-**Commands**: 
-- `maintenance-analysis` - Analyze repository health and maintenance needs  
-- `strategic-analysis` - High-level strategic analysis of project progress  
-- `readiness-validation` - Validate repository readiness for version releases  
-- `version-transition` - Execute full version transition process  
-- `new-version-planning` - Plan next version development  
-- `patch-release` - Execute patch release workflow  
-- `knowledge-sync` - Synchronize knowledge base  
-- `knowledge-update` - Update knowledge base documentation
-- `get-started` - Generate onboarding documentation from development experience
+**Available Commands**: 
+- `version-transition` - Execute full version transition process
+- `new-version-planning` - Plan next version development
+- `patch-release [version]` - Execute patch release workflow
+- `knowledge-sync [args]` - Synchronize knowledge base
+- `knowledge-update [args]` - Update knowledge base documentation
+- `maintenance-analysis [args]` - Analyze repository maintenance needs
+- `strategic-analysis [args]` - Generate strategic insights
+- `readiness-validation [args]` - Validate version readiness
+- `get-started [args]` - Generate onboarding documentation
 
-### Knowledge Management
+**Examples**:
+```bash
+transition-manage version-transition
+transition-manage patch-release v1.2.1
+transition-manage knowledge-sync --target docs
+```
 
-**Note**: Knowledge management operations are now available through `transition-manage`:
-- `transition-manage knowledge-update` - Update project knowledge base
-- `transition-manage knowledge-sync` - Synchronize knowledge across components
+### Task and Workflow Scripts
 
-**Note**: Onboarding documentation generation is now available through `transition-manage get-started`
+#### `task-create`
+**Purpose**: Task creation and management  
+**Note**: Script has execution issues (shebang line ending problem)
 
-### Archive and Cleanup
+#### `inbox-process`
+**Purpose**: Process inbox tasks and convert to issues  
+**Behavior**: Processes tasks from inbox directory, creates GitHub issues
 
-#### `archive-audit-logs.js`
-**Purpose**: Archive completed audit logs for long-term storage  
-**Usage**: `archive-audit-logs [--compress] [--destination path]`  
-**Features**: Compression, timestamping, organized storage
-
-### Utility Scripts
-
-#### `debug-repo.js`
-**Purpose**: Repository debugging and diagnostic information  
-**Usage**: `debug-repo [--verbose] [--check-all]`  
-**Output**: System state, configuration issues, dependency problems
-
-### Legacy Scripts
-
-#### `audit-functions.sh`
-**Purpose**: Legacy bash functions for audit logging  
-**Status**: Deprecated - use `audit-log` instead  
-**Migration**: Node.js scripts provide better functionality
-
-#### `git-workflow-helpers.sh`
-**Purpose**: Legacy bash helpers for git operations  
-**Status**: Deprecated - use individual `git-*` scripts instead
+#### `outbox-process`
+**Purpose**: Collect and distribute cross-repository tasks  
+**Behavior**: Routes tasks between repositories in orchestrator mode
 
 ## Integration Patterns
 
@@ -161,8 +110,10 @@ gh-issue close 123 --comment "Fixed in latest commit"
 ```bash
 # In workflow files
 claude/wow/scripts/audit-manage log "WORKFLOW" "start" "init" "" "Starting workflow"
-claude/wow/scripts/git-manage status --porcelain
+claude/wow/scripts/git-manage status
 claude/wow/scripts/git-manage commit --message "Auto-generated commit"
+claude/wow/scripts/issue-manage close 123
+claude/wow/scripts/transition-manage version-transition
 ```
 
 ### Error Handling
@@ -172,48 +123,39 @@ All scripts follow consistent error handling:
 - Exit code 2 for system errors
 - Structured error messages to stderr
 
-### Output Formats
-Scripts support multiple output formats:
-- `--format json` for machine consumption
-- `--format text` for human readable (default)
-- `--quiet` for minimal output
-- `--verbose` for detailed output
+### Getting Help
+Execute any script without arguments to see available commands:
+```bash
+claude/wow/scripts/audit-manage     # Shows all audit-manage commands
+claude/wow/scripts/git-manage       # Shows all git-manage commands
+claude/wow/scripts/issue-manage     # Shows all issue-manage commands
+```
 
-## Library Modules (`lib/` directory)
+## Support Files and Libraries
 
-### Core Libraries
-- `audit.js` - Audit logging functionality
-- `cache.js` - Caching operations
-- `events.js` - Event emission system
-- `github-api.js` - GitHub API wrapper
-- `repo-config.js` - Repository configuration
+### Internal Support Directories
+- `audit/` - Audit-specific libraries and analyzers
+- `git/` - Git operation implementations
+- `github/` - GitHub API implementations
+- `transition/` - Version transition engines
+- `lib/` - Shared library modules
+- `_old/` - Deprecated/legacy scripts (archived)
 
-### Specialized Libraries
-- `github-cache.js` - GitHub data caching
-- `github-issues.js` - Issue management
-- `github-releases.js` - Release management
-- `tasks.js` - Task file operations
-- `workflow-orchestration.js` - Workflow coordination
+**Note**: Files in subdirectories are not directly executable and are used internally by the main scripts.
 
 ## Best Practices
 
 ### Script Execution
-1. Always use full paths in workflows
+1. Always use full paths in workflows: `claude/wow/scripts/script-name`
 2. Check exit codes for error handling
-3. Use appropriate output formats for context
+3. Use help (no arguments) to discover available commands
 4. Include audit logging for workflow steps
 
 ### Error Recovery
-1. Most scripts support `--dry-run` for testing
-2. Use `--verbose` for debugging issues
+1. Scripts provide meaningful error messages
+2. Use `--dry-run` flags when available for testing
 3. Check logs in `claude/project/audit/current/current.log`
 4. Scripts are designed to be idempotent when possible
-
-### Performance
-1. Use batch operations when available
-2. Cache-enabled scripts for repeated operations
-3. Lazy loading for expensive operations
-4. Event-driven patterns for non-blocking workflows
 
 ---
 

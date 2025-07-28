@@ -1,0 +1,14 @@
+{
+  "name": "claude-project-scripts",
+  "version": "1.0.0",
+  "description": "Node.js scripts for Claude project management",
+  "type": "module",
+  "scripts": {
+    "test": "echo 'No tests defined yet'"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
