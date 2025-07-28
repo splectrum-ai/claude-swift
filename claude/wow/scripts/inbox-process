@@ -97,10 +97,10 @@ function main() {
         }
         
         try {
-            // Create GitHub issue from task content using our create-issue script
+            // Create GitHub issue from task content using issue-manage
             
             console.log('  🔄 Creating GitHub issue...');
-            execSync(`claude/wow/scripts/create-issue "${taskFile}"`, { 
+            execSync(`claude/wow/scripts/issue-manage import "${taskFile}"`, { 
                 stdio: 'inherit',
                 encoding: 'utf8' 
             });
@@ -153,6 +153,6 @@ function main() {
 }
 
 // Run the script
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && process.argv[1].endsWith('inbox-process')) {
     main();
 }

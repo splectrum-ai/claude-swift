@@ -1,0 +1,14 @@
+{
+  "auditLogPath": "/home/herma/sesameh/claude-swift/claude/project/audit/current/current.log",
+  "auditLogDirectory": "/home/herma/sesameh/claude-swift/claude/project/audit/current",
+  "projectRoot": "/home/herma/sesameh/claude-swift",
+  "scriptsPath": "/home/herma/sesameh/claude-swift/claude/wow/scripts",
+  "owner": "sesameh",
+  "repo": "claude-swift",
+  "gitRemote": "https://github.com/sesameh/claude-swift.git",
+  "configVersion": "2.0.0",
+  "generatedBy": "AUTO_GENERATION",
+  "lastUpdated": "2025-07-27T19:48:53.059Z",
+  "issues_seeded": true,
+  "last_seeded_at": "2025-07-27T19:48:54.621Z"
+}

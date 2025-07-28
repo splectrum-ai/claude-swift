@@ -331,6 +331,6 @@ export async function main(args) {
 }
 
 // Run CLI if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && process.argv[1].endsWith('repo-config.js')) {
     main(process.argv.slice(2));
 }

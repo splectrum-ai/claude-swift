@@ -16,9 +16,9 @@ Use natural language with "sesame" suffix:
 - `outbox sesame` → OUTBOX workflow (collect and distribute cross-repository tasks) - ORCHESTRATOR ONLY
 - `task sesame` → TASK_CREATE workflow (interactive task creation: specify target [org]/[repo] or use current)
 
-**MANDATORY**: When encountering a sesame trigger that is NOT in the above list, you MUST check [claude/project/WORKFLOW_REFERENCE.md](./claude/project/WORKFLOW_REFERENCE.md) for project-specific workflows before reporting it as unknown.
-
 **MANDATORY PROJECT CONTEXT**: Before working on any substantive task, Claude MUST read the project-specific context in `claude/project/project-info.md` to understand project identity and any specific requirements. This ensures work aligns with project objectives and follows project-specific patterns.
+
+**MANDATORY SCRIPT CONTEXT**: Before working on any substantive task, Claude MUST read the script tools reference `claude/wow/SCRIPT_REFERENCE.md` to understand how to use the script toolsn for any specific requirements.
 
 **Single-Word Sesame Magic Word:**
 **`sesame`** (standalone) → **Universal positive affirmation**
@@ -35,17 +35,11 @@ Use natural language with "sesame" suffix:
 - **File Path Specification**: All references MUST specify exact paths
 - **Repository State**: All work committed directly to main branch
 
-
 ## Key Files for Understanding
 
 **Core Platform**:
 - `claude/wow/` - Ways of Working framework
 - `claude/local/repo-config.json` - Local repository-specific configuration for scripts and workflows (instance-specific settings only)
-
-**Development Strategy**:
-- `claude/wow/docs/phase-based-development-strategy.md` - Roadmap execution approach
-- `claude/wow/docs/main-only-workflow.md` - Simplified direct commit workflow
-
 
 ## Documentation Standards
 

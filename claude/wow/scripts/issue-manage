@@ -148,10 +148,18 @@ async function ensureIssuesInitialized() {
         }
     }
     
-    // If not seeded, suggest seeding (but don't auto-seed)
+    // If not seeded, auto-seed from GitHub
     if (!config.issues_seeded) {
         console.log('💡 Issues structure is ready but not seeded from GitHub.');
-        console.log('   Run "issue-manage seed" to import issues from GitHub.');
+        console.log('🌱 Auto-seeding from GitHub...');
+        
+        try {
+            await seedFromGitHub();
+            console.log('✅ Auto-seeding completed successfully');
+        } catch (error) {
+            console.warn(`⚠️  Auto-seeding failed: ${error.message}`);
+            console.log('   You can manually run "issue-manage seed" later');
+        }
     }
 }
 
@@ -183,6 +191,7 @@ function createSlug(title) {
 // Load template
 function loadTemplate(type) {
     const templatePath = `claude/issues/templates/${type}.md`;
+    console.log(`  Template path: ${path.resolve(templatePath)}`);
     if (!fs.existsSync(templatePath)) {
         throw new Error(`Template not found: ${type}. Available: feature, bug, task`);
     }
@@ -283,6 +292,85 @@ function createIssue(type, title, options = {}) {
     console.log(`✓ Created issue ${issueId}: ${title}`);
     console.log(`  File: ${filepath}`);
     console.log(`  Type: ${type}`);
+    
+    return { issueId, filepath, filename };
+}
+
+// Import issue from task file
+function importIssue(taskFilePath) {
+    if (!fs.existsSync(taskFilePath)) {
+        throw new Error(`Task file not found: ${taskFilePath}`);
+    }
+    
+    const taskContent = fs.readFileSync(taskFilePath, 'utf8');
+    
+    // Extract frontmatter if present
+    const frontmatter = extractFrontmatter(taskContent);
+    
+    // Get title from frontmatter or derive from filename
+    let title = frontmatter.title;
+    if (!title) {
+        // Extract from filename: timestamp_source_task-name.md -> task name
+        const basename = path.basename(taskFilePath, '.md');
+        const parts = basename.split('_');
+        if (parts.length >= 3) {
+            title = parts.slice(2).join('_').replace(/-/g, ' ');
+        } else {
+            title = basename.replace(/-/g, ' ');
+        }
+    }
+    
+    // Determine type from frontmatter or default to 'task'
+    let type = frontmatter.type || 'task';
+    
+    // Validate type exists in templates
+    const validTypes = ['bug', 'feature', 'task'];
+    if (!validTypes.includes(type)) {
+        console.warn(`⚠️  Unknown issue type '${type}', using 'task' template`);
+        type = 'task';
+    }
+    
+    // Extract body content (everything after frontmatter)
+    let body = taskContent;
+    const frontmatterMatch = taskContent.match(/^---\n[\s\S]*?\n---\n/);
+    if (frontmatterMatch) {
+        body = taskContent.substring(frontmatterMatch[0].length);
+    }
+    
+    // Create the issue
+    const issueId = getNextIssueId();
+    const slug = createSlug(title);
+    const filename = `${issueId}-${slug}.md`;
+    const filepath = path.join('claude/issues/unassigned', filename);
+    
+    // Load template for proper structure
+    console.log(`  Loading template: ${type}`);
+    let content = loadTemplate(type);
+    
+    // Update frontmatter with task data
+    const updates = {
+        title: title,
+        local_updated_at: new Date().toISOString(),
+        imported_from: taskFilePath,
+        ...frontmatter
+    };
+    
+    content = updateFrontmatter(content, updates);
+    
+    // Replace template body with task content
+    const bodyStartMatch = content.match(/---\n[\s\S]*?\n---\n\n/);
+    if (bodyStartMatch) {
+        const headerEnd = bodyStartMatch[0].length;
+        content = content.substring(0, headerEnd) + body.trim();
+    }
+    
+    // Write the imported issue
+    fs.writeFileSync(filepath, content);
+    
+    console.log(`✓ Imported issue ${issueId}: ${title}`);
+    console.log(`  File: ${filepath}`);
+    console.log(`  Type: ${type}`);
+    console.log(`  Source: ${taskFilePath}`);
     
     return { issueId, filepath, filename };
 }
@@ -946,6 +1034,14 @@ async function main() {
                 createIssue(args[1], args.slice(2).join(' '));
                 break;
                 
+            case 'import':
+                if (!args[1]) {
+                    console.log('Usage: issue-manage import <task-file-path>');
+                    process.exit(1);
+                }
+                importIssue(args[1]);
+                break;
+                
             case 'list':
                 listIssues(args[1]);
                 break;
@@ -994,6 +1090,7 @@ async function main() {
                 console.log('Local Issue Management');
                 console.log('Commands:');
                 console.log('  create <type> <title>  - Create new issue');
+                console.log('  import <file>          - Import issue from task file');
                 console.log('  list [location]        - List issues (all/unassigned/v1.0/etc)');
                 console.log('  show <id>              - Show issue details');
                 console.log('  close <id|milestone>   - Close issue or milestone (delete if unassigned, archive if milestone)');
