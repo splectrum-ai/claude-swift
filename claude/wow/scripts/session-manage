@@ -158,15 +158,17 @@ async function endSession() {
     auditLog(workflow, 'session_termination', '', 'workflow_start', 'Starting session termination workflow');
     
     try {
-        // Execute COMMIT workflow
-        console.log('💾 Executing COMMIT workflow...');
-        execSync('claude/wow/scripts/git-manage commit', { stdio: 'inherit' });
-        auditLog(workflow, 'commit_complete', '', 'step', 'COMMIT workflow completed');
-        
-        // Archive session
+        // Archive session first
         console.log('📁 Archiving session...');
         execSync('claude/wow/scripts/audit-manage archive-session', { stdio: 'inherit' });
+        
+        // Execute COMMIT workflow (includes archived session)
+        console.log('💾 Executing COMMIT workflow...');
+        execSync('claude/wow/scripts/git-manage commit', { stdio: 'inherit' });
+        
+        // Log completion to fresh audit log
         auditLog(workflow, 'archive_complete', '', 'step', 'Session archive completed');
+        auditLog(workflow, 'commit_complete', '', 'step', 'COMMIT workflow completed');
         
         console.log('✅ Session end workflow completed');
         
