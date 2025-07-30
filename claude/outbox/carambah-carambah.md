@@ -1,4 +1,11 @@
-Remove CLAUDE.md and claude/wow symlinks from git tracking and add to .gitignore
+---
+target: carambah/carambah
+source: claude-swift
+created: 2025-07-30T12:00:00.000Z
+description: Remove CLAUDE.md and claude/wow symlinks from git tracking and add to .gitignore
+---
+
+# Remove CLAUDE.md and claude/wow symlinks from git tracking and add to .gitignore
 
 ## Task Details
 - Remove CLAUDE.md from git tracking: `git rm --cached CLAUDE.md`
