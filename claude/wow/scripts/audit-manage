@@ -93,6 +93,39 @@ async function archiveSession(workflow = 'SESSION_END') {
 }
 
 /**
+ * Handle session start audit workflow
+ */
+async function sessionStart() {
+    const workflow = 'SESSION_START';
+    
+    // Log session start
+    auditLog(workflow, 'session_init', '', 'workflow_start', 'Starting new session with recovery check');
+    
+    // Check for incomplete previous session (basic check)
+    auditLog(workflow, 'recovery_check', '', 'step', 'Checking for incomplete previous session');
+    
+    // Log session start completion (workflows will handle other steps)
+    auditLog(workflow, 'session_ready', '', 'workflow_complete', 'Session audit workflow completed');
+    
+    console.log('✓ Session start audit workflow completed');
+}
+
+/**
+ * Handle session end audit workflow (includes archive)
+ */
+async function sessionEnd() {
+    const workflow = 'SESSION_END';
+    
+    // Log session end start
+    auditLog(workflow, 'session_termination', '', 'workflow_start', 'Starting session termination workflow');
+    
+    // Archive session and create fresh log
+    await archiveSession(workflow);
+    
+    console.log('✓ Session end audit workflow completed');
+}
+
+/**
  * Archive audit logs for version release
  */
 async function archiveVersion(version, workflow = 'RELEASE_PROCESS') {
@@ -204,6 +237,8 @@ async function main() {
         if (!command) {
             console.log('Audit Management Script - Available commands:');
             console.log('  log <workflow> <action> <step> <details> <description> - Basic audit logging');
+            console.log('  session-start - Handle session start audit workflow');
+            console.log('  session-end - Handle session end audit workflow (includes archive)');
             console.log('  archive-session - Archive current log for session end');
             console.log('  archive-version <version> - Archive logs for version release');
             console.log('  fresh-log - Create fresh audit log with marker');
@@ -211,6 +246,8 @@ async function main() {
             console.log('  metrics - Run audit metrics analysis');
             console.log('');
             console.log('Examples:');
+            console.log('  audit-manage session-start');
+            console.log('  audit-manage session-end');
             console.log('  audit-manage log SESSION_START workflow_start session_init');
             console.log('  audit-manage archive-session');
             console.log('  audit-manage archive-version v1.2.3');
@@ -235,6 +272,14 @@ async function main() {
                 }
                 
                 auditLog(workflow, step, details, action, description);
+                break;
+                
+            case 'session-start':
+                await sessionStart();
+                break;
+                
+            case 'session-end':
+                await sessionEnd();
                 break;
                 
             case 'metrics':

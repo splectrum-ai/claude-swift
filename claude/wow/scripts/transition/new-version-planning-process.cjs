@@ -11,9 +11,44 @@ function loadVersionConfig() {
         if (fs.existsSync('claude/project/version-config.md')) {
             const versionConfig = fs.readFileSync('claude/project/version-config.md', 'utf8');
             
-            // Extract target version
-            const versionMatch = versionConfig.match(/TARGET_VERSION.*:\s*(.+)/);
-            if (versionMatch) config.targetVersion = versionMatch[1].trim();
+            // Extract current and target versions
+            const currentMatch = versionConfig.match(/CURRENT_VERSION.*:\s*(.+)/);
+            const targetMatch = versionConfig.match(/TARGET_VERSION.*:\s*(.+)/);
+            
+            if (currentMatch) config.currentVersion = currentMatch[1].trim();
+            if (targetMatch) config.targetVersion = targetMatch[1].trim();
+            
+            // Auto-increment version after release: current becomes target, target becomes next version
+            if (config.currentVersion && config.targetVersion) {
+                console.log(`🔄 Post-release version transition: ${config.currentVersion} → ${config.targetVersion} → next`);
+                
+                // Parse target version and increment minor version for next target
+                const versionParts = config.targetVersion.split('.');
+                if (versionParts.length >= 2) {
+                    const major = parseInt(versionParts[0]);
+                    const minor = parseInt(versionParts[1]);
+                    const nextVersion = `${major}.${minor + 1}.0`;
+                    
+                    console.log(`📈 Version transition: current=${config.targetVersion}, next target=${nextVersion}`);
+                    
+                    // Update both current and target versions
+                    let updatedConfig = versionConfig.replace(
+                        /\*\*CURRENT_VERSION\*\*:\s*(.+)/,
+                        `**CURRENT_VERSION**: ${config.targetVersion}`
+                    );
+                    updatedConfig = updatedConfig.replace(
+                        /\*\*TARGET_VERSION\*\*:\s*(.+)/,
+                        `**TARGET_VERSION**: ${nextVersion}`
+                    );
+                    
+                    fs.writeFileSync('claude/project/version-config.md', updatedConfig);
+                    console.log(`✓ Updated version config: CURRENT_VERSION = ${config.targetVersion}, TARGET_VERSION = ${nextVersion}`);
+                    
+                    // Update config object for this run
+                    config.currentVersion = config.targetVersion;
+                    config.targetVersion = nextVersion;
+                }
+            }
             
             // Extract version strategy
             const strategyMatch = versionConfig.match(/VERSION_STRATEGY.*:\s*(.+)/);
@@ -92,27 +127,28 @@ function issueSelection(config) {
     try {
         console.log('🔍 Analyzing issue backlog...');
         
-        // Get all open issues
-        const openIssues = execSync('claude/wow/scripts/gh-issue list --state open --json number,title,labels', { encoding: 'utf8' });
-        const issues = JSON.parse(openIssues);
+        // Get all open issues using local issue management
+        const openIssues = execSync('claude/wow/scripts/issue-manage list all', { encoding: 'utf8' });
+        console.log('Issue backlog analysis completed');
         
-        console.log(`📊 Found ${issues.length} open issues in backlog`);
-        
-        // Filter issues without milestones (available for planning)
-        const unplannedIssues = issues.filter(issue => 
-            !issue.labels.some(label => label.name.startsWith('v'))
-        );
-        
-        console.log(`📋 Available for planning: ${unplannedIssues.length} issues`);
-        
-        if (unplannedIssues.length === 0) {
-            console.log('ℹ No unplanned issues available for version selection');
+        // Check for unassigned issues (available for planning)
+        const fs = require('fs');
+        const unassignedPath = 'claude/issues/unassigned';
+        if (fs.existsSync(unassignedPath)) {
+            const unassignedFiles = fs.readdirSync(unassignedPath).filter(f => f.endsWith('.md'));
+            console.log(`📋 Available for planning: ${unassignedFiles.length} unassigned issues`);
+            
+            if (unassignedFiles.length === 0) {
+                console.log('ℹ No unassigned issues available for version selection');
+            }
+        } else {
+            console.log('📋 No unassigned issues directory found');
         }
         
         return true;
     } catch (error) {
         console.log('⚠ Issue analysis failed - planning can continue manually');
-        console.log('  Use: claude/wow/scripts/gh-issue list to review issues');
+        console.log('  Use: claude/wow/scripts/issue-manage list to review issues');
         return true;
     }
 }
@@ -129,21 +165,22 @@ function milestoneCreation(config) {
     try {
         console.log(`🎯 Creating milestone: ${targetVersion}`);
         
-        // Check if milestone already exists
-        try {
-            execSync(`claude/wow/scripts/gh-issue milestone view "${targetVersion}"`, { stdio: 'pipe' });
-            console.log(`✓ Milestone ${targetVersion} already exists`);
-        } catch (error) {
-            // Milestone doesn't exist, create it
-            const description = `Version ${targetVersion} development milestone`;
-            execSync(`claude/wow/scripts/gh-issue milestone create "${targetVersion}" --description "${description}"`, { stdio: 'inherit' });
-            console.log(`✓ Created milestone: ${targetVersion}`);
+        // Check if milestone directory already exists
+        const fs = require('fs');
+        const milestonePath = `claude/issues/${targetVersion}`;
+        
+        if (fs.existsSync(milestonePath)) {
+            console.log(`✓ Milestone directory ${targetVersion} already exists`);
+        } else {
+            // Create milestone directory
+            fs.mkdirSync(milestonePath, { recursive: true });
+            console.log(`✓ Created milestone directory: ${targetVersion}`);
         }
         
         return true;
     } catch (error) {
         console.log(`⚠ Milestone creation failed: ${error.message}`);
-        console.log('  Manual creation: gh issue milestone create');
+        console.log('  Manual creation: mkdir claude/issues/' + targetVersion);
         return false;
     }
 }
@@ -153,28 +190,71 @@ function labelOrganization(config) {
     const targetVersion = config.targetVersion;
     
     if (!targetVersion) {
-        console.log('⚠ Cannot create labels without target version');
+        console.log('⚠ Cannot add labels without target version');
         return false;
     }
     
     try {
-        console.log(`🏷️ Setting up version label: ${targetVersion}`);
+        console.log(`🏷️ Setting up version label for issues: ${targetVersion}`);
         
-        // Create version label if it doesn't exist
-        try {
-            execSync(`claude/wow/scripts/gh-issue label view "${targetVersion}"`, { stdio: 'pipe' });
-            console.log(`✓ Label ${targetVersion} already exists`);
-        } catch (error) {
-            // Label doesn't exist, create it
-            const description = `Version ${targetVersion} issues`;
-            execSync(`claude/wow/scripts/gh-issue label create "${targetVersion}" --description "${description}" --color "0366d6"`, { stdio: 'inherit' });
-            console.log(`✓ Created label: ${targetVersion}`);
+        const fs = require('fs');
+        const path = require('path');
+        const milestonePath = `claude/issues/${targetVersion}`;
+        
+        if (!fs.existsSync(milestonePath)) {
+            console.log(`⚠ Milestone directory ${targetVersion} doesn't exist yet`);
+            return true; // Not an error, just nothing to label yet
         }
         
+        // Get all issue files in the milestone directory
+        const issueFiles = fs.readdirSync(milestonePath)
+            .filter(f => f.endsWith('.md'));
+            
+        if (issueFiles.length === 0) {
+            console.log(`✓ No issues in ${targetVersion} to label yet`);
+            return true;
+        }
+        
+        let labeledCount = 0;
+        
+        // Add version label to each issue's frontmatter
+        for (const file of issueFiles) {
+            const filepath = path.join(milestonePath, file);
+            const content = fs.readFileSync(filepath, 'utf8');
+            
+            // Extract current labels from frontmatter
+            const labelsMatch = content.match(/labels:\s*"?(\[.*?\])"?/);
+            let labels = [];
+            
+            if (labelsMatch) {
+                try {
+                    labels = JSON.parse(labelsMatch[1]);
+                } catch (error) {
+                    // Invalid JSON, start fresh
+                    labels = [];
+                }
+            }
+            
+            // Add version label if not already present
+            if (!labels.includes(targetVersion)) {
+                labels.push(targetVersion);
+                
+                // Update frontmatter
+                const updatedContent = updateFrontmatter(content, {
+                    labels: JSON.stringify(labels)
+                });
+                
+                fs.writeFileSync(filepath, updatedContent);
+                labeledCount++;
+            }
+        }
+        
+        console.log(`✓ Added ${targetVersion} label to ${labeledCount} issues`);
         return true;
+        
     } catch (error) {
-        console.log(`⚠ Label creation failed: ${error.message}`);
-        console.log('  Manual creation: gh issue label create');
+        console.log(`⚠ Label organization failed: ${error.message}`);
+        console.log('  Manual labeling: Edit issue frontmatter to add version label');
         return false;
     }
 }
@@ -191,19 +271,37 @@ function scopeValidation(config) {
     }
     
     try {
-        // Check milestone issues
-        const milestoneIssues = execSync(`claude/wow/scripts/gh-issue list --milestone "${targetVersion}" --json number,title`, { encoding: 'utf8' });
-        const issues = JSON.parse(milestoneIssues);
+        // Check milestone directory for issues
+        const fs = require('fs');
+        const path = require('path');
+        const milestonePath = `claude/issues/${targetVersion}`;
         
-        console.log(`📊 Issues assigned to ${targetVersion}: ${issues.length}`);
+        if (!fs.existsSync(milestonePath)) {
+            console.log(`⚠ No milestone directory ${targetVersion} found`);
+            console.log('  Create directory: mkdir claude/issues/' + targetVersion);
+            return false;
+        }
         
-        if (issues.length === 0) {
+        // Get all issue files in the milestone directory
+        const issueFiles = fs.readdirSync(milestonePath)
+            .filter(f => f.endsWith('.md'));
+        
+        console.log(`📊 Issues assigned to ${targetVersion}: ${issueFiles.length}`);
+        
+        if (issueFiles.length === 0) {
             console.log('⚠ No issues assigned to version milestone yet');
-            console.log('  Use: claude/wow/scripts/gh-issue edit <number> --milestone "' + targetVersion + '"');
+            console.log('  Move issues from unassigned: mv claude/issues/unassigned/xxx-*.md claude/issues/' + targetVersion + '/');
         } else {
             console.log('✓ Version has assigned issues for development');
-            issues.forEach((issue, index) => {
-                console.log(`  ${index + 1}. #${issue.number}: ${issue.title}`);
+            
+            // Show issue titles
+            issueFiles.forEach((file, index) => {
+                const content = fs.readFileSync(path.join(milestonePath, file), 'utf8');
+                const titleMatch = content.match(/title: "(.*)"/);
+                const title = titleMatch ? titleMatch[1] : 'No title';
+                const id = file.split('-')[0];
+                
+                console.log(`  ${index + 1}. ${id}: ${title}`);
             });
         }
         
@@ -260,21 +358,21 @@ function main() {
     
     if (successCount === totalSteps) {
         console.log('\n🎉 NEW VERSION PLANNING COMPLETE');
-        console.log('✓ Version milestone and labels created');
-        console.log('✓ Issue backlog analyzed and ready for assignment');
+        console.log('✓ Version milestone directory created');
+        console.log('✓ Issue backlog analyzed and ready for organization');
         console.log('✓ Version scope framework established');
         console.log('\nNext steps:');
-        console.log('- Assign issues to version milestone');
-        console.log('- Apply version labels to selected issues');
+        console.log('- Move issues to version milestone directory: mv claude/issues/unassigned/xxx-*.md claude/issues/' + config.targetVersion + '/');
+        console.log('- Version labels will be automatically added to issues in milestone directory');
         console.log('- Begin development with clear version scope');
     } else {
         console.log('\n⚠ NEW VERSION PLANNING COMPLETED WITH ISSUES');
         console.log(`${totalSteps - successCount} steps failed or had warnings`);
         console.log('Check configuration and GitHub authentication');
         console.log('\nManual setup may be required for:');
-        console.log('- Milestone creation: gh issue milestone create');
-        console.log('- Label creation: gh issue label create');
-        console.log('- Issue assignment: gh issue edit <number> --milestone');
+        console.log('- Milestone creation: mkdir claude/issues/' + (config.targetVersion || 'vX.X.X'));
+        console.log('- Issue organization: mv claude/issues/unassigned/xxx-*.md claude/issues/' + (config.targetVersion || 'vX.X.X') + '/');
+        console.log('- Label management: Edit issue frontmatter to add version labels');
     }
     
     // Exit with appropriate code

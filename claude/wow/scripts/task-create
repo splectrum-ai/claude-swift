@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Generate timestamp with milliseconds
 function generateTimestamp() {
@@ -91,12 +91,22 @@ function extractTargetRepo(targetInput) {
 
 // Main function
 function main() {
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    const isDryRun = args.includes('--dry-run') || args.includes('-n');
+    const targetRepo = args.find(arg => !arg.startsWith('--') && arg !== '-n') || null;
+    
+    if (isDryRun) {
+        console.log('🔍 DRY RUN MODE - No files will be created');
+    }
+    
     // Read task content from stdin
     let taskContent = '';
     
     if (process.stdin.isTTY) {
         console.error('Error: Task content must be provided via stdin');
-        console.error('Usage: echo "task content" | claude/wow/scripts/task-create');
+        console.error('Usage: echo "task content" | claude/wow/scripts/task-create [target-repo] [--dry-run]');
+        console.error('Example: echo "Fix bug in auth" | claude/wow/scripts/task-create jules-tenbos/splectrum --dry-run');
         process.exit(1);
     }
     
@@ -119,59 +129,100 @@ function main() {
             }
             
             const metadata = metadataMatch[1];
-            const targetMatch = metadata.match(/target:\s*(.+)/);
+            const yamlTargetMatch = metadata.match(/target:\s*(.+)/);
             const titleMatch = taskContent.match(/^# (.+)$/m);
             
-            if (!targetMatch || !titleMatch) {
-                console.error('Error: Could not extract target repository or title from task content');
+            // Use command line target repo if provided, otherwise look in YAML
+            let targetInput;
+            if (targetRepo) {
+                targetInput = targetRepo;
+            } else if (yamlTargetMatch) {
+                targetInput = yamlTargetMatch[1].trim();
+            } else {
+                console.error('Error: Target repository must be provided via command line argument or YAML frontmatter');
+                console.error('Usage: echo "content" | task-create jules-tenbos/splectrum');
                 process.exit(1);
             }
             
-            const targetInput = targetMatch[1].trim();
-            const targetRepo = extractTargetRepo(targetInput);
+            if (!titleMatch) {
+                console.error('Error: Could not extract title from task content (expecting # Title format)');
+                process.exit(1);
+            }
+            
+            const finalTargetRepo = extractTargetRepo(targetInput);
             const title = titleMatch[1].trim();
             const taskName = cleanTaskName(title);
             
             // Generate filename
             const timestamp = generateTimestamp();
-            const filename = `${timestamp}_${targetRepo}_${taskName}.md`;
+            const filename = `${timestamp}_${finalTargetRepo}_${taskName}.md`;
             
             console.log(`Generated filename: ${filename}`);
             
-            // Setup outbox directory
-            ensureDirectory('claude/outbox');
-            createOutboxReadme();
-            console.log(`✓ Outbox directory ready: ${process.cwd()}/claude/outbox`);
+            // Setup outbox directory (unless dry run)
+            if (!isDryRun) {
+                ensureDirectory('claude/outbox');
+                createOutboxReadme();
+                console.log(`✓ Outbox directory ready: ${process.cwd()}/claude/outbox`);
+            } else {
+                console.log(`[DRY RUN] Would setup outbox directory: ${process.cwd()}/claude/outbox`);
+            }
             
             // Write task file
             const taskFilePath = path.join('claude/outbox', filename);
-            fs.writeFileSync(taskFilePath, taskContent);
-            console.log(`✓ Task file created: ${taskFilePath}`);
-            
-            // Verify file
-            const stats = fs.statSync(taskFilePath);
-            if (stats.size > 0) {
-                const lineCount = taskContent.split('\n').length;
-                console.log(`✓ Task file verified (${lineCount} lines)`);
+            if (!isDryRun) {
+                fs.writeFileSync(taskFilePath, taskContent);
+                console.log(`✓ Task file created: ${taskFilePath}`);
+                
+                // Verify file
+                const stats = fs.statSync(taskFilePath);
+                if (stats.size > 0) {
+                    const lineCount = taskContent.split('\n').length;
+                    console.log(`✓ Task file verified (${lineCount} lines)`);
+                } else {
+                    console.log('✗ Task file verification failed');
+                    process.exit(1);
+                }
             } else {
-                console.log('✗ Task file verification failed');
-                process.exit(1);
+                console.log(`[DRY RUN] Would create task file: ${taskFilePath}`);
+                const lineCount = taskContent.split('\n').length;
+                console.log(`[DRY RUN] File would contain ${lineCount} lines`);
             }
             
             // Completion summary
-            console.log('\n=== TASK CREATION COMPLETE ===');
-            console.log(`Task file: ${filename}`);
-            console.log(`Location: ${process.cwd()}/claude/outbox/`);
-            console.log(`Target repository: ${targetRepo}`);
-            console.log(`Task title: ${title}`);
-            console.log(`\nFile size: ${(stats.size / 1024).toFixed(1)}KB`);
-            console.log(`Lines: ${lineCount}`);
-            console.log('\nNext steps:');
-            console.log(`1. Review task file: cat claude/outbox/${filename}`);
-            console.log('2. Distribute task: \`outbox sesame\` (from base repository)');
-            console.log('3. Target repository will receive task in their inbox');
-            console.log('4. Target can process: \`inbox sesame\` (converts to GitHub issue)');
-            console.log('\nTask is ready for distribution! 🚀');
+            if (isDryRun) {
+                console.log('\n=== DRY RUN COMPLETE ===');
+                console.log(`[DRY RUN] Task file: ${filename}`);
+                console.log(`[DRY RUN] Location: ${process.cwd()}/claude/outbox/`);
+                console.log(`[DRY RUN] Target repository: ${finalTargetRepo}`);
+                console.log(`[DRY RUN] Task title: ${title}`);
+                const lineCount = taskContent.split('\n').length;
+                const fileSize = (Buffer.byteLength(taskContent, 'utf8') / 1024).toFixed(1);
+                console.log(`\n[DRY RUN] File size: ${fileSize}KB`);
+                console.log(`[DRY RUN] Lines: ${lineCount}`);
+                console.log('\n[DRY RUN] Would execute next steps:');
+                console.log(`1. Review task file: cat claude/outbox/${filename}`);
+                console.log('2. Distribute task: \`outbox sesame\` (from base repository)');
+                console.log('3. Target repository will receive task in their inbox');
+                console.log('4. Target can process: \`inbox sesame\` (converts to GitHub issue)');
+                console.log('\n[DRY RUN] No files were created. Run without --dry-run to create task! 🔍');
+            } else {
+                console.log('\n=== TASK CREATION COMPLETE ===');
+                console.log(`Task file: ${filename}`);
+                console.log(`Location: ${process.cwd()}/claude/outbox/`);
+                console.log(`Target repository: ${finalTargetRepo}`);
+                console.log(`Task title: ${title}`);
+                const stats = fs.statSync(taskFilePath);
+                const lineCount = taskContent.split('\n').length;
+                console.log(`\nFile size: ${(stats.size / 1024).toFixed(1)}KB`);
+                console.log(`Lines: ${lineCount}`);
+                console.log('\nNext steps:');
+                console.log(`1. Review task file: cat claude/outbox/${filename}`);
+                console.log('2. Distribute task: \`outbox sesame\` (from base repository)');
+                console.log('3. Target repository will receive task in their inbox');
+                console.log('4. Target can process: \`inbox sesame\` (converts to GitHub issue)');
+                console.log('\nTask is ready for distribution! 🚀');
+            }
             
         } catch (error) {
             console.error('Error:', error.message);
@@ -181,6 +232,12 @@ function main() {
 }
 
 // Run the script
-if (require.main === module) {
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const scriptName = path.basename(__filename);
+const argv1Name = path.basename(process.argv[1] || '');
+
+if (argv1Name === scriptName || argv1Name === 'task-create') {
     main();
 }

@@ -286,6 +286,17 @@ function createIssue(type, title, options = {}) {
                     .replace(/\[Bug Summary\]/g, title)  
                     .replace(/\[Task Name\]/g, title);
     
+    // Handle dry-run mode
+    if (options.dryRun) {
+        console.log(`[DRY RUN] Would create issue ${issueId}: ${title}`);
+        console.log(`[DRY RUN] File: ${filepath}`);
+        console.log(`[DRY RUN] Type: ${type}`);
+        console.log(`[DRY RUN] Content generated (${content.split('\n').length} lines)`);
+        
+        // Return content for task payload use
+        return { issueId, filepath, filename, content };
+    }
+    
     // Write file
     fs.writeFileSync(filepath, content);
     
@@ -376,7 +387,7 @@ function importIssue(taskFilePath) {
 }
 
 // List issues
-function listIssues(location = 'all') {
+function listIssues(location = 'all', detailed = false) {
     if (location === 'all') {
         // List all milestone folders plus unassigned
         const issuesDir = 'claude/issues';
@@ -384,7 +395,7 @@ function listIssues(location = 'all') {
             .filter(dirent => dirent.isDirectory())
             .map(dirent => dirent.name)
             .filter(name => !['templates'].includes(name));
-        return listIssues(allDirs);
+        return listIssues(allDirs, detailed);
     }
     
     const locations = Array.isArray(location) ? location : [location];
@@ -405,11 +416,35 @@ function listIssues(location = 'all') {
             
             files.forEach(file => {
                 const content = fs.readFileSync(path.join(dirPath, file), 'utf8');
-                const titleMatch = content.match(/title: "(.*)"/);
-                const title = titleMatch ? titleMatch[1] : 'No title';
+                const frontmatter = extractFrontmatter(content);
+                const title = frontmatter.title || 'No title';
+                const priority = frontmatter.priority || 'medium';
                 const id = file.split('-')[0];
                 
-                console.log(`  ${id}: ${title}`);
+                if (detailed) {
+                    let summary = frontmatter.short_summary || '';
+                    
+                    // Fallback to first 80 chars if no short_summary
+                    if (!summary) {
+                        const body = content.substring(content.indexOf('\n\n', content.indexOf('---', 3)) + 2);
+                        const sectionMatch = body.match(/## (?:Problem Statement|Description|Objective)\n(.+?)(?:\n\n|\n##|$)/s);
+                        if (sectionMatch) {
+                            summary = sectionMatch[1].trim().split('\n')[0];
+                        } else {
+                            const lines = body.split('\n').filter(line => line.trim() && !line.startsWith('#'));
+                            summary = lines[0] || '';
+                        }
+                        
+                        if (summary.length > 80) {
+                            summary = summary.substring(0, 77) + '...';
+                        }
+                    }
+                    
+                    console.log(`  ${id}: ${title} [${priority}]`);
+                    console.log(`      ${summary || 'No description available'}`);
+                } else {
+                    console.log(`  ${id}: ${title}`);
+                }
             });
         }
         
@@ -690,6 +725,21 @@ async function syncWithGitHub(options = {}) {
         const config = getRepoConfig();
         const { owner, repo } = config.getRepositoryInfo();
         
+        // Helper function to get milestone numbers from names
+        const getMilestoneNumber = async (milestoneName) => {
+            if (!milestoneName || milestoneName === 'unassigned') return null;
+            
+            try {
+                const milestonesJson = execSync(`gh api repos/${owner}/${repo}/milestones`, { encoding: 'utf8' });
+                const milestones = JSON.parse(milestonesJson);
+                const milestone = milestones.find(m => m.title === milestoneName);
+                return milestone ? milestone.number : null;
+            } catch (error) {
+                console.warn(`⚠️  Could not fetch milestones: ${error.message}`);
+                return null;
+            }
+        };
+        
         console.log(`Repository: ${owner}/${repo}`);
         
         // Check gh CLI authentication
@@ -721,23 +771,48 @@ async function syncWithGitHub(options = {}) {
         
         for (const dir of dirs) {
             const dirPath = path.join(issuesDir, dir);
-            const files = fs.readdirSync(dirPath)
-                .filter(f => f.endsWith('.md') && !f.startsWith('.'));
             
-            for (const file of files) {
-                const filepath = path.join(dirPath, file);
-                const content = fs.readFileSync(filepath, 'utf8');
-                const frontmatter = extractFrontmatter(content);
+            // Scan main directory files
+            const scanDirectory = (scanPath, isClosed = false) => {
+                if (!fs.existsSync(scanPath)) return;
                 
-                if (frontmatter.github_id) {
-                    localIssuesMap.set(frontmatter.github_id, {
-                        filepath,
-                        content,
-                        frontmatter,
-                        directory: dir
-                    });
+                const files = fs.readdirSync(scanPath)
+                    .filter(f => f.endsWith('.md') && !f.startsWith('.'));
+                
+                for (const file of files) {
+                    const filepath = path.join(scanPath, file);
+                    const content = fs.readFileSync(filepath, 'utf8');
+                    const frontmatter = extractFrontmatter(content);
+                    
+                    if (frontmatter.github_id && frontmatter.github_id !== null && frontmatter.github_id !== "null") {
+                        localIssuesMap.set(frontmatter.github_id, {
+                            filepath,
+                            content,
+                            frontmatter,
+                            directory: dir,
+                            isClosed: isClosed,
+                            isNew: false
+                        });
+                    } else if (frontmatter.github_id === null || frontmatter.github_id === "null") {
+                        // Track new issues that need creation
+                        localIssuesMap.set(`new_${file}`, {
+                            filepath,
+                            content,
+                            frontmatter,
+                            directory: dir,
+                            isClosed: isClosed,
+                            isNew: true
+                        });
+                    }
                 }
-            }
+            };
+            
+            // Scan main directory
+            scanDirectory(dirPath, false);
+            
+            // Scan closed/ subdirectory
+            const closedPath = path.join(dirPath, 'closed');
+            scanDirectory(closedPath, true);
         }
         
         console.log(`Found ${localIssuesMap.size} local issues with GitHub IDs`);
@@ -756,11 +831,70 @@ async function syncWithGitHub(options = {}) {
             if (!localIssue) {
                 // New issue from GitHub - import it
                 console.log(`📥 New issue from GitHub: #${githubIssue.number}`);
-                // Use existing seed logic to import
-                // ... (similar to seedFromGitHub logic)
+                
+                if (!options.dryRun) {
+                    try {
+                        const type = classifyIssueType(githubIssue);
+                        const localId = getNextIssueId();
+                        const slug = createSlug(githubIssue.title);
+                        const filename = `${localId}-${slug}.md`;
+                        
+                        // Determine target directory based on milestone
+                        let targetDir = 'unassigned';
+                        let milestoneNote = null;
+                        
+                        if (githubIssue.milestone) {
+                            if (isVersionMilestone(githubIssue.milestone.title)) {
+                                // Valid version milestone - create/use folder
+                                targetDir = githubIssue.milestone.title;
+                                fs.mkdirSync(`claude/issues/${targetDir}`, { recursive: true });
+                            } else {
+                                // Non-version milestone - note it but keep in unassigned
+                                milestoneNote = githubIssue.milestone.title;
+                            }
+                        }
+                        
+                        const filepath = path.join(`claude/issues/${targetDir}`, filename);
+                        
+                        // Load template and populate
+                        let content = loadTemplate(type);
+                        
+                        const updates = {
+                            title: githubIssue.title,
+                            github_id: githubIssue.number,
+                            state: githubIssue.state,
+                            milestone: githubIssue.milestone ? githubIssue.milestone.title : 'unassigned',
+                            labels: JSON.stringify(githubIssue.labels.map(l => l.name)),
+                            github_updated_at: githubIssue.updated_at,
+                            local_updated_at: new Date().toISOString()
+                        };
+                        
+                        // Add milestone note if non-version milestone
+                        if (milestoneNote) {
+                            updates.github_milestone = milestoneNote;
+                        }
+                        
+                        content = updateFrontmatter(content, updates);
+                        
+                        // Replace template body with GitHub issue body
+                        if (githubIssue.body) {
+                            const bodyStart = content.lastIndexOf('---') + 4;
+                            content = content.substring(0, bodyStart) + '\n' + githubIssue.body + '\n';
+                        }
+                        
+                        fs.writeFileSync(filepath, content);
+                        console.log(`  ✓ Imported #${githubIssue.number} to ${targetDir}/${filename}`);
+                        
+                    } catch (error) {
+                        console.error(`❌ Failed to import #${githubIssue.number}: ${error.message}`);
+                        conflictCount++;
+                        continue;
+                    }
+                }
+                
                 pulledCount++;
-            } else {
-                // Always push local content to GitHub to ensure metadata is synced
+            } else if (!localIssue.isNew) {
+                // Sync existing issue with GitHub
                 console.log(`📤 Syncing #${githubIssue.number} to GitHub`);
                 
                 // Extract issue body from local content
@@ -775,14 +909,42 @@ async function syncWithGitHub(options = {}) {
                 // Clean issue body - remove any frontmatter that might have leaked
                 issueBody = issueBody.replace(/^---[\s\S]*?---\n*/m, '');
                 
-                // Update GitHub issue
-                const updateCommand = `gh api repos/${owner}/${repo}/issues/${githubIssue.number} ` +
-                    `-X PATCH ` +
-                    `-f body="${issueBody.replace(/"/g, '\\"').replace(/\$/g, '\\$')}" ` +
-                    `-f title="${localIssue.frontmatter.title.replace(/"/g, '\\"')}"`;
+                // Filter out problematic shell characters
+                issueBody = issueBody
+                    .replace(/[`$\\]/g, '') // Remove backticks, dollar signs, backslashes
+                    .replace(/\n\s*[-│├└]/g, '\n-') // Convert tree characters to simple dashes
+                    .replace(/[""]/g, '"') // Convert smart quotes to regular quotes
+                    .replace(/['']/g, "'") // Convert smart apostrophes to regular ones
+                    .replace(/[^\x20-\x7E\n\r\t]/g, ''); // Remove non-printable/extended ASCII
+                
+                // Determine if issue state needs to change
+                const shouldBeClosed = localIssue.isClosed;
+                const isCurrentlyOpen = githubIssue.state === 'open';
+                const needsStatusChange = shouldBeClosed && isCurrentlyOpen;
+                
+                // Determine milestone from directory
+                const milestoneName = localIssue.directory !== 'unassigned' ? localIssue.directory : null;
+                const milestoneNumber = milestoneName ? await getMilestoneNumber(milestoneName) : null;
+                const needsMilestoneUpdate = milestoneName && 
+                    (!githubIssue.milestone || githubIssue.milestone.title !== milestoneName);
                 
                 if (!options.dryRun) {
                     try {
+                        // Update issue content and metadata
+                        let updateCommand = `gh api repos/${owner}/${repo}/issues/${githubIssue.number} -X PATCH ` +
+                            `-f body="${issueBody.replace(/"/g, '\\"')}" ` +
+                            `-f title="${localIssue.frontmatter.title.replace(/"/g, '\\"')}"`;
+                        
+                        // Add milestone if needed
+                        if (needsMilestoneUpdate && milestoneNumber) {
+                            updateCommand += ` -f milestone=${milestoneNumber}`;
+                        }
+                        
+                        // Add state change if needed
+                        if (needsStatusChange) {
+                            updateCommand += ` -f state="closed"`;
+                        }
+                        
                         execSync(updateCommand, { stdio: 'pipe' });
                         pushedCount++;
                         
@@ -800,13 +962,108 @@ async function syncWithGitHub(options = {}) {
                         const updatedContent = updateFrontmatter(localIssue.content, updates);
                         fs.writeFileSync(localIssue.filepath, updatedContent);
                         
+                        if (needsStatusChange) {
+                            console.log(`  ✓ Closed issue #${githubIssue.number}`);
+                        }
+                        if (needsMilestoneUpdate) {
+                            console.log(`  ✓ Updated milestone to ${milestoneName} for #${githubIssue.number}`);
+                        }
+                        
                     } catch (error) {
                         console.error(`❌ Failed to push #${githubIssue.number}: ${error.message}`);
                         conflictCount++;
                     }
                 } else {
-                    console.log(`  [DRY RUN] Would update GitHub issue #${githubIssue.number}`);
+                    let dryRunActions = [`Update content`];
+                    if (needsStatusChange) dryRunActions.push(`Close issue`);
+                    if (needsMilestoneUpdate) dryRunActions.push(`Set milestone: ${milestoneName}`);
+                    
+                    console.log(`  [DRY RUN] Would update GitHub issue #${githubIssue.number}: ${dryRunActions.join(', ')}`);
                     pushedCount++;
+                }
+            }
+        }
+        
+        // Process new local issues that need creation
+        let createdCount = 0;
+        console.log('\n🆕 Creating new issues on GitHub...');
+        
+        for (const [key, localIssue] of localIssuesMap) {
+            if (localIssue.isNew) {
+                console.log(`📤 Creating new issue: ${localIssue.frontmatter.title}`);
+                
+                // Extract issue body
+                const bodyStart = localIssue.content.indexOf('\n\n', localIssue.content.indexOf('---', 3)) + 2;
+                let issueBody = localIssue.content.substring(bodyStart).trim();
+                
+                if (issueBody.startsWith('#')) {
+                    issueBody = issueBody.substring(issueBody.indexOf('\n') + 1).trim();
+                }
+                issueBody = issueBody.replace(/^---[\s\S]*?---\n*/m, '');
+                
+                // Filter out problematic shell characters
+                issueBody = issueBody
+                    .replace(/[`$\\]/g, '') // Remove backticks, dollar signs, backslashes
+                    .replace(/\n\s*[-│├└]/g, '\n-') // Convert tree characters to simple dashes
+                    .replace(/[""]/g, '"') // Convert smart quotes to regular quotes
+                    .replace(/['']/g, "'") // Convert smart apostrophes to regular ones
+                    .replace(/[^\x20-\x7E\n\r\t]/g, ''); // Remove non-printable/extended ASCII
+                
+                const milestoneName = localIssue.directory !== 'unassigned' ? localIssue.directory : null;
+                const milestoneNumber = milestoneName ? await getMilestoneNumber(milestoneName) : null;
+                
+                if (!options.dryRun) {
+                    try {
+                        // First, create issue with minimal content to avoid shell escaping issues
+                        const cleanTitle = localIssue.frontmatter.title.replace(/"/g, '\\"');
+                        const shortBody = `Issue created via sync. Full content will be updated.`;
+                        
+                        let createCommand = `gh api repos/${owner}/${repo}/issues -X POST ` +
+                            `-f title="${cleanTitle}" ` +
+                            `-f body="${shortBody}"`;
+                        
+                        if (milestoneNumber) {
+                            createCommand += ` -f milestone=${milestoneNumber}`;
+                        }
+                        
+                        const newIssueJson = execSync(createCommand, { encoding: 'utf8' });
+                        const newIssue = JSON.parse(newIssueJson);
+                        
+                        // Now update with full content using gh issue edit (more reliable)
+                        try {
+                            // Write body to temporary file to avoid shell escaping
+                            const tempFile = `/tmp/issue-body-${newIssue.number}.md`;
+                            fs.writeFileSync(tempFile, issueBody);
+                            
+                            execSync(`gh issue edit ${newIssue.number} --body-file "${tempFile}"`, { encoding: 'utf8' });
+                            
+                            // Clean up temp file
+                            fs.unlinkSync(tempFile);
+                            
+                        } catch (updateError) {
+                            console.warn(`  ⚠️  Created issue #${newIssue.number} but failed to update body: ${updateError.message}`);
+                        }
+                        
+                        // Update local file with GitHub ID
+                        const updates = {
+                            github_id: newIssue.number,
+                            github_updated_at: newIssue.updated_at
+                        };
+                        const updatedContent = updateFrontmatter(localIssue.content, updates);
+                        fs.writeFileSync(localIssue.filepath, updatedContent);
+                        
+                        console.log(`  ✓ Created issue #${newIssue.number}`);
+                        createdCount++;
+                        
+                    } catch (error) {
+                        console.error(`❌ Failed to create issue: ${error.message}`);
+                        conflictCount++;
+                    }
+                } else {
+                    const actions = [`Create issue: ${localIssue.frontmatter.title}`];
+                    if (milestoneName) actions.push(`Milestone: ${milestoneName}`);
+                    console.log(`  [DRY RUN] Would ${actions.join(', ')}`);
+                    createdCount++;
                 }
             }
         }
@@ -816,18 +1073,22 @@ async function syncWithGitHub(options = {}) {
             last_sync: new Date().toISOString(),
             last_github_fetch: new Date().toISOString(),
             total_issues: localIssuesMap.size,
-            sync_version: '2.0.0',
+            sync_version: '2.1.0',
             bidirectional_sync: true,
             pulled_from_github: pulledCount,
             pushed_to_github: pushedCount,
+            created_on_github: createdCount,
             conflicts: conflictCount
         };
         
-        fs.writeFileSync('claude/issues/sync.json', JSON.stringify(syncData, null, 2));
+        if (!options.dryRun) {
+            fs.writeFileSync('claude/issues/sync.json', JSON.stringify(syncData, null, 2));
+        }
         
         console.log('\n📊 Sync Summary:');
         console.log(`  📥 Pulled from GitHub: ${pulledCount}`);
         console.log(`  📤 Pushed to GitHub: ${pushedCount}`);
+        console.log(`  🆕 Created on GitHub: ${createdCount}`);
         console.log(`  ⚠️  Conflicts: ${conflictCount}`);
         console.log(`  📁 Total local issues: ${localIssuesMap.size}`);
         
@@ -940,12 +1201,36 @@ function closeIssue(identifier) {
     }
 }
 
+// Helper function to get target version from version config
+function getTargetVersion() {
+    try {
+        const versionConfigPath = 'claude/project/version-config.md';
+        if (!fs.existsSync(versionConfigPath)) {
+            return null;
+        }
+        
+        const content = fs.readFileSync(versionConfigPath, 'utf8');
+        const targetMatch = content.match(/- \*\*TARGET_VERSION\*\*: (.+)/);
+        return targetMatch ? `v${targetMatch[1]}` : null;
+    } catch (error) {
+        console.warn(`⚠️  Could not read version config: ${error.message}`);
+        return null;
+    }
+}
+
 // Housekeeping - remove closed milestones that aren't the target version
 function housekeeping() {
     const issuesDir = 'claude/issues';
     
     if (!fs.existsSync(issuesDir)) {
         console.log('❌ No issues directory found');
+        return;
+    }
+    
+    // Get target version from config
+    const targetVersion = getTargetVersion();
+    if (!targetVersion) {
+        console.log('⚠️  Could not determine target version from config');
         return;
     }
     
@@ -959,27 +1244,13 @@ function housekeeping() {
         return;
     }
     
-    // Find the latest version milestone (assumed to be target)
-    const versionMilestones = milestones.filter(m => m.match(/^v\d+\.\d+\.\d+$/));
-    const latestVersion = versionMilestones.sort((a, b) => {
-        const aVersions = a.substring(1).split('.').map(Number);
-        const bVersions = b.substring(1).split('.').map(Number);
-        
-        for (let i = 0; i < 3; i++) {
-            if (aVersions[i] !== bVersions[i]) {
-                return bVersions[i] - aVersions[i]; // Descending order
-            }
-        }
-        return 0;
-    })[0];
-    
-    console.log(`🎯 Target version: ${latestVersion || 'none detected'}`);
+    console.log(`🎯 Target version: ${targetVersion}`);
     console.log('🧹 Checking milestones for housekeeping...\n');
     
     let removedCount = 0;
     
     for (const milestone of milestones) {
-        if (milestone === latestVersion) {
+        if (milestone === targetVersion) {
             console.log(`⏭ Skipping target milestone: ${milestone}`);
             continue;
         }
@@ -1027,11 +1298,37 @@ async function main() {
         switch (command) {
             case 'create':
                 if (args.length < 3) {
-                    console.log('Usage: issue-manage create <type> <title>');
+                    console.log('Usage: issue-manage create <type> <title> [--dry-run]');
                     console.log('Types: feature, bug, task');
+                    console.log('Options: --dry-run (generate content without saving)');
                     process.exit(1);
                 }
-                createIssue(args[1], args.slice(2).join(' '));
+                
+                // Parse arguments and options
+                const createOptions = {};
+                const titleArgs = [];
+                
+                for (let i = 2; i < args.length; i++) {
+                    if (args[i] === '--dry-run') {
+                        createOptions.dryRun = true;
+                    } else {
+                        titleArgs.push(args[i]);
+                    }
+                }
+                
+                if (titleArgs.length === 0) {
+                    console.log('Error: Title is required');
+                    process.exit(1);
+                }
+                
+                const result = createIssue(args[1], titleArgs.join(' '), createOptions);
+                
+                // In dry-run mode, output the content for potential task payload use
+                if (createOptions.dryRun && result.content) {
+                    console.log('\n--- GENERATED ISSUE CONTENT ---');
+                    console.log(result.content);
+                    console.log('--- END CONTENT ---');
+                }
                 break;
                 
             case 'import':
@@ -1043,7 +1340,9 @@ async function main() {
                 break;
                 
             case 'list':
-                listIssues(args[1]);
+                const detailed = args.includes('--detailed') || args.includes('-d');
+                const location = args.find(arg => !arg.startsWith('-') && arg !== 'list') || 'all';
+                listIssues(location, detailed);
                 break;
                 
             case 'show':
@@ -1089,9 +1388,9 @@ async function main() {
             default:
                 console.log('Local Issue Management');
                 console.log('Commands:');
-                console.log('  create <type> <title>  - Create new issue');
+                console.log('  create <type> <title> [--dry-run] - Create new issue (or generate content only)');
                 console.log('  import <file>          - Import issue from task file');
-                console.log('  list [location]        - List issues (all/unassigned/v1.0/etc)');
+                console.log('  list [location] [-d]   - List issues (all/unassigned/v1.0/etc) [--detailed for summaries]');
                 console.log('  show <id>              - Show issue details');
                 console.log('  close <id|milestone>   - Close issue or milestone (delete if unassigned, archive if milestone)');
                 console.log('  triage                 - Review unassigned issues');

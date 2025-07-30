@@ -2,34 +2,38 @@
 
 # SESSION_END Workflow
 
-## Session Termination
-
-**SESSION TERMINATION**: When any Claude session ends, Claude should execute this session closure sequence to preserve work and maintain continuity.
-
 ## Trigger
 **User-Friendly**: `finish sesame`
-**Technical**: `SESSION_END`
 
-**SESSION TERMINATION:**
-1. **OUTBOX DISTRIBUTION**: For base repositories, distribute pending outbox tasks
-2. **COMPLETE OUTSTANDING WORK**: Ensure all workflow steps and GitHub issues are properly completed
-3. **COMMIT ALL WORK**: Commit all changes directly to main branch
+## Purpose
+Properly terminate a work session with learning capture, work commitment, and audit log archiving.
 
 ## Workflow Execution
 
+### 1. Work Completion and Commitment
 ```bash
-# Start session end workflow
-claude/wow/scripts/audit-manage log "SESSION_END" "workflow_start" "session_termination" "" "Starting SESSION_END workflow for session closure"
+# Execute COMMIT workflow to handle any outstanding work
+claude/wow/scripts/git-manage commit
 ```
 
-## Session Completion Steps
+### 2. Session Termination and Archive
+```bash
+# Execute session end audit workflow (includes archive)
+claude/wow/scripts/audit-manage session-end
+```
 
-### **1. Outbox Distribution**
-- Execute OUTBOX workflow (distribute pending tasks)
+## Success Criteria
+- All work committed to repository
+- Audit log archived with timestamp
+- Fresh audit log ready for next session
+- Clean handoff to next session
 
-### **2. Complete Session Work**
-- Execute COMMIT workflow (handles all git operations and issue closure)
-- Archive session and prepare for next session
-- Log SESSION_END completion
+## Integration with SESSION_START
+- Creates clean session boundary for SESSION_START to detect
+- SESSION_START will verify clean termination by looking for `SESSION_END | workflow_complete`
+- Archive provides historical context for future sessions
+- Fresh log ensures SESSION_START has clean starting point
 
+---
 
+*Session termination workflow with learning capture and proper archival*

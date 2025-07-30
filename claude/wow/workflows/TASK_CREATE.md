@@ -60,13 +60,63 @@ claude/wow/scripts/audit-manage log "TASK_CREATE" "workflow_complete" "task_crea
 - **Flexible workflow**: Claude adapts questions based on context
 - **Quality control**: Claude validates completeness before creation
 
-## Task Template Structure
-**Generated files follow standardized format:**
-- **Metadata header**: YAML frontmatter with source/target/priority/effort
-- **Task sections**: Description, dependencies, test criteria, work area
-- **Filename format**: `TIMESTAMP_target-repo_task-name.md`
+## Task File Structure
+**Tasks consist of transport header + issue payload:**
+
+### Transport Header (Required)
+```yaml
+---
+target: jules-tenbos/splectrum          # Destination repository
+source: splectrum/spl1                  # Source repository
+created: 2025-07-30T04:23:01.838Z      # Creation timestamp
+description: Task created from splectrum/spl1 issue #28 - Title
+---
+```
+
+### Payload: Issue Content
+**Two scenarios:**
+
+#### 1. Existing Issue → Task
+- Use existing issue content "as is" (already follows template)
+- Include complete issue frontmatter and content
+
+#### 2. New Task → Issue  
+- Create issue content using appropriate template (feature/bug/task)
+- Use `issue-manage create <type> <title> --dry-run` to generate template content
+- ✅ **Available**: `issue-manage` supports `--dry-run` flag for content generation without saving
+
+### Example Task File (Existing Issue)
+```markdown
+---
+target: jules-tenbos/splectrum
+source: splectrum/spl1
+created: 2025-07-30T04:23:01.838Z
+description: Task created from splectrum/spl1 issue #28 - Git Workflow Enforcement
+---
+
+---
+type: feature
+github_id: null
+title: "Git Workflow Enforcement Engine Prototype"
+state: open
+milestone: unassigned
+labels: ["enhancement","SE"]
+priority: medium
+estimated_effort: TBD
+github_updated_at: null
+local_updated_at: null
+---
+
+## Problem Statement
+Current git workflows require manual execution...
+```
+
+### Filename Format
+`TIMESTAMP_target-repo_task-name.md`
 
 ## Usage Examples
+
+### Creating Tasks from Existing Issues
 ```bash
 # Interactive mode (prompts for target)
 task sesame
@@ -76,6 +126,24 @@ task org/project sesame
 
 # Target current repository
 task . sesame
+```
+
+### Creating New Tasks with Generated Issue Content
+```bash
+# Generate issue content for task payload
+ISSUE_CONTENT=$(./claude/wow/scripts/issue-manage create feature "New Feature Name" --dry-run 2>/dev/null | sed -n '/--- GENERATED ISSUE CONTENT ---/,/--- END CONTENT ---/p' | sed '1d;$d')
+
+# Create task with transport header + generated payload
+cat > claude/outbox/task-file.md << EOF
+---
+target: jules-tenbos/splectrum
+source: splectrum/spl1
+created: $(date -Iseconds)
+description: New task - Feature Name
+---
+
+$ISSUE_CONTENT
+EOF
 ```
 
 ## Integration Points

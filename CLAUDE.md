@@ -20,6 +20,8 @@ Use natural language with "sesame" suffix:
 
 **MANDATORY SCRIPT CONTEXT**: Before working on any substantive task, Claude MUST read the script tools reference `claude/wow/SCRIPT_REFERENCE.md` to understand how to use the script toolsn for any specific requirements.
 
+**MANDATORY WORKFLOW DOCUMENTATION**: It is MANDATORY to read workflow documentation before executing any workflow. At minimum, workflows must be documented in the workflow reference document `claude/project/WORKFLOW_REFERENCE.md`. It is MANDATORY to give a warning when executing an undocumented workflow (not listed in the workflow reference).
+
 **Single-Word Sesame Magic Word:**
 **`sesame`** (standalone) → **Universal positive affirmation**
 - **Meaning**: "Yes", "I agree", "Go ahead", "Proceed", "Approved"
