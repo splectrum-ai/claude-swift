@@ -12,23 +12,14 @@ Initialize a new work session with proper recovery checks, task processing, and 
 
 ### 1. Session Initialization and Recovery
 ```bash
-# Execute session start audit workflow
-claude/wow/scripts/audit-manage session-start
+# Check session state and handle recovery
+claude/wow/scripts/session-manage start-initialize
 ```
 
-### 2. Task Distribution and Processing
+### 2. Complete Session Start Workflow  
 ```bash
-# Execute OUTBOX workflow (distribute pending tasks)
-claude/wow/scripts/outbox-process
-
-# Execute INBOX workflow (process received tasks)  
-claude/wow/scripts/inbox-process
-```
-
-### 3. Issue Synchronization and Triage
-```bash
-# Ensure issue cache is current and perform triage
-claude/wow/scripts/issue-manage triage
+# Execute task processing and issue triage
+claude/wow/scripts/session-manage start-complete
 ```
 
 ## Success Criteria

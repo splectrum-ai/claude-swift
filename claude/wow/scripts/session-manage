@@ -1,0 +1,233 @@
+#!/usr/bin/env node
+
+/**
+ * Session Management Script - Handle session lifecycle
+ * 
+ * Manages session initialization, recovery, and termination:
+ * - start-initialize: Check session state and handle recovery
+ * - start-complete: Complete session initialization workflow
+ * - end-session: Handle session termination and archiving
+ * 
+ * Usage:
+ *   session-manage start-initialize
+ *   session-manage start-complete  
+ *   session-manage end-session
+ */
+
+import { promises as fs, existsSync } from 'fs';
+import { execSync } from 'child_process';
+import path from 'path';
+
+/**
+ * Audit logging helper
+ */
+function auditLog(workflow, step, details = '', action = 'step', description = '') {
+    try {
+        execSync(`claude/wow/scripts/audit-manage log "${workflow}" "${action}" "${step}" "${details}" "${description}"`, { stdio: 'ignore' });
+    } catch (error) {
+        const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        console.log(`[AUDIT] ${timestamp}|${workflow}|${action}|${step}|${details}|${description}`);
+    }
+}
+
+/**
+ * Check if previous session ended cleanly
+ */
+async function checkPreviousSessionState() {
+    const auditPath = 'claude/project/audit/current/current.log';
+    
+    if (!existsSync(auditPath)) {
+        // No current log - check for recent session archives
+        const archiveDir = 'claude/project/audit/current';
+        try {
+            const files = await fs.readdir(archiveDir);
+            const sessionFiles = files.filter(f => f.startsWith('session_') && f.endsWith('.log'));
+            if (sessionFiles.length > 0) {
+                return { status: 'recovered', message: 'Previous session archived but current.log missing - recovered' };
+            }
+        } catch (err) {
+            // Archive directory might not exist
+        }
+        return { status: 'clean', message: 'No previous session detected' };
+    }
+    
+    try {
+        const content = await fs.readFile(auditPath, 'utf8');
+        const lines = content.trim().split('\n').filter(line => line.length > 0);
+        
+        if (lines.length === 0) {
+            return { status: 'clean', message: 'Fresh audit log detected' };
+        }
+        
+        const lastLine = lines[lines.length - 1];
+        
+        // Check if last entry indicates clean SESSION_END completion
+        if (lastLine.includes('SESSION_END') && lastLine.includes('workflow_complete')) {
+            return { status: 'needs-recovery', message: 'Previous session ended but archive not completed' };
+        }
+        
+        // Check for incomplete SESSION_END
+        if (lastLine.includes('SESSION_END') && lastLine.includes('workflow_start')) {
+            return { status: 'needs-recovery', message: 'Previous session termination was incomplete' };
+        }
+        
+        // Session appears to have ended normally or is continuing
+        return { status: 'clean', message: 'Previous session state appears clean' };
+        
+    } catch (error) {
+        return { status: 'error', message: `Could not read audit log: ${error.message}` };
+    }
+}
+
+/**
+ * Handle session start initialization with recovery check
+ */
+async function startInitialize() {
+    const workflow = 'SESSION_START';
+    
+    auditLog(workflow, 'session_init', '', 'workflow_start', 'Starting session initialization with recovery check');
+    
+    // Check previous session state
+    const sessionState = await checkPreviousSessionState();
+    auditLog(workflow, 'recovery_check', sessionState.status, 'step', sessionState.message);
+    
+    // Handle recovery if needed
+    if (sessionState.status === 'needs-recovery') {
+        console.log('⚠️  Previous session needs recovery - completing missing steps...');
+        
+        // Complete missing session end steps by archiving current log
+        try {
+            execSync('claude/wow/scripts/audit-manage archive-session', { stdio: 'inherit' });
+            auditLog(workflow, 'recovery_complete', '', 'step', 'Completed missing session end steps');
+            console.log('✓ Session recovery completed');
+        } catch (error) {
+            auditLog(workflow, 'recovery_error', '', 'step', `Recovery failed: ${error.message}`);
+            console.error('❌ Session recovery failed:', error.message);
+            return false;
+        }
+    }
+    
+    auditLog(workflow, 'initialize_complete', '', 'step', 'Session initialization completed');
+    console.log('✓ Session initialization completed');
+    
+    return sessionState.status === 'needs-recovery';
+}
+
+/**
+ * Complete session start workflow
+ */
+async function startComplete() {
+    const workflow = 'SESSION_START';
+    
+    auditLog(workflow, 'workflow_execution', '', 'step', 'Executing session start workflow');
+    
+    try {
+        // Execute OUTBOX workflow
+        console.log('📦 Executing OUTBOX workflow...');
+        execSync('claude/wow/scripts/outbox-process', { stdio: 'inherit' });
+        auditLog(workflow, 'outbox_complete', '', 'step', 'OUTBOX workflow completed');
+        
+        // Execute INBOX workflow
+        console.log('📥 Executing INBOX workflow...');
+        execSync('claude/wow/scripts/inbox-process', { stdio: 'inherit' });
+        auditLog(workflow, 'inbox_complete', '', 'step', 'INBOX workflow completed');
+        
+        // Execute issue triage
+        console.log('📋 Executing issue triage...');
+        execSync('claude/wow/scripts/issue-manage triage', { stdio: 'inherit' });
+        auditLog(workflow, 'triage_complete', '', 'step', 'Issue triage completed');
+        
+        auditLog(workflow, 'session_ready', '', 'workflow_complete', 'Session start workflow completed successfully');
+        console.log('✅ Session start workflow completed - ready for work!');
+        
+    } catch (error) {
+        auditLog(workflow, 'workflow_error', '', 'step', `Session start workflow failed: ${error.message}`);
+        console.error('❌ Session start workflow failed:', error.message);
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Handle session end workflow
+ */
+async function endSession() {
+    const workflow = 'SESSION_END';
+    
+    auditLog(workflow, 'session_termination', '', 'workflow_start', 'Starting session termination workflow');
+    
+    try {
+        // Execute COMMIT workflow
+        console.log('💾 Executing COMMIT workflow...');
+        execSync('claude/wow/scripts/git-manage commit', { stdio: 'inherit' });
+        auditLog(workflow, 'commit_complete', '', 'step', 'COMMIT workflow completed');
+        
+        // Archive session
+        console.log('📁 Archiving session...');
+        execSync('claude/wow/scripts/audit-manage archive-session', { stdio: 'inherit' });
+        auditLog(workflow, 'archive_complete', '', 'step', 'Session archive completed');
+        
+        console.log('✅ Session end workflow completed');
+        
+    } catch (error) {
+        auditLog(workflow, 'workflow_error', '', 'step', `Session end workflow failed: ${error.message}`);
+        console.error('❌ Session end workflow failed:', error.message);
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+    try {
+        const args = process.argv.slice(2);
+        const command = args[0];
+        
+        if (!command) {
+            console.log('Session Management Script - Available commands:');
+            console.log('  start-initialize - Check session state and handle recovery');
+            console.log('  start-complete - Complete session initialization workflow');
+            console.log('  end-session - Handle session termination and archiving');
+            console.log('');
+            console.log('Examples:');
+            console.log('  session-manage start-initialize');
+            console.log('  session-manage start-complete');
+            console.log('  session-manage end-session');
+            return;
+        }
+        
+        switch (command) {
+            case 'start-initialize':
+                const recoveryPerformed = await startInitialize();
+                process.exit(recoveryPerformed ? 1 : 0); // Exit code indicates recovery status
+                break;
+                
+            case 'start-complete':
+                const success = await startComplete();
+                process.exit(success ? 0 : 1);
+                break;
+                
+            case 'end-session':
+                const endSuccess = await endSession();
+                process.exit(endSuccess ? 0 : 1);
+                break;
+                
+            default:
+                throw new Error(`Unknown command: ${command}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Session management failed: ${error.message}`);
+        auditLog('MANUAL', 'error', '', 'workflow_error', `Session management failed: ${error.message}`);
+        process.exit(1);
+    }
+}
+
+// Run if called directly
+if (process.argv[1] && process.argv[1].endsWith('session-manage')) {
+    main();
+}

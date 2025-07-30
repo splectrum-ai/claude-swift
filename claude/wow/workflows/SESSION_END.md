@@ -10,16 +10,10 @@ Properly terminate a work session with learning capture, work commitment, and au
 
 ## Workflow Execution
 
-### 1. Work Completion and Commitment
+### 1. Session Termination and Archive
 ```bash
-# Execute COMMIT workflow to handle any outstanding work
-claude/wow/scripts/git-manage commit
-```
-
-### 2. Session Termination and Archive
-```bash
-# Execute session end audit workflow (includes archive)
-claude/wow/scripts/audit-manage session-end
+# Execute complete session end workflow (commit + archive)
+claude/wow/scripts/session-manage end-session
 ```
 
 ## Success Criteria
