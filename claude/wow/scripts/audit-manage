@@ -35,7 +35,7 @@ function auditLog(workflow, step, details = '', action = 'step', description = '
     try {
         const auditPath = 'claude/project/audit/current/current.log';
         const logCmd = `echo "${entry}" >> "${auditPath}"`;
-        require('child_process').execSync(logCmd, { stdio: 'ignore' });
+        execSync(logCmd, { stdio: 'ignore' });
     } catch (error) {
         console.log(`[AUDIT] ${entry}`);
     }

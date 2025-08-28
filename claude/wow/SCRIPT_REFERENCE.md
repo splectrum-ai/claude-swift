@@ -11,6 +11,17 @@ claude/wow/scripts/script-name [options]
 
 **Only the main script files in `claude/wow/scripts/` directory can be executed directly. Subdirectory scripts are internal/support files.**
 
+## SPL Integration (Development Use)
+
+**IMPORTANT**: The repository has a new `spl_execute` command router at `/home/herma/splectrum/spl1/spl_execute` that is actively being used for development work with the spl-dev install. While not yet ready for general production use, it provides a unified execution point with app/module command overlay capabilities.
+
+**Current Status**: 
+- ✅ In active use for development work (spl-dev)
+- ⚠️ Not yet ready for general/production use
+- 🔄 Features are being migrated from scripts to SPL commands
+
+During the transition phase, both script patterns and SPL commands are available. This reference will be updated as more features are migrated to the SPL system.
+
 ## Available Scripts
 
 ### Core Management Scripts
@@ -54,13 +65,27 @@ audit-manage archive-version v1.2.3
 **Available Commands**: 
 - `create <type> <title>` - Create new issue
 - `import <file>` - Import issue from task file
-- `list [location]` - List issues (all/unassigned/v1.0/etc)
+- `list [location] [-d]` - List issues (all/unassigned/v1.0/etc), --detailed for summaries
 - `show <id>` - Show issue details
 - `close <id|milestone>` - Close issue or milestone
 - `triage` - Review unassigned issues
 - `housekeeping` - Remove closed milestones
 - `seed [--dry-run] [--state=open|closed]` - Import from GitHub
 - `sync [--dry-run] [--state=open|all]` - Bidirectional sync with GitHub
+
+#### `session-manage`
+**Purpose**: Session lifecycle management operations  
+**Available Commands**: 
+- `start-initialize` - Check session state and handle recovery
+- `start-complete` - Complete session initialization workflow
+- `end-session --message="<commit message>"` - Handle session termination and archiving with meaningful commit message
+
+**Examples**:
+```bash
+session-manage start-initialize
+session-manage start-complete
+session-manage end-session --message="Complete feature implementation and testing"
+```
 
 #### `project-manage`
 **Purpose**: Project-level management operations  

@@ -11,19 +11,22 @@
  * Usage:
  *   session-manage start-initialize
  *   session-manage start-complete  
- *   session-manage end-session
+ *   session-manage end-session [--message "commit message"]
  */
 
 import { promises as fs, existsSync } from 'fs';
 import { execSync } from 'child_process';
 import path from 'path';
+import { getRepoConfig } from './lib/repo-config.js';
 
 /**
  * Audit logging helper
  */
 function auditLog(workflow, step, details = '', action = 'step', description = '') {
     try {
-        execSync(`claude/wow/scripts/audit-manage log "${workflow}" "${action}" "${step}" "${details}" "${description}"`, { stdio: 'ignore' });
+        const repoConfig = getRepoConfig();
+        const scriptsPath = `${repoConfig.projectRoot}/claude/wow/scripts`;
+        execSync(`${scriptsPath}/audit-manage log "${workflow}" "${action}" "${step}" "${details}" "${description}"`, { stdio: 'ignore' });
     } catch (error) {
         const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
         console.log(`[AUDIT] ${timestamp}|${workflow}|${action}|${step}|${details}|${description}`);
@@ -59,20 +62,18 @@ async function checkPreviousSessionState() {
             return { status: 'clean', message: 'Fresh audit log detected' };
         }
         
-        const lastLine = lines[lines.length - 1];
+        // Check last 10 entries for SESSION_END workflow_complete
+        const lastEntries = lines.slice(-10);
+        const hasCleanSessionEnd = lastEntries.some(line => 
+            line.includes('SESSION_END') && line.includes('workflow_complete')
+        );
         
-        // Check if last entry indicates clean SESSION_END completion
-        if (lastLine.includes('SESSION_END') && lastLine.includes('workflow_complete')) {
-            return { status: 'needs-recovery', message: 'Previous session ended but archive not completed' };
+        if (hasCleanSessionEnd) {
+            return { status: 'clean', message: 'Previous session ended cleanly' };
         }
         
-        // Check for incomplete SESSION_END
-        if (lastLine.includes('SESSION_END') && lastLine.includes('workflow_start')) {
-            return { status: 'needs-recovery', message: 'Previous session termination was incomplete' };
-        }
-        
-        // Session appears to have ended normally or is continuing
-        return { status: 'clean', message: 'Previous session state appears clean' };
+        // No clean SESSION_END found in recent entries
+        return { status: 'needs-recovery', message: 'Previous session requires completion - no clean SESSION_END detected' };
         
     } catch (error) {
         return { status: 'error', message: `Could not read audit log: ${error.message}` };
@@ -91,26 +92,17 @@ async function startInitialize() {
     const sessionState = await checkPreviousSessionState();
     auditLog(workflow, 'recovery_check', sessionState.status, 'step', sessionState.message);
     
-    // Handle recovery if needed
+    // Return directive if recovery is needed
     if (sessionState.status === 'needs-recovery') {
-        console.log('⚠️  Previous session needs recovery - completing missing steps...');
-        
-        // Complete missing session end steps by archiving current log
-        try {
-            execSync('claude/wow/scripts/audit-manage archive-session', { stdio: 'inherit' });
-            auditLog(workflow, 'recovery_complete', '', 'step', 'Completed missing session end steps');
-            console.log('✓ Session recovery completed');
-        } catch (error) {
-            auditLog(workflow, 'recovery_error', '', 'step', `Recovery failed: ${error.message}`);
-            console.error('❌ Session recovery failed:', error.message);
-            return false;
-        }
+        console.log('⚠️  Previous session requires completion - please execute SESSION_END workflow first');
+        auditLog(workflow, 'recovery_directive', '', 'step', 'Recovery required - SESSION_END workflow needed');
+        return true;
     }
     
     auditLog(workflow, 'initialize_complete', '', 'step', 'Session initialization completed');
     console.log('✓ Session initialization completed');
     
-    return sessionState.status === 'needs-recovery';
+    return false;
 }
 
 /**
@@ -118,23 +110,30 @@ async function startInitialize() {
  */
 async function startComplete() {
     const workflow = 'SESSION_START';
+    const repoConfig = getRepoConfig();
+    const scriptsPath = `${repoConfig.projectRoot}/claude/wow/scripts`;
     
     auditLog(workflow, 'workflow_execution', '', 'step', 'Executing session start workflow');
     
     try {
         // Execute OUTBOX workflow
         console.log('📦 Executing OUTBOX workflow...');
-        execSync('claude/wow/scripts/outbox-process', { stdio: 'inherit' });
+        execSync(`${scriptsPath}/outbox-process`, { stdio: 'inherit' });
         auditLog(workflow, 'outbox_complete', '', 'step', 'OUTBOX workflow completed');
         
         // Execute INBOX workflow
         console.log('📥 Executing INBOX workflow...');
-        execSync('claude/wow/scripts/inbox-process', { stdio: 'inherit' });
+        execSync(`${scriptsPath}/inbox-process`, { stdio: 'inherit' });
         auditLog(workflow, 'inbox_complete', '', 'step', 'INBOX workflow completed');
+        
+        // Execute issue sync
+        console.log('🔄 Executing issue sync...');
+        execSync(`${scriptsPath}/issue-manage sync`, { stdio: 'inherit' });
+        auditLog(workflow, 'issue_sync_complete', '', 'step', 'Issue sync completed');
         
         // Execute issue triage
         console.log('📋 Executing issue triage...');
-        execSync('claude/wow/scripts/issue-manage triage', { stdio: 'inherit' });
+        execSync(`${scriptsPath}/issue-manage triage`, { stdio: 'inherit' });
         auditLog(workflow, 'triage_complete', '', 'step', 'Issue triage completed');
         
         auditLog(workflow, 'session_ready', '', 'workflow_complete', 'Session start workflow completed successfully');
@@ -152,7 +151,7 @@ async function startComplete() {
 /**
  * Handle session end workflow
  */
-async function endSession() {
+async function endSession(commitMessage = null) {
     const workflow = 'SESSION_END';
     
     auditLog(workflow, 'session_termination', '', 'workflow_start', 'Starting session termination workflow');
@@ -160,15 +159,21 @@ async function endSession() {
     try {
         // Archive session first
         console.log('📁 Archiving session...');
-        execSync('claude/wow/scripts/audit-manage archive-session', { stdio: 'inherit' });
+        const repoConfig = getRepoConfig();
+        const scriptsPath = `${repoConfig.projectRoot}/claude/wow/scripts`;
+        execSync(`${scriptsPath}/audit-manage archive-session`, { stdio: 'inherit' });
         
         // Execute COMMIT workflow (includes archived session)
         console.log('💾 Executing COMMIT workflow...');
-        execSync('claude/wow/scripts/git-manage commit', { stdio: 'inherit' });
+        const commitCommand = commitMessage 
+            ? `${scriptsPath}/git-manage commit --message "${commitMessage}"`
+            : `${scriptsPath}/git-manage commit`;
+        execSync(commitCommand, { stdio: 'inherit' });
         
-        // Log completion to fresh audit log
-        auditLog(workflow, 'archive_complete', '', 'step', 'Session archive completed');
-        auditLog(workflow, 'commit_complete', '', 'step', 'COMMIT workflow completed');
+        // Log SESSION_END completion AFTER commit completes (final entry in fresh log)
+        console.log('📝 Logging SESSION_END completion...');
+        auditLog(workflow, 'session_termination_complete', '', 'workflow_complete', 'SESSION_END workflow completed successfully');
+        console.log('✅ SESSION_END completion logged');
         
         console.log('✅ Session end workflow completed');
         
@@ -193,12 +198,13 @@ async function main() {
             console.log('Session Management Script - Available commands:');
             console.log('  start-initialize - Check session state and handle recovery');
             console.log('  start-complete - Complete session initialization workflow');
-            console.log('  end-session - Handle session termination and archiving');
+            console.log('  end-session [--message "text"] - Handle session termination and archiving');
             console.log('');
             console.log('Examples:');
             console.log('  session-manage start-initialize');
             console.log('  session-manage start-complete');
             console.log('  session-manage end-session');
+            console.log('  session-manage end-session --message "Implement new feature"');
             return;
         }
         
@@ -214,7 +220,13 @@ async function main() {
                 break;
                 
             case 'end-session':
-                const endSuccess = await endSession();
+                // Parse --message parameter
+                const messageIndex = args.indexOf('--message');
+                const commitMessage = (messageIndex !== -1 && messageIndex + 1 < args.length) 
+                    ? args[messageIndex + 1] 
+                    : null;
+                
+                const endSuccess = await endSession(commitMessage);
                 process.exit(endSuccess ? 0 : 1);
                 break;
                 

@@ -1363,10 +1363,14 @@ async function main() {
                 
             case 'close':
                 if (!args[1]) {
-                    console.log('Usage: issue-manage close <issue-id>');
+                    console.log('Usage: issue-manage close <issue-id> [issue-id2 issue-id3 ...]');
                     process.exit(1);
                 }
-                closeIssue(args[1]);
+                // Handle multiple issue IDs
+                const issueIds = args.slice(1).filter(arg => !arg.startsWith('--'));
+                for (const issueId of issueIds) {
+                    closeIssue(issueId);
+                }
                 break;
                 
             case 'seed':

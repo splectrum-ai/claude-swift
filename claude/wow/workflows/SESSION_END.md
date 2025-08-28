@@ -11,10 +11,26 @@ Properly terminate a work session with learning capture, work commitment, and au
 ## Workflow Execution
 
 ### 1. Session Termination and Archive
+
+**IMPORTANT**: Always provide a meaningful commit message that summarizes the work completed in the session.
+
 ```bash
-# Execute complete session end workflow (commit + archive)
-claude/wow/scripts/session-manage end-session
+# Execute complete session end workflow WITH meaningful commit message
+claude/wow/scripts/session-manage end-session --message "Descriptive summary of work completed"
+
+# Examples of good commit messages:
+# --message "Implement user authentication with JWT tokens and password hashing"
+# --message "Fix responsive design issues in mobile navigation component"  
+# --message "Add comprehensive test suite for payment processing module"
+# --message "Refactor database queries for improved performance and caching"
 ```
+
+**Commit Message Guidelines**:
+- Describe WHAT was accomplished, not just what was changed
+- Include key technical decisions or architectural changes
+- Mention major bug fixes, new features, or refactoring efforts
+- Be specific enough that future developers understand the session's value
+- Avoid generic messages like "Update files" or "Various changes"
 
 ## Success Criteria
 - All work committed to repository

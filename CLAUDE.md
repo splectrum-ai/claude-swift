@@ -16,9 +16,9 @@ Use natural language with "sesame" suffix:
 - `outbox sesame` → OUTBOX workflow (collect and distribute cross-repository tasks) - ORCHESTRATOR ONLY
 - `task sesame` → TASK_CREATE workflow (interactive task creation: specify target [org]/[repo] or use current)
 
-**MANDATORY PROJECT CONTEXT**: Before working on any substantive task, Claude MUST read the project-specific context in `claude/project/project-info.md` to understand project identity and any specific requirements. This ensures work aligns with project objectives and follows project-specific patterns.
+**MANDATORY PROJECT CONTEXT**: Before working on any substantive task, Claude MUST read the project-specific context in `claude/project/project-info.md` to understand project identity and any specific requirements. This ensures work aligns with project objectives and follows project-specific patterns. For development work, check if project has specific essential knowledge requirements documented in the project folder.
 
-**MANDATORY SCRIPT CONTEXT**: Before working on any substantive task, Claude MUST read the script tools reference `claude/wow/SCRIPT_REFERENCE.md` to understand how to use the script toolsn for any specific requirements.
+**MANDATORY SCRIPT CONTEXT**: Before working on any substantive task, Claude MUST read the script tools reference `claude/wow/SCRIPT_REFERENCE.md` to understand how to use the script tools for any specific requirements.
 
 **MANDATORY WORKFLOW DOCUMENTATION**: It is MANDATORY to read workflow documentation before executing any workflow. At minimum, workflows must be documented in the workflow reference document `claude/project/WORKFLOW_REFERENCE.md`. It is MANDATORY to give a warning when executing an undocumented workflow (not listed in the workflow reference).
 
@@ -42,6 +42,13 @@ Use natural language with "sesame" suffix:
 **Core Platform**:
 - `claude/wow/` - Ways of Working framework
 - `claude/local/repo-config.json` - Local repository-specific configuration for scripts and workflows (instance-specific settings only)
+
+**SPL Execution**: Use repository-configured command tool from `claude/local/repo-config.json`
+- **Command Path**: `/home/herma/splectrum/spl1/spl_execute`
+- **Default Install**: `dev`
+- **Usage Pattern**: `{command_path} {install} {command} [args...]`
+- **Example**: `/home/herma/splectrum/spl1/spl_execute dev manage/issue/create --title="test"`
+- **Status**: Active development use with app/module command overlay (not yet for general production)
 
 ## Documentation Standards
 

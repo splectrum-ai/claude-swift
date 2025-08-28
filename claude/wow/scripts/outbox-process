@@ -178,7 +178,8 @@ function distributeTasks(mode, registeredProjects = [], currentRepo, dryRun = fa
         const targetRepo = extractTargetRepo(taskFile);
         
         if (!targetRepo) {
-            console.log(`✗ Invalid task filename format: ${taskName}`);
+            console.log(`✗ No target repository found for: ${taskName}`);
+            console.log(`  → Add 'target: repo-name' to frontmatter`);
             failedCount++;
             continue;
         }
@@ -224,10 +225,9 @@ function distributeTasks(mode, registeredProjects = [], currentRepo, dryRun = fa
                 failedCount++;
             }
         } else {
-            // Universal mode - can only handle self-targeted tasks
-            console.log(`  ✗ Cross-repository task '${targetRepo}' requires orchestrator mode`);
-            console.log(`    Run from base repository with projects/ directory`);
-            failedCount++;
+            // Universal mode - skip cross-repository tasks
+            console.log(`  → Skipping: Cross-repository task for '${targetRepo}' (requires orchestrator mode)`);
+            // Don't count as failed - just leave it in outbox
         }
     }
     
@@ -282,10 +282,11 @@ function main() {
     console.log(`Distribution: ${distributed} tasks delivered successfully`);
     
     if (failed > 0) {
-        console.log(`Failures: ${failed} tasks remain in outbox (see errors above)`);
-        console.log('Check target repositories and retry outbox workflow');
-    } else if (distributed > 0) {
-        console.log('Status: All tasks distributed successfully');
+        console.log(`Failures: ${failed} tasks failed (see errors above)`);
+    }
+    
+    if (mode === 'universal') {
+        console.log('Note: Cross-repository tasks remain in outbox (orchestrator mode required)');
     }
     
     if (mode === 'orchestrator') {

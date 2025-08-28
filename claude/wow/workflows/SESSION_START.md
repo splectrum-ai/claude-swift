@@ -25,6 +25,7 @@ claude/wow/scripts/session-manage start-complete
 ## Success Criteria
 - Previous session recovery completed (if needed)
 - All pending tasks distributed and processed
+- Issues synchronized with GitHub (bidirectional)
 - Issue cache synchronized and triaged
 - Session ready for productive work
 
