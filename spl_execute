@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+/**
+ * SPL Repository Router
+ * Routes commands to specific SPL install folders
+ * 
+ * Usage: ./spl <install> <command> [args...]
+ * Example: ./spl dev manage/issue/create --title="test issue"
+ */
+
+const { spawn } = require('child_process');
+const { existsSync } = require('fs');
+const path = require('path');
+
+// Get command line arguments
+const args = process.argv.slice(2);
+
+// Validate arguments
+if (args.length === 0) {
+    console.error('Usage: ./spl <install> <command> [args...]');
+    console.error('Example: ./spl dev manage/issue/create --title="test issue"');
+    process.exit(1);
+}
+
+// Parse install target and remaining arguments
+const installTarget = args[0];           // "dev"
+const installPath = `spl-${installTarget}`; // "spl-dev"
+const remainingArgs = args.slice(1);     // ["manage/issue/create", "--title=test issue"]
+
+// Detect repository context and find SPL installs
+function findSplInstalls() {
+    // Try current repository first
+    const localInstall = path.join(__dirname, installPath);
+    if (existsSync(localInstall)) {
+        return localInstall;
+    }
+    
+    // Try splectrum/spl1 as fallback
+    const splectrumInstall = path.join('/home/herma/splectrum/spl1', installPath);
+    if (existsSync(splectrumInstall)) {
+        return splectrumInstall;
+    }
+    
+    return null;
+}
+
+// Validate install folder exists
+const installDir = findSplInstalls();
+if (!installDir) {
+    console.error(`Error: Install folder '${installPath}' not found`);
+    console.error(`Searched:`);
+    console.error(`  - ${path.join(__dirname, installPath)}`);
+    console.error(`  - ${path.join('/home/herma/splectrum/spl1', installPath)}`);
+    process.exit(1);
+}
+
+// Validate spl executable exists in install folder
+const splExecutable = path.join(installDir, 'spl');
+if (!existsSync(splExecutable)) {
+    console.error(`Error: SPL executable not found in '${installPath}'`);
+    console.error(`Expected: ${splExecutable}`);
+    process.exit(1);
+}
+
+// Route command to target SPL install
+const child = spawn('node', [splExecutable, ...remainingArgs], {
+    stdio: 'inherit',
+    cwd: installDir
+});
+
+// Handle process exit
+child.on('error', (error) => {
+    console.error(`Error executing SPL: ${error.message}`);
+    process.exit(1);
+});
+
+child.on('exit', (code) => {
+    process.exit(code || 0);
+});

@@ -5,22 +5,15 @@ This file provides essential operational guidance for Claude Code when working w
 ## Quick Reference
 
 **User-Friendly Sesame Triggers:**
-Use natural language with "sesame" suffix:
-- `start sesame` → SESSION_START workflow
-- `finish sesame` → SESSION_END workflow  
-- `release sesame` → RELEASE workflow (unified release management: target version executes full sequence, patch executes patch-only)
-- `commit sesame` → COMMIT workflow (intelligent commit with issue closure)
-- `issue sesame` → ISSUE workflow (unified issue management with natural language: close, next, cache, create)
-- `inbox sesame` → INBOX workflow (task ingestion converting inbox tasks to GitHub issues with milestone assignment)
-- `to-inbox sesame` → TO_INBOX workflow (process self-targeted tasks from outbox to inbox) - UNIVERSAL
-- `outbox sesame` → OUTBOX workflow (collect and distribute cross-repository tasks) - ORCHESTRATOR ONLY
-- `task sesame` → TASK_CREATE workflow (interactive task creation: specify target [org]/[repo] or use current)
+Core responsibilities with natural language "sesame" suffix:
+- `inbox sesame` → INBOX management (task ingestion and processing)
+- `outbox sesame` → OUTBOX management (task distribution and routing)
+- `task sesame` → TASK execution and management
+- `issue sesame` → ISSUE data management and operations
+- `workflow sesame` → WORKFLOW process management
 
-**MANDATORY PROJECT CONTEXT**: Before working on any substantive task, Claude MUST read the project-specific context in `claude/project/project-info.md` to understand project identity and any specific requirements. This ensures work aligns with project objectives and follows project-specific patterns. For development work, check if project has specific essential knowledge requirements documented in the project folder.
 
-**MANDATORY SCRIPT CONTEXT**: Before working on any substantive task, Claude MUST read the script tools reference `claude/wow/SCRIPT_REFERENCE.md` to understand how to use the script tools for any specific requirements.
-
-**MANDATORY WORKFLOW DOCUMENTATION**: It is MANDATORY to read workflow documentation before executing any workflow. At minimum, workflows must be documented in the workflow reference document `claude/project/WORKFLOW_REFERENCE.md`. It is MANDATORY to give a warning when executing an undocumented workflow (not listed in the workflow reference).
+**MANDATORY WORKFLOW DOCUMENTATION**: It is MANDATORY to read workflow documentation before executing any workflow. Core responsibility workflows are documented in `claude/wow/workflows/[responsibility-name]/` folders. All workflow-specific information is contained within the workflow folder.
 
 **Single-Word Sesame Magic Word:**
 **`sesame`** (standalone) → **Universal positive affirmation**
@@ -30,10 +23,7 @@ Use natural language with "sesame" suffix:
 - **Reference**: "Open Sesame" - the magic word that opens possibilities
 
 **Critical Workflow Principles:**
-- **Outcome-First Optimization**: Question when rules add value vs. create overhead - optimize for outcomes, activate process only when needed
-- **Ceremonial Workflow Boundaries**: `start sesame` and `finish sesame` workflows exist for critical session boundaries but should be completely ignored during normal work - zero cognitive load until explicitly triggered
-- **Item-Triggered Audit Logging**: When work 'feels' like a discrete item, execute the work completely, then log multiple `item_complete` entries reflecting each workflow used during completion. Log any observations about what went badly or issues encountered, then forget - fire and forget approach
-- **Single-Step Completion**: Each step is DONE, then choose next action
+- **Task-Based Execution**: Each step is a task which is posted in inbox, moved to active during execution and into completed when execution is finished. The info in the completed task will be used for commits. Committed completed tasks are deleted.
 - **File Path Specification**: All references MUST specify exact paths
 - **Repository State**: All work committed directly to main branch
 
@@ -44,12 +34,8 @@ Use natural language with "sesame" suffix:
 - `claude/local/repo-config.json` - Local repository-specific configuration for scripts and workflows (instance-specific settings only)
 
 **SPL Execution**: Use repository-configured command tool from `claude/local/repo-config.json`
-- **Command Path**: `/home/herma/splectrum/spl1/spl_execute`
-- **Default Install**: `dev`
-- **Usage Pattern**: `{command_path} {install} {command} [args...]`
-- **Example**: `/home/herma/splectrum/spl1/spl_execute dev manage/issue/create --title="test"`
-- **Status**: Active development use with app/module command overlay (not yet for general production)
-
-## Documentation Standards
-
-**Documentation Rules**: See `claude/wow/workflows/OPERATIONAL_RULES.md` for mandatory documentation standards and automatic correction procedures.
+- **Command Path**: `./spl_execute` (repository-context aware)
+- **Install Target**: Configured in `claude/local/repo-config.json`
+- **Usage Pattern**: `./spl_execute {install} {command} [args...]`
+- **Example**: `./spl_execute {configured_install} spl/console/log "hello world"`
+- **Status**: Active development use with repository-aware routing
