@@ -7,6 +7,3 @@ claude/local/
 
 # Generated cache files
 claude/cache/
-
-# SPL development workspaces (synced to canonical modules/ and apps/ before commits)
-spl-*/

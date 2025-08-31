@@ -62,8 +62,23 @@ if (!existsSync(splExecutable)) {
     process.exit(1);
 }
 
+// Auto-prefix session working directory for claude-swift commands only
+let command = remainingArgs;
+
+if (installTarget === 'claude-swift' && remainingArgs.length > 0) {
+    // Find first non-flag argument to get app name
+    const firstCommand = remainingArgs.find(arg => !arg.startsWith('-'));
+    if (firstCommand && firstCommand.includes('/')) {
+        const appName = firstCommand.split('/')[0];
+        const appDataPath = path.join(__dirname, 'spl-claude-swift', 'apps', appName, 'data');
+        
+        // Prefix with session working directory config
+        command = [`${appName}/config/set-session-working-dir`, `--path=${appDataPath}`, '@@', ...remainingArgs];
+    }
+}
+
 // Route command to target SPL install
-const child = spawn('node', [splExecutable, ...remainingArgs], {
+const child = spawn('node', [splExecutable, ...command], {
     stdio: 'inherit',
     cwd: installDir
 });
